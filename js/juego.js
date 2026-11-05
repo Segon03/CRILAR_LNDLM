@@ -138,7 +138,7 @@
   /* ---------- encastre ---------- */
   function intentarEncaje(g) {
     const ms = miembros(g);
-    if (ms.length === ses.piezas.length) return;
+    if (ms.length === ses.piezas.length) return false;
     let mejor = null;
     for (const a of ms) {
       const fa = a.th - a.d.rot;
@@ -154,17 +154,64 @@
         if (!mejor || sc < mejor.sc) mejor = { a: a, b: b, ex: ex, ey: ey, fb: fb, sc: sc };
       }
     }
-    if (!mejor) return;
+    if (!mejor) return false;
     const base = guardar(ms);
     const fa = mejor.a.th - mejor.a.d.rot;
     girar(ms, mejor.a.x, mejor.a.y, norm(mejor.fb - fa));
     const dx = mejor.ex - mejor.a.x, dy = mejor.ey - mejor.a.y;
     ms.forEach((p) => pose(p, p.x + dx, p.y + dy, p.th));
-    if (!valido(ms, mejor.b.g, 14)) { restaurar(ms, base); return; }
+    if (!dentro(ms)) { restaurar(ms, base); return false; }
     const gb = mejor.b.g;
     ses.piezas.forEach((p) => { if (p.g === g) p.g = gb; });
     ms.forEach((p) => { ponerEl(p); p.el.classList.remove('encaja'); void p.el.offsetWidth; p.el.classList.add('encaja'); });
+    despejar(gb);
     revisarFinal();
+    return true;
+  }
+
+  /* ---------- "levantar y apoyar": las piezas pasan unas sobre otras al arrastrar,
+     pero al soltarlas nunca quedan superpuestas ---------- */
+  const TOPE_REPOSO = 24;
+  function dentro(ms) {
+    return ms.every((p) => p.x >= 24 && p.x <= W - 24 && p.y >= 24 && p.y <= H - 24);
+  }
+  function deslizar(ms) {
+    ms.forEach((p) => { p.el.classList.add('desliza'); });
+    setTimeout(() => ms.forEach((p) => p.el.classList.remove('desliza')), 360);
+  }
+  // busca el lugar libre más cercano para el conjunto ms (se mueve rígido)
+  function buscarLibre(ms) {
+    const base = guardar(ms);
+    for (let r = 0; r <= 1300; r += 12) {
+      const n = r === 0 ? 1 : Math.min(40, Math.round(r / 6) + 8);
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2;
+        mover(ms, base, r * Math.cos(a), r * Math.sin(a));
+        if (valido(ms, undefined, TOPE_REPOSO)) return true;
+      }
+    }
+    restaurar(ms, base);
+    return false;
+  }
+  // deja el conjunto g apoyado: si queda sobre otra pieza, lo corre al lugar libre más próximo
+  function asentar(g, previo) {
+    const ms = miembros(g);
+    if (valido(ms, undefined, TOPE_REPOSO)) return true;
+    if (buscarLibre(ms)) { deslizar(ms); ms.forEach(ponerEl); return true; }
+    if (previo) restaurar(ms, previo);
+    deslizar(ms); ms.forEach(ponerEl);
+    return false;
+  }
+  // tras un encaje: las piezas sueltas que quedaron debajo se corren del lugar
+  function despejar(g) {
+    const ms = miembros(g);
+    const otros = [];
+    ses.piezas.forEach((p) => { if (p.g !== g && otros.indexOf(p.g) < 0) otros.push(p.g); });
+    otros.forEach((og) => {
+      const os = miembros(og);
+      if (!os.some((o) => ms.some((m) => chocan(m, o, TOPE_REPOSO)))) return;
+      if (buscarLibre(os)) { deslizar(os); os.forEach(ponerEl); }
+    });
   }
 
   function revisarFinal() {
@@ -211,49 +258,46 @@
     function comenzar(p, pt) {
       const ms = miembros(p.g);
       alFrente(ms);
-      ms.forEach((m) => m.el.classList.add('arriba'));
       arr = { p: p, g: p.g, ms: ms, base: guardar(ms), x0: pt.x, y0: pt.y, cx: 0, cy: 0, movio: false };
+      ms.forEach((m) => m.el.classList.add('arriba'));
     }
     function terminar() {
       if (!arr) return;
       arr.ms.forEach((m) => m.el.classList.remove('arriba'));
-      const g = arr.g;
+      const g = arr.g, previo = arr.base;
       arr = null;
-      intentarEncaje(g);
-    }
-    function probar(dx, dy) {
-      mover(arr.ms, arr.base, dx, dy);
-      if (valido(arr.ms)) { arr.cx = dx; arr.cy = dy; return true; }
-      mover(arr.ms, arr.base, arr.cx, arr.cy);
-      return false;
+      if (!intentarEncaje(g)) asentar(g, previo);
     }
     function arrastrar(pt) {
       const tx = pt.x - arr.x0, ty = pt.y - arr.y0;
       if (!arr.movio && Math.hypot(tx, ty) > 3) arr.movio = true;
-      if (probar(tx, ty)) { arr.ms.forEach(ponerEl); return; }
-      // buscar hasta dónde se puede llegar sobre el recorrido
-      let lo = 0, hi = 1;
-      const sx = arr.cx, sy = arr.cy;
-      for (let i = 0; i < 7; i++) {
-        const mid = (lo + hi) / 2;
-        if (probar(sx + (tx - sx) * mid, sy + (ty - sy) * mid)) lo = mid; else hi = mid;
+      mover(arr.ms, arr.base, tx, ty);
+      // la pieza levantada no sale de la mesa
+      let ex = 0, ey = 0;
+      arr.ms.forEach((p) => {
+        ex = Math.max(ex, 24 - p.x, p.x - (W - 24)); ey = Math.max(ey, 24 - p.y, p.y - (H - 24));
+      });
+      if (ex || ey) {
+        let cx = 0, cy = 0;
+        arr.ms.forEach((p) => {
+          if (p.x < 24) cx = Math.max(cx, 24 - p.x); if (p.x > W - 24) cx = Math.min(cx, W - 24 - p.x);
+          if (p.y < 24) cy = Math.max(cy, 24 - p.y); if (p.y > H - 24) cy = Math.min(cy, H - 24 - p.y);
+        });
+        mover(arr.ms, arr.base, tx + cx, ty + cy);
       }
-      // deslizar sobre el borde de la pieza contra la que topa
-      probar(tx, arr.cy);
-      probar(arr.cx, ty);
       arr.ms.forEach(ponerEl);
     }
     function rotar(p, d) {
       const ms = miembros(p.g), base = guardar(ms);
       girar(ms, p.x, p.y, d);
-      if (!valido(ms)) { restaurar(ms, base); return false; }
+      if (!dentro(ms)) { restaurar(ms, base); return false; }
       ms.forEach(ponerEl);
       if (arr && arr.g === p.g) { arr.base = guardar(arr.ms); arr.cx = 0; arr.cy = 0; }
       return true;
     }
     function programarEncaje(g) {
       clearTimeout(tEncaje);
-      tEncaje = setTimeout(() => { if (!arr) intentarEncaje(g); }, 380);
+      tEncaje = setTimeout(() => { if (!arr && !intentarEncaje(g)) asentar(g, null); }, 380);
     }
 
     st.addEventListener('pointerdown', (ev) => {
@@ -334,9 +378,9 @@
     const c = cfg || {};
     raiz.innerHTML =
       '<div class="juego__mesa" role="group" aria-label="Mesa con las piezas del rompecabezas del mapa de La Rioja">' +
-        '<div class="juego__stage"></div></div>' +
+        '<div class="juego__stage"><div class="juego__piezas"></div></div></div>' +
       '<p class="juego__final" hidden></p>';
-    const mesa = raiz.querySelector('.juego__mesa'), stage = raiz.querySelector('.juego__stage'), final = raiz.querySelector('.juego__final');
+    const mesa = raiz.querySelector('.juego__mesa'), stage = raiz.querySelector('.juego__stage'), cap = raiz.querySelector('.juego__piezas'), final = raiz.querySelector('.juego__final');
     mesa.style.backgroundImage = 'url("' + DEF.mesa + '")';
     final.textContent = c.texto || '';
     ses.piezas.forEach((p) => {
@@ -346,7 +390,7 @@
       img.style.left = (-p.ax) + 'px'; img.style.top = (-p.ay) + 'px';
       img.style.width = p.w + 'px'; img.style.height = p.h + 'px';
       img.style.transformOrigin = p.ax + 'px ' + p.ay + 'px';
-      el.appendChild(img); stage.appendChild(el);
+      el.appendChild(img); cap.appendChild(el);
       p.el = el; p.img = img;
     });
     const etiquetas = document.createElement('div'); etiquetas.className = 'juego__etiquetas'; stage.appendChild(etiquetas);
