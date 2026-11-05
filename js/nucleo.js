@@ -76,6 +76,8 @@
     btnLuz.hidden = !e.luz;
     btnLuz.setAttribute('aria-pressed', String(estado.luzApagada));
     btnLuzTxt.textContent = estado.luzApagada ? 'Usar linterna' : 'Encender luces';
+    btnLuz.setAttribute('aria-label', btnLuzTxt.textContent);
+    btnLuz.title = btnLuzTxt.textContent;
     const total = listarObjetos().length, v = vistos();
     if (pines.children.length !== total) { pines.innerHTML = ''; for (let i = 0; i < total; i++) pines.appendChild(crear('i', 'pin')); }
     Array.prototype.forEach.call(pines.children, (n, i) => n.classList.toggle('on', i < v));

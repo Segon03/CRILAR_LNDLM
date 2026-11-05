@@ -247,7 +247,7 @@ img{max-width:100%}
 .boton--icono.apagado{color:var(--luna-2);border-color:rgba(217,229,246,.35)}
 .boton:disabled{opacity:.65;cursor:default}
 .creditos{position:fixed;left:0;right:0;bottom:max(4px,calc(env(safe-area-inset-bottom)*.4));z-index:16;margin:0;padding:0 12px;text-align:center;font-size:10.5px;line-height:1.25;color:var(--luna-2);opacity:.62;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.85)}
-@media (max-width:480px){#btn-mapa span{display:none}#btn-mapa{padding:.45rem .65rem}.creditos{font-size:9.5px}}
+@media (max-width:480px){#btn-mapa span,#btn-luz-txt{display:none}#btn-mapa,#btn-luz{padding:.45rem .65rem}.creditos{font-size:9.5px}}
 
 /* ---------- Escena de video (auditorio) ---------- */
 .vista--video{background:#03050e}

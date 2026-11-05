@@ -13,19 +13,21 @@
   const cfg = (C.D && C.D.sonido) || {};
   const memoria = C.util.memoria;
   const boton = document.getElementById('btn-sonido');
+  const botonPasos = document.getElementById('btn-pasos');
   const creditos = document.getElementById('creditos');
 
   if (creditos) {
     if (cfg.creditos) creditos.textContent = cfg.creditos;
     else creditos.hidden = true;
   }
-  if (!cfg.musica && !cfg.pasos) { if (boton) boton.hidden = true; return; }
+  if (!cfg.musica && !cfg.pasos) { if (boton) boton.hidden = true; const bp = document.getElementById('btn-pasos'); if (bp) bp.hidden = true; return; }
 
   /* Con http(s) se usa Web Audio, que permite controlar el volumen también en iPhone.
      Al abrir index.html desde la carpeta (file://) se usa el volumen del propio elemento. */
   const AC = window.AudioContext || window.webkitAudioContext;
   const conWebAudio = !!AC && /^https?:$/.test(window.location.protocol);
   let encendido = memoria.leer('sonido', true) !== false;
+  let pasosOn = memoria.leer('pasos', true) !== false;
   let ctx = null, iniciado = false, tPasos = 0, pasosSonando = false, bajada = false;
 
   function canal(url, max) {
@@ -103,7 +105,7 @@
 
   /* Pasos durante "ms" milisegundos; la música baja un poco y vuelve al terminar. */
   function caminar(ms) {
-    if (!iniciado || !encendido || !pasos) return;
+    if (!iniciado || !encendido || !pasosOn || !pasos) return;
     pasosSonando = true;
     clearTimeout(tPasos);
     try { pasos.el.currentTime = 0; } catch (e) { /* nada */ }
@@ -167,9 +169,29 @@
   pintar();
   if (boton) boton.addEventListener('click', alternar);
 
+  /* ---------- botón de los pasos (solo las pisadas, la música sigue) ---------- */
+  function pintarPasos() {
+    if (!botonPasos) return;
+    botonPasos.classList.toggle('apagado', !pasosOn);
+    const t = pasosOn ? 'Silenciar los pasos' : 'Activar los pasos';
+    botonPasos.setAttribute('aria-label', t);
+    botonPasos.title = t;
+  }
+  function alternarPasos() {
+    pasosOn = !pasosOn;
+    memoria.guardar('pasos', pasosOn);
+    pintarPasos();
+    if (!pasosOn) parar();
+  }
+  if (botonPasos) {
+    if (!pasos) botonPasos.hidden = true;
+    botonPasos.addEventListener('click', alternarPasos);
+  }
+  pintarPasos();
+
   /* ---------- primer toque y segundo plano ---------- */
   function gesto(ev) {
-    if (boton && ev && ev.target && boton.contains(ev.target)) return;
+    if (ev && ev.target && ((boton && boton.contains(ev.target)) || (botonPasos && botonPasos.contains(ev.target)))) return;
     if (!iniciado) iniciar();
     else if (encendido && musica && musica.el.paused && !musica.el.ended && !document.hidden) arrancarMusica();
   }
