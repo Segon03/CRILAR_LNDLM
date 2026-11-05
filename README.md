@@ -18,7 +18,8 @@ js/ventanas.js      fichas, mapa y sorteo
 js/inicio.js        arranque y carga de fotos
 js/editor.js        modo edición (solo se carga con ?editar=1)
 datos/muestra.js    textos, salas, puntos y fichas: el archivo que más vas a tocar
-images/escenas/     las fotos del recorrido (entrada, hall, salas y sus alas)
+images/escenas/     las fotos del recorrido (entrada y hall panorámico)
+videos/             los videos del auditorio y de las salas 1 y 2
 images/fichas/      fotos, infografías y videos de cada objeto
 images/logo/        logo del CRILAR en SVG y PDF (el original, una versión a trazos y una clara)
 fonts/              tipografías del sitio, con sus licencias
@@ -28,13 +29,13 @@ fonts/              tipografías del sitio, con sus licencias
 
 Reemplazá los archivos de `images/escenas/` conservando el nombre. El sitio se adapta solo al tamaño de cada foto. Para que cargue rápido en el celular, conviene que cada panorámica mida unos 2500 px de ancho y pese menos de 500 KB.
 
-Las fotos de `sala1.jpeg` y `sala2.jpeg` son la vista de cada sala antes de elegir el ala izquierda o derecha.
+Las salas 1 y 2 ya no usan fotos: se recorren en video (ver más abajo). Los archivos `.HEIC` del iPhone y los `.MOV` no se pueden usar en la web: hay que pasarlos a `.jpg` y `.mp4`, y los originales pesados quedan en carpetas `originales/`, que no se suben a GitHub.
 
 ## Acomodar los puntos sobre las fotos
 
 Los puntos de partida están en posiciones aproximadas. Para ubicarlos bien:
 
-1. Abrí `index.html?editar=1` (o, para ir directo a una sala, `index.html?editar=1&escena=sala2_L`).
+1. Abrí `index.html?editar=1` (o, para ir directo a una sala, `index.html?editar=1&escena=sala2`).
 2. Arrastrá cada punto hasta su vitrina u objeto. Con "Nuevo objeto" agregás uno tocando la foto. Con Supr quitás el que tengas seleccionado.
 3. Tocá "Copiar datos", abrí `datos/muestra.js`, borrá todo y pegá.
 
@@ -87,6 +88,14 @@ git push
 
 2. En GitHub, entrá a Settings, Pages. En "Build and deployment" elegí "Deploy from a branch", rama `main` y carpeta `/ (root)`.
 3. En uno o dos minutos el sitio queda en `https://segon03.github.io/CRILAR_LNDLM/`. Con una cuenta gratuita, el repositorio tiene que ser público.
+
+## Salas 1 y 2: recorrido en video por tramos
+
+- Cada sala es un video vertical (`videos/sala1-720.mp4` y `-480.mp4` para celulares con poca conexión, lo mismo para la sala 2) que se avanza con las flechas de los costados, con el teclado (← →) o deslizando el dedo.
+- En `datos/muestra.js`, cada sala tiene `paradas`: los segundos del video donde se detiene el recorrido. Cada tramo equivale a un ancho de imagen, salvo los tramos continuos de `continuos` (sala 1: 00:24 a 00:29; sala 2: 00:39 a 00:44), que se reproducen de una vez y a velocidad normal.
+- `velocidad` indica qué tan rápido se reproducen los tramos comunes (1,6 = un 60 % más rápido que el video original). Para cambiar un corte, editá el número de segundos en `paradas`.
+- Cada punto lleva `parada`: el número de parada en la que aparece (0 es la primera). En el modo edición (`?editar=1&escena=sala1`), avanzá hasta la parada que quieras y arrastrá o agregá los puntos ahí.
+- Los videos se convirtieron de HDR (iPhone) a colores normales, sin audio, a 720×1280 y 480×854.
 
 GitHub distingue mayúsculas de minúsculas: `Hall.jpeg` y `hall.jpeg` son archivos distintos. Si reemplazás una foto, usá exactamente el mismo nombre.
 

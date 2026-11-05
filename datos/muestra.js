@@ -74,16 +74,16 @@ window.MUESTRA = {
       "luz": true,
       "padre": null,
       "imagen": {
-        "src": "images/escenas/Hall.jpeg",
-        "w": 1600,
-        "h": 424
+        "src": "images/escenas/hall-panoramica.jpg",
+        "w": 4096,
+        "h": 2199
       },
       "puntos": [
         {
           "id": "ir-sala1",
           "tipo": "ir",
-          "x": 33.2,
-          "y": 23.1,
+          "x": 34,
+          "y": 33,
           "destino": "sala1",
           "direccion": "izquierda",
           "titulo": "Sala 1",
@@ -92,8 +92,8 @@ window.MUESTRA = {
         {
           "id": "ir-sala2",
           "tipo": "ir",
-          "x": 55.6,
-          "y": 23.2,
+          "x": 76,
+          "y": 33,
           "destino": "sala2",
           "direccion": "derecha",
           "titulo": "Sala 2",
@@ -102,16 +102,16 @@ window.MUESTRA = {
         {
           "id": "ir-auditorio",
           "tipo": "entrar",
-          "x": 41.9,
-          "y": 47,
+          "x": 53.3,
+          "y": 50.4,
           "destino": "auditorio",
           "titulo": "el auditorio"
         },
         {
           "id": "dino-hall",
           "tipo": "info",
-          "x": 10.5,
-          "y": 47,
+          "x": 21.9,
+          "y": 47.5,
           "titulo": "Dinosaurio",
           "ficha": {
             "area": "Paleontología",
@@ -129,7 +129,7 @@ window.MUESTRA = {
           "id": "ir-entrada",
           "tipo": "ir",
           "x": 50,
-          "y": 90,
+          "y": 91,
           "destino": "entrada",
           "direccion": "atras",
           "titulo": "Entrada"
@@ -137,56 +137,17 @@ window.MUESTRA = {
       ]
     },
     "sala1": {
-      "tipo": "escena",
+      "tipo": "recorrido",
       "titulo": "Sala 1, Paleontología",
       "corto": "Sala 1",
       "luz": true,
       "padre": "hall",
-      "imagen": {
-        "src": "images/escenas/sala1.jpeg",
-        "w": 960,
-        "h": 1280
-      },
-      "puntos": [
-        {
-          "id": "ir-sala1-L",
-          "tipo": "ir",
-          "x": 24,
-          "y": 55,
-          "destino": "sala1_L",
-          "direccion": "izquierda",
-          "titulo": "Paleontología",
-          "detalle": "Ala izquierda"
-        },
-        {
-          "id": "ir-sala1-R",
-          "tipo": "ir",
-          "x": 76,
-          "y": 55,
-          "destino": "sala1_R",
-          "direccion": "derecha",
-          "titulo": "Paleontología",
-          "detalle": "Ala derecha"
-        }
-      ]
-    },
-    "sala1_L": {
-      "tipo": "panorama",
-      "titulo": "Sala 1, ala izquierda",
-      "corto": "Izquierda",
-      "luz": true,
-      "padre": "sala1",
-      "imagen": {
-        "src": "images/escenas/sala1_L.jpeg",
-        "w": 1140,
-        "h": 464
-      },
       "puntos": [
         {
           "id": "s1L-1",
           "tipo": "objeto",
-          "x": 8,
-          "y": 33.8,
+          "x": 43.0,
+          "y": 39.9,
           "titulo": "Fósil de ejemplo 1",
           "ficha": {
             "area": "Paleontología",
@@ -198,13 +159,14 @@ window.MUESTRA = {
               "recorte": true,
               "alt": "Detalle de fósil de ejemplo 1"
             }
-          }
+          },
+          "parada": 0
         },
         {
           "id": "s1L-2",
           "tipo": "objeto",
-          "x": 29.8,
-          "y": 28.2,
+          "x": 56.0,
+          "y": 37.9,
           "titulo": "Fósil de ejemplo 2",
           "ficha": {
             "area": "Paleontología",
@@ -216,13 +178,14 @@ window.MUESTRA = {
               "src": "",
               "alt": ""
             }
-          }
+          },
+          "parada": 1
         },
         {
           "id": "s1L-3",
           "tipo": "objeto",
-          "x": 47.3,
-          "y": 30.3,
+          "x": 51.4,
+          "y": 45.5,
           "titulo": "Fósil de ejemplo 3",
           "ficha": {
             "area": "Paleontología",
@@ -234,27 +197,14 @@ window.MUESTRA = {
               "youtube": "",
               "mp4": ""
             }
-          }
-        }
-      ]
-    },
-    "sala1_R": {
-      "tipo": "panorama",
-      "titulo": "Sala 1, ala derecha",
-      "corto": "Derecha",
-      "luz": true,
-      "padre": "sala1",
-      "imagen": {
-        "src": "images/escenas/sala1_R.jpeg",
-        "w": 1280,
-        "h": 322
-      },
-      "puntos": [
+          },
+          "parada": 3
+        },
         {
           "id": "s1R-1",
           "tipo": "objeto",
-          "x": 20.0,
-          "y": 26.7,
+          "x": 32.3,
+          "y": 49.2,
           "titulo": "Fósil de ejemplo 1",
           "ficha": {
             "area": "Paleontología",
@@ -266,13 +216,14 @@ window.MUESTRA = {
               "recorte": true,
               "alt": "Detalle de fósil de ejemplo 1"
             }
-          }
+          },
+          "parada": 4
         },
         {
           "id": "s1R-2",
           "tipo": "objeto",
-          "x": 35.6,
-          "y": 51.7,
+          "x": 31.5,
+          "y": 47.3,
           "titulo": "Fósil de ejemplo 2",
           "ficha": {
             "area": "Paleontología",
@@ -284,13 +235,14 @@ window.MUESTRA = {
               "src": "",
               "alt": ""
             }
-          }
+          },
+          "parada": 5
         },
         {
           "id": "s1R-3",
           "tipo": "objeto",
-          "x": 88.5,
-          "y": 25.8,
+          "x": 32.8,
+          "y": 38.4,
           "titulo": "Fósil de ejemplo 3",
           "ficha": {
             "area": "Paleontología",
@@ -302,61 +254,46 @@ window.MUESTRA = {
               "youtube": "",
               "mp4": ""
             }
-          }
+          },
+          "parada": 6
         }
+      ],
+      "video": {
+        "src720": "videos/sala1-720.mp4",
+        "src480": "videos/sala1-480.mp4",
+        "w": 720,
+        "h": 1280,
+        "velocidad": 1.6,
+        "duracion": 60.39
+      },
+      "paradas": [
+        0.0,
+        14.28,
+        24,
+        29,
+        38.41,
+        48.38,
+        60.2
+      ],
+      "continuos": [
+        [
+          24,
+          29
+        ]
       ]
     },
     "sala2": {
-      "tipo": "escena",
+      "tipo": "recorrido",
       "titulo": "Sala 2",
       "corto": "Sala 2",
       "luz": true,
       "padre": "hall",
-      "imagen": {
-        "src": "images/escenas/sala2.jpeg",
-        "w": 1280,
-        "h": 960
-      },
-      "puntos": [
-        {
-          "id": "ir-sala2-L",
-          "tipo": "ir",
-          "x": 22,
-          "y": 55,
-          "destino": "sala2_L",
-          "direccion": "izquierda",
-          "titulo": "Ala izquierda",
-          "detalle": "Entomología, Entomología médica, Mastozoología, Micología, Cronobiología, Ecología y Paleobotánica"
-        },
-        {
-          "id": "ir-sala2-R",
-          "tipo": "ir",
-          "x": 78,
-          "y": 55,
-          "destino": "sala2_R",
-          "direccion": "derecha",
-          "titulo": "Ala derecha",
-          "detalle": "Botánica y Geociencias"
-        }
-      ]
-    },
-    "sala2_L": {
-      "tipo": "panorama",
-      "titulo": "Sala 2, ala izquierda",
-      "corto": "Izquierda",
-      "luz": true,
-      "padre": "sala2",
-      "imagen": {
-        "src": "images/escenas/sala2_L.jpeg",
-        "w": 1280,
-        "h": 436
-      },
       "puntos": [
         {
           "id": "s2L-1",
           "tipo": "objeto",
-          "x": 9.4,
-          "y": 31.3,
+          "x": 47.0,
+          "y": 57.5,
           "titulo": "Objeto de ejemplo de Entomología",
           "ficha": {
             "area": "Entomología",
@@ -368,13 +305,14 @@ window.MUESTRA = {
               "recorte": true,
               "alt": "Detalle de objeto de ejemplo de entomología"
             }
-          }
+          },
+          "parada": 0
         },
         {
           "id": "s2L-2",
           "tipo": "objeto",
-          "x": 16.5,
-          "y": 37.4,
+          "x": 69.1,
+          "y": 37.2,
           "titulo": "Objeto de ejemplo de Entomología médica",
           "ficha": {
             "area": "Entomología médica",
@@ -386,13 +324,14 @@ window.MUESTRA = {
               "src": "",
               "alt": ""
             }
-          }
+          },
+          "parada": 0
         },
         {
           "id": "s2L-3",
           "tipo": "objeto",
-          "x": 23.3,
-          "y": 47.2,
+          "x": 64.3,
+          "y": 43.5,
           "titulo": "Objeto de ejemplo de Mastozoología",
           "ficha": {
             "area": "Mastozoología",
@@ -404,13 +343,14 @@ window.MUESTRA = {
               "youtube": "",
               "mp4": ""
             }
-          }
+          },
+          "parada": 1
         },
         {
           "id": "s2L-4",
           "tipo": "objeto",
-          "x": 35.4,
-          "y": 46.6,
+          "x": 35.8,
+          "y": 39.1,
           "titulo": "Objeto de ejemplo de Micología",
           "ficha": {
             "area": "Micología",
@@ -422,13 +362,14 @@ window.MUESTRA = {
               "recorte": true,
               "alt": "Detalle de objeto de ejemplo de micología"
             }
-          }
+          },
+          "parada": 2
         },
         {
           "id": "s2L-5",
           "tipo": "objeto",
           "x": 42.3,
-          "y": 59.5,
+          "y": 57.2,
           "titulo": "Objeto de ejemplo de Cronobiología",
           "ficha": {
             "area": "Cronobiología",
@@ -440,13 +381,14 @@ window.MUESTRA = {
               "src": "",
               "alt": ""
             }
-          }
+          },
+          "parada": 3
         },
         {
           "id": "s2L-6",
           "tipo": "objeto",
-          "x": 51.7,
-          "y": 51.5,
+          "x": 37.2,
+          "y": 51.1,
           "titulo": "Objeto de ejemplo de Ecología",
           "ficha": {
             "area": "Ecología",
@@ -458,13 +400,14 @@ window.MUESTRA = {
               "youtube": "",
               "mp4": ""
             }
-          }
+          },
+          "parada": 5
         },
         {
           "id": "s2L-7",
           "tipo": "objeto",
-          "x": 59.6,
-          "y": 52.1,
+          "x": 55.6,
+          "y": 45.7,
           "titulo": "Objeto de ejemplo de Paleobotánica",
           "ficha": {
             "area": "Paleobotánica",
@@ -476,27 +419,14 @@ window.MUESTRA = {
               "recorte": true,
               "alt": "Detalle de objeto de ejemplo de paleobotánica"
             }
-          }
-        }
-      ]
-    },
-    "sala2_R": {
-      "tipo": "panorama",
-      "titulo": "Sala 2, ala derecha",
-      "corto": "Derecha",
-      "luz": true,
-      "padre": "sala2",
-      "imagen": {
-        "src": "images/escenas/sala2_R.jpeg",
-        "w": 1236,
-        "h": 476
-      },
-      "puntos": [
+          },
+          "parada": 6
+        },
         {
           "id": "s2R-1",
           "tipo": "objeto",
-          "x": 74.6,
-          "y": 50.5,
+          "x": 32.4,
+          "y": 41.4,
           "titulo": "Objeto de ejemplo de Botánica",
           "ficha": {
             "area": "Botánica",
@@ -508,13 +438,14 @@ window.MUESTRA = {
               "recorte": true,
               "alt": "Detalle de objeto de ejemplo de botánica"
             }
-          }
+          },
+          "parada": 6
         },
         {
           "id": "s2R-2",
           "tipo": "objeto",
-          "x": 92,
-          "y": 62.0,
+          "x": 57.2,
+          "y": 47.1,
           "titulo": "Objeto de ejemplo de Geociencias",
           "ficha": {
             "area": "Geociencias",
@@ -526,8 +457,33 @@ window.MUESTRA = {
               "src": "",
               "alt": ""
             }
-          }
+          },
+          "parada": 7
         }
+      ],
+      "video": {
+        "src720": "videos/sala2-720.mp4",
+        "src480": "videos/sala2-480.mp4",
+        "w": 720,
+        "h": 1280,
+        "velocidad": 1.6,
+        "duracion": 61.93
+      },
+      "paradas": [
+        0.0,
+        13.28,
+        24.66,
+        35.24,
+        39,
+        44,
+        54.49,
+        61.7
+      ],
+      "continuos": [
+        [
+          39,
+          44
+        ]
       ]
     },
     "auditorio": {
@@ -542,7 +498,8 @@ window.MUESTRA = {
         "final": "videos/auditorio-final.jpg",
         "w": 1920,
         "h": 1080,
-        "duracion": 21.3
+        "duracion": 21.3,
+        "pasosSeg": 10
       },
       "pantalla": {
         "x": 28.9,
@@ -564,5 +521,5 @@ window.MUESTRA = {
       ]
     }
   },
-  "version": 3
+  "version": 4
 };

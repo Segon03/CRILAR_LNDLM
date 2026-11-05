@@ -1,0 +1,6 @@
+# originales pesados o en formatos que la web no lee
+images/escenas/originales/
+*.HEIC
+*.heic
+*.MOV
+*.mov

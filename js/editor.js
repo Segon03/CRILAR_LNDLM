@@ -96,7 +96,7 @@
       const id = 'obj-' + Date.now().toString(36);
       escenas[estado.escena].puntos = escenas[estado.escena].puntos || [];
       escenas[estado.escena].puntos.push({
-        id: id, tipo: 'objeto', x: pos.x, y: pos.y, titulo: titulo,
+        id: id, tipo: 'objeto', x: pos.x, y: pos.y, titulo: titulo, parada: estado.parada != null ? estado.parada : undefined,
         ficha: { area: area, titulo: titulo, tipo: 'foto', media: { recorte: true, alt: '' }, texto: 'Texto de ejemplo. Acá va la descripción del objeto.', credito: '' }
       });
       guardar();

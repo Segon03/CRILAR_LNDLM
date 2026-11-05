@@ -265,3 +265,13 @@ img{max-width:100%}
 .video__saltar{position:fixed;left:50%;bottom:max(84px,calc(env(safe-area-inset-bottom) + 70px));transform:translateX(-50%);z-index:12;font-size:.9rem;background:rgba(8,14,34,.6)}
 .video__yt{position:absolute;z-index:3;opacity:0;pointer-events:none;font-size:.78rem;color:var(--luna-2);text-decoration:underline;text-underline-offset:3px;transition:opacity 1s ease 1.8s}
 .video--fin .video__yt{opacity:.8;pointer-events:auto}
+
+/* ---------- Recorrido en video (salas) ---------- */
+.fondo.bruma{width:112%;height:112%}
+.vista--recorrido .foto{object-fit:fill;transition:filter .6s ease,opacity .9s ease}
+.vista--recorrido:not(.video--listo) .foto{opacity:0}
+.punto--fuera{visibility:hidden;pointer-events:none;opacity:0}
+.punto{transition:opacity .5s ease}
+.vista--recorrido.recorriendo .pan{opacity:.35;pointer-events:none}
+
+@media (pointer:coarse){.vista--recorrido .pan{display:grid;width:40px;height:64px;margin-top:-32px}}

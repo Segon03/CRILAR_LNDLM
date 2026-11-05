@@ -127,7 +127,10 @@
     const b = crear('button', 'pan ' + (dir < 0 ? 'pan--izq' : 'pan--der'), dir < 0 ? ICONOS.izq : ICONOS.der);
     b.type = 'button';
     b.setAttribute('aria-label', dir < 0 ? 'Mirar hacia la izquierda' : 'Mirar hacia la derecha');
-    b.addEventListener('click', () => { estado.panObj = limitar(estado.panObj + dir * estado.vw * 0.55, 0, estado.mundo.max); });
+    b.addEventListener('click', () => {
+      if (estado.rec) { moverParada(dir); return; }
+      estado.panObj = limitar(estado.panObj + dir * estado.vw * 0.55, 0, estado.mundo.max);
+    });
     return b;
   }
 
@@ -152,6 +155,7 @@
     if (!v) return;
     const vid = $('video', v);
     if (vid) { try { vid.pause(); vid.removeAttribute('src'); vid.load(); } catch (err) { /* nada */ } }
+    if (estado.rec) { cancelAnimationFrame(estado.rec.raf); estado.rec = null; estado.parada = null; }
     if (v._yt) { window.removeEventListener('message', v._yt); v._yt = null; }
     if (v.classList.contains('vista--video') && CR.sonido) { CR.sonido.parar(); CR.sonido.musicaBaja(false); }
     v.remove();
@@ -213,7 +217,7 @@
     vid.src = fuente;
     const jugar = vid.play();
     if (jugar && jugar.catch) jugar.catch(terminar);
-    if (!opc || opc.pasos !== false) { if (CR.sonido) CR.sonido.pasos((vd.duracion || 21) * 1000 + 600); }
+    if (!opc || opc.pasos !== false) { if (CR.sonido) CR.sonido.pasos((vd.pasosSeg || 10) * 1000); }
     setTimeout(() => { if (!fin && estado.vista === v && vid.currentTime < 0.05) terminar(); }, 9000);
   }
 
@@ -247,10 +251,158 @@
     marco.appendChild(ifr);
   }
 
+  /* ---------- recorrido en video (salas): el video avanza por tramos con las flechas laterales ---------- */
+  function montarRecorrido(id, e) {
+    const vd = e.video, P = e.paradas && e.paradas.length ? e.paradas : [0];
+    estado.escena = id;
+    limpiarVista();
+    const luz = !!e.luz;
+    const v = crear('div', 'vista vista--recorrido' + (luz ? ' vista--luz' : ' vista--noche') + (luz && estado.luzApagada ? ' vista--apagada' : ''));
+    v.dataset.escena = id;
+    const bruma = crear('canvas', 'fondo bruma');
+    bruma.width = 40; bruma.height = 40;
+    const mundoVideo = crear('div', 'mundo mundo--foto');
+    const vid = crear('video', 'foto');
+    vid.muted = true; vid.defaultMuted = true; vid.playsInline = true; vid.preload = 'auto'; vid.disablePictureInPicture = true;
+    vid.setAttribute('playsinline', ''); vid.setAttribute('muted', ''); vid.setAttribute('aria-label', e.titulo || 'Recorrido');
+    mundoVideo.appendChild(vid);
+    v.appendChild(bruma);
+    v.appendChild(mundoVideo);
+    v.appendChild(crear('div', 'tinte'));
+    if (luz) { v.appendChild(crear('div', 'oscuridad')); v.appendChild(crear('div', 'haz')); v.appendChild(polvo()); }
+    v.appendChild(crear('div', 'vineta'));
+
+    const mundoPuntos = crear('div', 'mundo mundo--puntos');
+    estado.puntosDatos = [];
+    const lista = [];
+    (e.puntos || []).forEach((p) => {
+      const b = crearPunto(p);
+      mundoPuntos.appendChild(b);
+      const d = { el: b, x: p.x, y: p.y, cerca: false, parada: p.parada || 0 };
+      lista.push(d);
+      if (p.tipo !== 'ir') estado.puntosDatos.push(d);
+    });
+    v.appendChild(mundoPuntos);
+    const izq = botonPan(-1), der = botonPan(1);
+    izq.setAttribute('aria-label', 'Retroceder por la sala');
+    der.setAttribute('aria-label', 'Avanzar por la sala');
+    v.appendChild(izq);
+    v.appendChild(der);
+
+    escenario.insertBefore(v, escenario.firstChild);
+    estado.vista = v;
+    estado.mundos = [mundoVideo, mundoPuntos];
+    estado.dims = { w: vd.w || 720, h: vd.h || 1280 };
+    estado.lx = estado.lxObj = innerWidth / 2;
+    estado.ly = estado.lyObj = innerHeight / 2;
+    estado.tLuz = performance.now();
+    estado.pan = estado.panObj = 0;
+    const r = { e: e, vid: vid, i: 0, jugando: false, raf: 0, bruma: bruma, lista: lista, izq: izq, der: der, P: P };
+    estado.rec = r;
+    estado.parada = 0;
+    calcular();
+    actualizarHUD();
+    actualizarParada();
+
+    const liviano = tactil || innerWidth < 900 || (navigator.connection && navigator.connection.saveData);
+    vid.src = liviano && vd.src480 ? vd.src480 : vd.src720;
+    vid.addEventListener('loadedmetadata', () => {
+      try { vid.currentTime = P[0]; } catch (err) { /* nada */ }
+      const j = vid.play();   /* en iPhone hace falta arrancar el video una vez para que muestre el primer cuadro */
+      if (j && j.then) j.then(() => { vid.pause(); try { vid.currentTime = P[0]; } catch (err) { /* nada */ } }).catch(() => {});
+    }, { once: true });
+    vid.addEventListener('loadeddata', () => { if (estado.vista === v) { v.classList.add('video--listo'); pintarBruma(); } });
+    vid.addEventListener('seeked', () => { if (estado.vista === v) pintarBruma(); });
+  }
+
+  function pintarBruma() {
+    const r = estado.rec;
+    if (!r || !r.vid.videoWidth) return;
+    try {
+      const c = r.bruma.getContext('2d'), cw = r.bruma.width, ch = r.bruma.height;
+      const s = Math.max(cw / r.vid.videoWidth, ch / r.vid.videoHeight);
+      const dw = r.vid.videoWidth * s, dh = r.vid.videoHeight * s;
+      c.drawImage(r.vid, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+    } catch (err) { /* sin lienzo */ }
+  }
+
+  /* Muestra solo los puntos de la parada actual y las flechas que corresponden. */
+  function actualizarParada() {
+    const r = estado.rec;
+    if (!r) return;
+    estado.parada = r.i;
+    r.lista.forEach((d) => {
+      const fuera = r.jugando || d.parada !== r.i;
+      d.el.classList.toggle('punto--fuera', fuera);
+      if (fuera && d.cerca) { d.cerca = false; d.el.classList.remove('cerca'); }
+    });
+    r.izq.hidden = r.i <= 0;
+    r.der.hidden = r.i >= r.P.length - 1;
+    estado.vista.classList.toggle('recorriendo', r.jugando);
+  }
+
+  function moverParada(delta) {
+    const r = estado.rec;
+    if (!r || r.jugando || estado.cambiando || bloqueado() || estado.modal) return;
+    const j = r.i + delta;
+    if (j < 0 || j >= r.P.length) return;
+    const e = r.e, vid = r.vid, v = estado.vista;
+    const desde = r.P[r.i], hasta = r.P[j];
+    const lo = Math.min(desde, hasta), hi = Math.max(desde, hasta);
+    const continuo = (e.continuos || []).some((c) => lo >= c[0] - 0.05 && hi <= c[1] + 0.05);
+    const vel = continuo ? 1 : (e.video.velocidad || 1.6);
+    const dur = Math.abs(hasta - desde) / vel;
+    r.jugando = true;
+    r.i = j;
+    actualizarParada();
+    if (CR.sonido) CR.sonido.pasos(dur * 1000 + 300);
+    let hecho = false;
+    const fin = () => {
+      if (hecho || estado.vista !== v) return;
+      hecho = true;
+      cancelAnimationFrame(r.raf);
+      r.jugando = false;
+      vid.pause();
+      try { vid.currentTime = hasta; } catch (err) { /* nada */ }
+      pintarBruma();
+      actualizarParada();
+    };
+    setTimeout(fin, dur * 1000 + 4000);
+    if (delta > 0) {
+      try { vid.currentTime = desde; } catch (err) { /* nada */ }
+      vid.playbackRate = vel;
+      const jg = vid.play();
+      if (jg && jg.catch) jg.catch(fin);
+      const paso = () => {
+        if (estado.vista !== v || hecho) return;
+        pintarBruma();
+        if (vid.currentTime >= hasta - 0.03 || vid.ended) { fin(); return; }
+        r.raf = requestAnimationFrame(paso);
+      };
+      r.raf = requestAnimationFrame(paso);
+    } else {
+      /* hacia atrás: el navegador no reproduce al revés, así que se retrocede cuadro a cuadro */
+      vid.pause();
+      let t = desde, ult = performance.now();
+      const paso = (ts) => {
+        if (estado.vista !== v || hecho) return;
+        const dt = Math.min(0.1, (ts - ult) / 1000);
+        ult = ts;
+        t = Math.max(hasta, t - dt * vel);
+        if (!vid.seeking) { try { vid.currentTime = t; } catch (err) { /* nada */ } }
+        pintarBruma();
+        if (t <= hasta) { fin(); return; }
+        r.raf = requestAnimationFrame(paso);
+      };
+      r.raf = requestAnimationFrame(paso);
+    }
+  }
+
   function montarEscena(id, opc) {
     const e = escenas[id];
     if (!e || e.tipo === 'puerta') return;
     if (e.tipo === 'video') { montarVideo(id, e, opc); return; }
+    if (e.tipo === 'recorrido') { montarRecorrido(id, e); return; }
     estado.escena = id;
     limpiarVista();
     const luz = !!e.luz;
@@ -311,6 +463,7 @@
     const vw = innerWidth, vh = innerHeight;
     estado.vw = vw; estado.vh = vh;
     if (e.tipo === 'video') { calcularVideo(e, vw, vh); return; }
+    if (e.tipo === 'recorrido') { calcularRecorrido(vw, vh); return; }
     const iw = estado.dims.w, ih = estado.dims.h;
     const libre = Math.max(200, vh - 170);
     let s, top;
@@ -356,6 +509,21 @@
     aplicar();
   }
 
+  /* El video vertical se ve entero, centrado; a los costados queda una bruma con sus propios colores. */
+  function calcularRecorrido(vw, vh) {
+    const ar = estado.dims.w / estado.dims.h;
+    const H = Math.min(vh, vw / ar), W = H * ar;
+    estado.mundo = { W: W, H: H, top: (vh - H) / 2, max: 0, offX: (vw - W) / 2 };
+    estado.mundos.forEach((m) => { m.style.width = W + 'px'; m.style.height = H + 'px'; });
+    estado.esc = 1;
+    if (estado.mundos[1]) estado.mundos[1].style.setProperty('--esc', '1');
+    estado.r = limitar(Math.min(vw, vh) * 0.3, 150, 300);
+    estado.pan = estado.panObj = 0;
+    const r = estado.rec;
+    if (r) { r.bruma.width = 40; r.bruma.height = Math.max(24, Math.round(40 * vh / vw)); pintarBruma(); }
+    aplicar();
+  }
+
   function aplicar() {
     const m = estado.mundo;
     const t = 'translate3d(' + (m.offX - estado.pan) + 'px,' + m.top + 'px,0)';
@@ -373,7 +541,7 @@
   function irConAcercamiento(id, o) {
     const v = estado.vista;
     const aVideo = escenas[id].tipo === 'video';
-    if (CR.sonido) CR.sonido.pasos(ACERCAR_MS + 600 + (aVideo ? ((escenas[id].video.duracion || 21) * 1000 + 600) : 0));
+    if (CR.sonido) CR.sonido.pasos(ACERCAR_MS + 600 + (aVideo ? ((escenas[id].video.pasosSeg || 10) * 1000) : 0));
     v.classList.add('vista--caminando');
     v.style.transformOrigin = Math.round(o.x) + 'px ' + Math.round(o.y) + 'px';
     v.style.transition = 'transform ' + ACERCAR_MS + 'ms cubic-bezier(.4,.1,.55,1)';
@@ -414,11 +582,13 @@
     const e = escenas[estado.escena];
     if (!e || e.tipo === 'video' || bloqueado() || !CR.aviso) return;
     const vistas = memoria.leer('pistas', {});
-    const clave = e.luz ? 'luz' : 'flechas';
+    const clave = e.tipo === 'recorrido' ? 'recorrido' : (e.luz ? 'luz' : 'flechas');
     if (!vistas[clave]) {
       vistas[clave] = true;
       memoria.guardar('pistas', vistas);
-      CR.aviso(e.luz
+      CR.aviso(e.tipo === 'recorrido'
+        ? (tactil ? 'Usá las flechas de los costados (o deslizá) para recorrer la sala. Tocá los puntos dorados.' : 'Usá las flechas de los costados para recorrer la sala y mové el mouse para iluminar. Tocá los puntos dorados.')
+        : e.luz
         ? (tactil ? 'Arrastrá el dedo para iluminar la sala y mirar hacia los costados.' : 'Mové el mouse para iluminar la sala. Acercalo a los bordes o arrastrá para mirar hacia los costados.')
         : 'Tocá una flecha para pasar a otra sala. Arrastrá para mirar hacia los costados.', 6500);
     } else if (tactil && e.tipo === 'panorama' && innerHeight > innerWidth && !vistas.giro) {
@@ -452,10 +622,14 @@
     const dx = ev.clientX - a.xPrev;
     a.xPrev = ev.clientX;
     if (!a.moviendo && Math.abs(ev.clientX - a.x0) > 6) { a.moviendo = true; escenario.classList.add('arrastrando'); }
+    a.dx = ev.clientX - a.x0;
     if (a.moviendo) { estado.panObj = limitar(estado.panObj - dx, 0, estado.mundo.max); estado.pan = estado.panObj; aplicar(); }
   });
   const soltar = () => {
-    if (estado.arrastre && estado.arrastre.moviendo) estado.ultimoArrastre = performance.now();
+    if (estado.arrastre && estado.arrastre.moviendo) {
+      estado.ultimoArrastre = performance.now();
+      if (estado.rec && Math.abs(estado.arrastre.dx || 0) > 70 && !edicion()) moverParada(estado.arrastre.dx < 0 ? 1 : -1);
+    }
     estado.arrastre = null;
     escenario.classList.remove('arrastrando');
   };
@@ -473,6 +647,7 @@
   window.addEventListener('keydown', (ev) => {
     if (estado.modal || bloqueado()) return;
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return;
+    if (estado.rec) { if (ev.key === 'ArrowLeft') moverParada(-1); else if (ev.key === 'ArrowRight') moverParada(1); return; }
     if (ev.key === 'ArrowLeft') estado.panObj = limitar(estado.panObj - 140, 0, estado.mundo.max);
     else if (ev.key === 'ArrowRight') estado.panObj = limitar(estado.panObj + 140, 0, estado.mundo.max);
   });
@@ -514,6 +689,7 @@
     }
     if (!estado.luzApagada) {
       estado.puntosDatos.forEach((d) => {
+        if (estado.rec && d.parada !== estado.rec.i) return;
         const sx = m.offX - estado.pan + (d.x / 100) * m.W;
         const sy = m.top + (d.y / 100) * m.H;
         const cerca = Math.hypot(sx - estado.lx, sy - estado.ly) < r;
