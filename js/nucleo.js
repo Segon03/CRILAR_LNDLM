@@ -241,16 +241,16 @@
 
   /* Acercamiento hacia el cartel tocado: la escena se agranda desde ese punto, suenan los pasos
      y al final aparece la sala nueva asentándose. Con "reducir movimiento" se usa el fundido simple. */
-  const ACERCAR_MS = 1500;
+  const ACERCAR_MS = 2300;
   function irConAcercamiento(id, o) {
     const v = estado.vista;
-    if (CR.sonido) CR.sonido.pasos(ACERCAR_MS + 900);
+    if (CR.sonido) CR.sonido.pasos(ACERCAR_MS + 600);
     v.classList.add('vista--caminando');
     v.style.transformOrigin = Math.round(o.x) + 'px ' + Math.round(o.y) + 'px';
-    v.style.transition = 'transform ' + ACERCAR_MS + 'ms cubic-bezier(.5,.05,.8,.45)';
+    v.style.transition = 'transform ' + ACERCAR_MS + 'ms cubic-bezier(.4,.1,.55,1)';
     void v.offsetWidth;
-    v.style.transform = 'scale(3)';
-    setTimeout(() => cortina.classList.add('activa'), ACERCAR_MS - 450);
+    v.style.transform = 'scale(3.4)';
+    setTimeout(() => cortina.classList.add('activa'), ACERCAR_MS - 600);
     setTimeout(() => {
       montarEscena(id);
       const nueva = estado.vista;

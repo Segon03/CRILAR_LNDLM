@@ -176,7 +176,7 @@ img{max-width:100%}
 .puerta.abierta .puerta__luz{opacity:1}
 .puerta.abierta .hoja--izq{transform:rotateY(80deg)}
 .puerta.abierta .hoja--der{transform:rotateY(-80deg)}
-.puerta.abierta .puerta__caja{animation:acercar 3.1s cubic-bezier(.45,0,.7,.4) forwards,paseo .77s ease-in-out .35s 4}
+.puerta.abierta .puerta__caja{animation:acercar 3.1s cubic-bezier(.35,.05,.55,.95) forwards,paseo .77s ease-in-out .35s 4}
 .puerta.abierta .punto{opacity:0}
 @keyframes acercar{from{transform:scale(1)}to{transform:scale(4.4)}}
 /* balanceo suave al caminar (usa "translate", que se suma al zoom sin pisarlo) */
