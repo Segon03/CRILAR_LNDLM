@@ -101,13 +101,11 @@ window.MUESTRA = {
         },
         {
           "id": "ir-auditorio",
-          "tipo": "ir",
+          "tipo": "entrar",
           "x": 41.9,
           "y": 47,
           "destino": "auditorio",
-          "direccion": "adelante",
-          "titulo": "Auditorio",
-          "detalle": "Video institucional"
+          "titulo": "el auditorio"
         },
         {
           "id": "dino-hall",

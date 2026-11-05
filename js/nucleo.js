@@ -99,7 +99,7 @@
     } else {
       b = crear('button', 'punto punto--' + p.tipo + (estado.visto.has(p.id) ? ' visto' : ''));
       b.innerHTML = '<span class="punto__aro"></span><span class="punto__nucleo"></span>' + ICONOS.mano;
-      b.setAttribute('aria-label', 'Ver ' + (p.titulo || 'objeto'));
+      b.setAttribute('aria-label', (p.tipo === 'entrar' ? 'Entrar a ' : 'Ver ') + (p.titulo || 'objeto'));
     }
     b.type = 'button';
     b.style.left = p.x + '%';
@@ -117,6 +117,7 @@
 
   function activar(p, origen) {
     if (p.tipo === 'ir') irA(p.destino, p.direccion && p.direccion !== 'atras' ? { origen: origen } : null);
+    else if (p.tipo === 'entrar') irA(p.destino, { origen: origen });
     else if (CR.abrirFicha) CR.abrirFicha(p);
   }
 
