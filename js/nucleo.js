@@ -252,6 +252,28 @@
   }
 
   /* ---------- recorrido en video (salas): el video avanza por tramos con las flechas laterales ---------- */
+  /* Los videos de las salas se bajan enteros a la memoria: así el avance rápido y el retroceso no se
+     traban esperando datos de la red. Mientras tanto el video arranca igual, directo desde el servidor. */
+  const blobs = {};
+  function bajarVideo(src) {
+    if (!blobs[src]) {
+      blobs[src] = (window.fetch && /^https?:$/.test(location.protocol))
+        ? fetch(src).then((r) => { if (!r.ok) throw new Error('video'); return r.blob(); }).then((b) => URL.createObjectURL(b)).catch(() => null)
+        : Promise.resolve(null);
+    }
+    return blobs[src];
+  }
+  function fuenteRecorrido(vd) {
+    const px = Math.min(innerHeight, innerWidth / ((vd.w || 720) / (vd.h || 1280))) * (window.devicePixelRatio || 1);
+    const ahorro = navigator.connection && navigator.connection.saveData;
+    return (!vd.src480 || (px > 960 && !ahorro && !tactil && innerWidth >= 900)) ? vd.src720 : vd.src480;
+  }
+  /* En el hall, con la red libre, se adelanta la descarga de los videos de las salas. */
+  function adelantarVideos() {
+    if (navigator.connection && navigator.connection.saveData) return;
+    Object.keys(escenas).forEach((k) => { if (escenas[k].tipo === 'recorrido' && escenas[k].video) bajarVideo(fuenteRecorrido(escenas[k].video)); });
+  }
+
   function montarRecorrido(id, e) {
     const vd = e.video, P = e.paradas && e.paradas.length ? e.paradas : [0];
     estado.escena = id;
@@ -304,8 +326,17 @@
     actualizarHUD();
     actualizarParada();
 
-    const liviano = tactil || innerWidth < 900 || (navigator.connection && navigator.connection.saveData);
-    vid.src = liviano && vd.src480 ? vd.src480 : vd.src720;
+    const fuente = fuenteRecorrido(vd);
+    vid.src = fuente;
+    /* cuando el video ya está entero en memoria, se cambia (en una parada) para que no haya esperas */
+    r.cambiarAMemoria = () => {
+      if (r.enMemoria || r.jugando || estado.rec !== r || !r.blob) return;
+      r.enMemoria = true;
+      const t = r.P[r.i];
+      vid.addEventListener('loadedmetadata', () => { try { vid.currentTime = t; } catch (err) { /* nada */ } }, { once: true });
+      vid.src = r.blob;
+    };
+    bajarVideo(fuente).then((u) => { if (u && estado.rec === r) { r.blob = u; r.cambiarAMemoria(); } });
     vid.addEventListener('loadedmetadata', () => {
       try { vid.currentTime = P[0]; } catch (err) { /* nada */ }
       const j = vid.play();   /* en iPhone hace falta arrancar el video una vez para que muestre el primer cuadro */
@@ -366,8 +397,9 @@
       try { vid.currentTime = hasta; } catch (err) { /* nada */ }
       pintarBruma();
       actualizarParada();
+      r.cambiarAMemoria();
     };
-    setTimeout(fin, dur * 1000 + 4000);
+    setTimeout(fin, dur * 1000 * 1.6 + 9000);
     if (delta > 0) {
       try { vid.currentTime = desde; } catch (err) { /* nada */ }
       vid.playbackRate = vel;
@@ -455,6 +487,7 @@
     estado.pan = estado.panObj = estado.mundo.max / 2;
     aplicar();
     actualizarHUD();
+    if (id === 'hall') setTimeout(adelantarVideos, 1500);
   }
 
   function calcular() {
