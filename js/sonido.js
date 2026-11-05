@@ -109,7 +109,7 @@
     pasosSonando = true;
     clearTimeout(tPasos);
     try { pasos.el.currentTime = 0; } catch (e) { /* nada */ }
-    pasos.el.loop = ms > 6200;
+    pasos.el.loop = ms > 15500;
     pasos.nivel = 0;
     aplicar(pasos);
     jugar(pasos);

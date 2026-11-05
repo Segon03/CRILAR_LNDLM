@@ -43,7 +43,7 @@ window.MUESTRA = {
     "pasos": "sounds/pasos.mp3",
     "volumenMusica": 0.7,
     "volumenPasos": 0.95,
-    "creditos": "Música: “Museums”, de Silent Partner. Pasos: “Soggy Steps”. Biblioteca de audio de YouTube."
+    "creditos": "Música: “Museums”, de Silent Partner. Biblioteca de audio de YouTube."
   },
   "inicio": "entrada",
   "sorteo": {
