@@ -128,21 +128,17 @@ window.MUESTRA = {
           }
         },
         {
-          "id": "fosil-hall",
-          "tipo": "info",
+          "id": "mesa-hall",
+          "tipo": "objeto",
           "x": 8.6,
           "y": 79.6,
-          "titulo": "Fósil sobre la mesa",
+          "titulo": "Mapa de La Rioja en 3D",
           "ficha": {
-            "area": "Paleontología",
-            "titulo": "Fósil sobre la mesa",
-            "tipo": "foto",
-            "media": {
-              "recorte": true,
-              "alt": "Fósil expuesto sobre la mesa del hall"
-            },
-            "texto": "Texto de ejemplo. Acá va la descripción de la pieza que está sobre la mesa del hall.",
-            "credito": ""
+            "titulo": "Rompecabezas de La Rioja",
+            "tipo": "juego",
+            "juego": {
+              "texto": "Modelo de Elevación de la Provincia de La Rioja, reproducido en impresión 3D. Cada pieza del rompecabezas corresponde a los departamentos de la provincia."
+            }
           }
         },
         {
@@ -601,5 +597,5 @@ window.MUESTRA = {
       ]
     }
   },
-  "version": 6
+  "version": 7
 };

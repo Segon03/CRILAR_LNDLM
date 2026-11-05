@@ -120,3 +120,11 @@ Los archivos del `index.html` llevan `?v=5` al final. Cada vez que se cambie alg
 - En el hall, el cartel **Auditorio** lleva a una caminata en video (`videos/auditorio-1080-web.mp4`, o `auditorio480.mp4` en celulares). Al terminar queda el último fotograma y sobre la pantalla se reproduce el video de YouTube "Ciencia es Cultura". La flecha **Hall** vuelve; mientras camina hay un botón para saltar el recorrido.
 - Todo se configura en `datos/muestra.js`, escena `auditorio`: archivos de video, `pantalla` (posición y tamaño en % sobre el fotograma final) e identificador de YouTube.
 - Los videos pesados originales van en `videos/originales/`, que no se sube a GitHub. GitHub no acepta archivos de más de 100 MB (25 MB si se suben desde la web), por eso se usan versiones comprimidas.
+
+## Rompecabezas de La Rioja (Hall)
+
+El punto de la mesa, abajo a la izquierda en el Hall, abre un rompecabezas con las 18 piezas del mapa 3D (una por departamento). Se arrastran, giran con la rueda del mouse, doble clic o doble toque (o dos dedos) y no se solapan. Si una pieza queda bien puesta respecto de otra, encastran y se mueven juntas. Al completar el mapa aparecen los nombres y el texto final. Cuenta como objeto visitado con solo abrirlo.
+
+- Piezas y mesa: `images/juego/` (recortadas de las fotos de la mesa).
+- Datos de cada pieza (posición de encaje, giro, máscara): `datos/rompecabezas.js`.
+- Lógica: `js/juego.js`. Texto final: `ficha.juego.texto` en `datos/muestra.js`.
