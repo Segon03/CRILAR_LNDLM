@@ -350,7 +350,7 @@
     const desde = r.P[r.i], hasta = r.P[j];
     const lo = Math.min(desde, hasta), hi = Math.max(desde, hasta);
     const continuo = (e.continuos || []).some((c) => lo >= c[0] - 0.05 && hi <= c[1] + 0.05);
-    const vel = continuo ? 1 : (e.video.velocidad || 1.6);
+    const vel = continuo ? (e.video.velocidadContinuo || 1.8) : (e.video.velocidad || 3);
     const dur = Math.abs(hasta - desde) / vel;
     r.jugando = true;
     r.i = j;
@@ -520,6 +520,11 @@
     estado.r = limitar(Math.min(vw, vh) * 0.3, 150, 300);
     estado.pan = estado.panObj = 0;
     const r = estado.rec;
+    if (r) {
+      r.izq.style.left = Math.round((vw - W) / 2 + 8) + 'px';
+      r.der.style.left = Math.round((vw + W) / 2 - 8 - (r.der.offsetWidth || 46)) + 'px';
+      r.der.style.right = 'auto';
+    }
     if (r) { r.bruma.width = 40; r.bruma.height = Math.max(24, Math.round(40 * vh / vw)); pintarBruma(); }
     aplicar();
   }
@@ -587,7 +592,7 @@
       vistas[clave] = true;
       memoria.guardar('pistas', vistas);
       CR.aviso(e.tipo === 'recorrido'
-        ? (tactil ? 'Usá las flechas de los costados (o deslizá) para recorrer la sala. Tocá los puntos dorados.' : 'Usá las flechas de los costados para recorrer la sala y mové el mouse para iluminar. Tocá los puntos dorados.')
+        ? (tactil ? 'Deslizá el dedo hacia los costados (o usá las flechas) para recorrer la sala. Tocá los puntos dorados.' : 'Arrastrá hacia los costados, usá la rueda del mouse o las flechas para recorrer la sala. Tocá los puntos dorados.')
         : e.luz
         ? (tactil ? 'Arrastrá el dedo para iluminar la sala y mirar hacia los costados.' : 'Mové el mouse para iluminar la sala. Acercalo a los bordes o arrastrá para mirar hacia los costados.')
         : 'Tocá una flecha para pasar a otra sala. Arrastrá para mirar hacia los costados.', 6500);
@@ -628,7 +633,7 @@
   const soltar = () => {
     if (estado.arrastre && estado.arrastre.moviendo) {
       estado.ultimoArrastre = performance.now();
-      if (estado.rec && Math.abs(estado.arrastre.dx || 0) > 70 && !edicion()) moverParada(estado.arrastre.dx < 0 ? 1 : -1);
+      if (estado.rec && Math.abs(estado.arrastre.dx || 0) > 50 && !edicion()) moverParada(estado.arrastre.dx < 0 ? 1 : -1);
     }
     estado.arrastre = null;
     escenario.classList.remove('arrastrando');
@@ -641,6 +646,14 @@
     ev.preventDefault();
     const k = ev.deltaMode === 1 ? 16 : 1;
     const d = (Math.abs(ev.deltaX) > Math.abs(ev.deltaY) ? ev.deltaX : ev.deltaY) * k;
+    if (estado.rec) {
+      /* en las salas, la rueda (o el deslizar de dos dedos) avanza o retrocede un tramo */
+      const r = estado.rec;
+      if (r.jugando || performance.now() - (r.tRueda || 0) < 450) return;
+      r.acum = (r.acum || 0) + d;
+      if (Math.abs(r.acum) > 50) { const sentido = r.acum > 0 ? 1 : -1; r.acum = 0; r.tRueda = performance.now(); moverParada(sentido); }
+      return;
+    }
     estado.panObj = limitar(estado.panObj + d, 0, estado.mundo.max);
   }, { passive: false });
 

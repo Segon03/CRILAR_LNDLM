@@ -91,9 +91,10 @@ git push
 
 ## Salas 1 y 2: recorrido en video por tramos
 
-- Cada sala es un video vertical (`videos/sala1-720.mp4` y `-480.mp4` para celulares con poca conexión, lo mismo para la sala 2) que se avanza con las flechas de los costados, con el teclado (← →) o deslizando el dedo.
-- En `datos/muestra.js`, cada sala tiene `paradas`: los segundos del video donde se detiene el recorrido. Cada tramo equivale a un ancho de imagen, salvo los tramos continuos de `continuos` (sala 1: 00:24 a 00:29; sala 2: 00:39 a 00:44), que se reproducen de una vez y a velocidad normal.
-- `velocidad` indica qué tan rápido se reproducen los tramos comunes (1,6 = un 60 % más rápido que el video original). Para cambiar un corte, editá el número de segundos en `paradas`.
+- Cada sala es un video vertical (`videos/sala1-720.mp4` y `-480.mp4` para celulares con poca conexión, lo mismo para la sala 2). Se avanza arrastrando el mouse o el dedo hacia los costados, con la rueda del mouse, con el teclado (← →) o con las flechas pegadas al borde del video.
+- En `datos/muestra.js`, cada sala tiene `paradas`: los segundos del video donde se detiene el recorrido (sala 1: 7 paradas; sala 2: 10). Salen de las capturas `salaX_tomaN.jpg`, que se buscaron cuadro por cuadro dentro del video. En `continuos` están los tramos que se reproducen de una vez sin cortes (sala 1: de la parada 3 a la 4; sala 2: de la 7 a la 8).
+- `velocidad` es qué tan rápido se reproducen los tramos comunes (3 = el triple del video original) y `velocidadContinuo` la de los tramos continuos (1,8). Para cambiar un corte, editá el número de segundos en `paradas`.
+- Hay un punto de interacción por parada.
 - Cada punto lleva `parada`: el número de parada en la que aparece (0 es la primera). En el modo edición (`?editar=1&escena=sala1`), avanzá hasta la parada que quieras y arrastrá o agregá los puntos ahí.
 - Los videos se convirtieron de HDR (iPhone) a colores normales, sin audio, a 720×1280 y 480×854.
 

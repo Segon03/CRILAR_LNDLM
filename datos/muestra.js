@@ -146,8 +146,8 @@ window.MUESTRA = {
         {
           "id": "s1L-1",
           "tipo": "objeto",
-          "x": 43.0,
-          "y": 39.9,
+          "x": 48.7,
+          "y": 51.2,
           "titulo": "Fósil de ejemplo 1",
           "ficha": {
             "area": "Paleontología",
@@ -165,8 +165,8 @@ window.MUESTRA = {
         {
           "id": "s1L-2",
           "tipo": "objeto",
-          "x": 56.0,
-          "y": 37.9,
+          "x": 61.9,
+          "y": 49.3,
           "titulo": "Fósil de ejemplo 2",
           "ficha": {
             "area": "Paleontología",
@@ -184,8 +184,8 @@ window.MUESTRA = {
         {
           "id": "s1L-3",
           "tipo": "objeto",
-          "x": 51.4,
-          "y": 45.5,
+          "x": 50.2,
+          "y": 51.7,
           "titulo": "Fósil de ejemplo 3",
           "ficha": {
             "area": "Paleontología",
@@ -198,13 +198,13 @@ window.MUESTRA = {
               "mp4": ""
             }
           },
-          "parada": 3
+          "parada": 2
         },
         {
           "id": "s1R-1",
           "tipo": "objeto",
-          "x": 32.3,
-          "y": 49.2,
+          "x": 41.2,
+          "y": 50.2,
           "titulo": "Fósil de ejemplo 1",
           "ficha": {
             "area": "Paleontología",
@@ -217,13 +217,13 @@ window.MUESTRA = {
               "alt": "Detalle de fósil de ejemplo 1"
             }
           },
-          "parada": 4
+          "parada": 3
         },
         {
           "id": "s1R-2",
           "tipo": "objeto",
-          "x": 31.5,
-          "y": 47.3,
+          "x": 53.6,
+          "y": 55.9,
           "titulo": "Fósil de ejemplo 2",
           "ficha": {
             "area": "Paleontología",
@@ -236,13 +236,13 @@ window.MUESTRA = {
               "alt": ""
             }
           },
-          "parada": 5
+          "parada": 4
         },
         {
           "id": "s1R-3",
           "tipo": "objeto",
-          "x": 32.8,
-          "y": 38.4,
+          "x": 38.6,
+          "y": 46.1,
           "titulo": "Fósil de ejemplo 3",
           "ficha": {
             "area": "Paleontología",
@@ -255,6 +255,25 @@ window.MUESTRA = {
               "mp4": ""
             }
           },
+          "parada": 5
+        },
+        {
+          "id": "s1R-4",
+          "tipo": "objeto",
+          "x": 38.5,
+          "y": 56.2,
+          "titulo": "Fósil de ejemplo 4",
+          "ficha": {
+            "area": "Paleontología",
+            "titulo": "Fósil de ejemplo 4",
+            "tipo": "foto",
+            "texto": "Texto de ejemplo. Acá va la descripción del objeto: qué es, de dónde viene y por qué forma parte de la muestra.",
+            "credito": "",
+            "media": {
+              "recorte": true,
+              "alt": "Detalle de fósil de ejemplo 1"
+            }
+          },
           "parada": 6
         }
       ],
@@ -263,22 +282,23 @@ window.MUESTRA = {
         "src480": "videos/sala1-480.mp4",
         "w": 720,
         "h": 1280,
-        "velocidad": 1.6,
-        "duracion": 60.39
+        "velocidad": 3,
+        "duracion": 60.39,
+        "velocidadContinuo": 1.8
       },
       "paradas": [
         0.0,
-        14.28,
-        24,
-        29,
-        38.41,
-        48.38,
-        60.2
+        14.91,
+        23.92,
+        30.5,
+        38.51,
+        50.78,
+        59.59
       ],
       "continuos": [
         [
-          24,
-          29
+          23.92,
+          30.5
         ]
       ]
     },
@@ -292,8 +312,8 @@ window.MUESTRA = {
         {
           "id": "s2L-1",
           "tipo": "objeto",
-          "x": 47.0,
-          "y": 57.5,
+          "x": 55.4,
+          "y": 40.8,
           "titulo": "Objeto de ejemplo de Entomología",
           "ficha": {
             "area": "Entomología",
@@ -311,8 +331,8 @@ window.MUESTRA = {
         {
           "id": "s2L-2",
           "tipo": "objeto",
-          "x": 69.1,
-          "y": 37.2,
+          "x": 63.5,
+          "y": 59.3,
           "titulo": "Objeto de ejemplo de Entomología médica",
           "ficha": {
             "area": "Entomología médica",
@@ -325,13 +345,13 @@ window.MUESTRA = {
               "alt": ""
             }
           },
-          "parada": 0
+          "parada": 1
         },
         {
           "id": "s2L-3",
           "tipo": "objeto",
-          "x": 64.3,
-          "y": 43.5,
+          "x": 54.3,
+          "y": 52.3,
           "titulo": "Objeto de ejemplo de Mastozoología",
           "ficha": {
             "area": "Mastozoología",
@@ -344,13 +364,13 @@ window.MUESTRA = {
               "mp4": ""
             }
           },
-          "parada": 1
+          "parada": 2
         },
         {
           "id": "s2L-4",
           "tipo": "objeto",
-          "x": 35.8,
-          "y": 39.1,
+          "x": 40.4,
+          "y": 40.3,
           "titulo": "Objeto de ejemplo de Micología",
           "ficha": {
             "area": "Micología",
@@ -363,13 +383,13 @@ window.MUESTRA = {
               "alt": "Detalle de objeto de ejemplo de micología"
             }
           },
-          "parada": 2
+          "parada": 3
         },
         {
           "id": "s2L-5",
           "tipo": "objeto",
-          "x": 42.3,
-          "y": 57.2,
+          "x": 50.8,
+          "y": 41.2,
           "titulo": "Objeto de ejemplo de Cronobiología",
           "ficha": {
             "area": "Cronobiología",
@@ -382,13 +402,13 @@ window.MUESTRA = {
               "alt": ""
             }
           },
-          "parada": 3
+          "parada": 4
         },
         {
           "id": "s2L-6",
           "tipo": "objeto",
-          "x": 37.2,
-          "y": 51.1,
+          "x": 41.3,
+          "y": 44.8,
           "titulo": "Objeto de ejemplo de Ecología",
           "ficha": {
             "area": "Ecología",
@@ -406,8 +426,8 @@ window.MUESTRA = {
         {
           "id": "s2L-7",
           "tipo": "objeto",
-          "x": 55.6,
-          "y": 45.7,
+          "x": 36.8,
+          "y": 49.3,
           "titulo": "Objeto de ejemplo de Paleobotánica",
           "ficha": {
             "area": "Paleobotánica",
@@ -425,8 +445,8 @@ window.MUESTRA = {
         {
           "id": "s2R-1",
           "tipo": "objeto",
-          "x": 32.4,
-          "y": 41.4,
+          "x": 48.3,
+          "y": 56.8,
           "titulo": "Objeto de ejemplo de Botánica",
           "ficha": {
             "area": "Botánica",
@@ -439,13 +459,13 @@ window.MUESTRA = {
               "alt": "Detalle de objeto de ejemplo de botánica"
             }
           },
-          "parada": 6
+          "parada": 7
         },
         {
           "id": "s2R-2",
           "tipo": "objeto",
-          "x": 57.2,
-          "y": 47.1,
+          "x": 50.5,
+          "y": 52.8,
           "titulo": "Objeto de ejemplo de Geociencias",
           "ficha": {
             "area": "Geociencias",
@@ -458,7 +478,26 @@ window.MUESTRA = {
               "alt": ""
             }
           },
-          "parada": 7
+          "parada": 8
+        },
+        {
+          "id": "s2R-3",
+          "tipo": "objeto",
+          "x": 50.0,
+          "y": 53.2,
+          "titulo": "Objeto de ejemplo de Entomología (2)",
+          "ficha": {
+            "area": "Entomología",
+            "titulo": "Objeto de ejemplo de Entomología (2)",
+            "tipo": "infografia",
+            "texto": "Texto de ejemplo. Acá va la descripción del objeto: qué es, de dónde viene y por qué forma parte de la muestra.",
+            "credito": "",
+            "media": {
+              "recorte": true,
+              "alt": "Detalle de objeto de ejemplo de entomología"
+            }
+          },
+          "parada": 9
         }
       ],
       "video": {
@@ -466,23 +505,26 @@ window.MUESTRA = {
         "src480": "videos/sala2-480.mp4",
         "w": 720,
         "h": 1280,
-        "velocidad": 1.6,
-        "duracion": 61.93
+        "velocidad": 3,
+        "duracion": 61.93,
+        "velocidadContinuo": 1.8
       },
       "paradas": [
-        0.0,
-        13.28,
-        24.66,
-        35.24,
-        39,
-        44,
-        54.49,
-        61.7
+        0.53,
+        7.81,
+        13.78,
+        22.32,
+        30.96,
+        36.1,
+        38.97,
+        45.01,
+        52.75,
+        60.66
       ],
       "continuos": [
         [
-          39,
-          44
+          38.97,
+          45.01
         ]
       ]
     },
@@ -521,5 +563,5 @@ window.MUESTRA = {
       ]
     }
   },
-  "version": 4
+  "version": 5
 };
