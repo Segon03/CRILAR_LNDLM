@@ -1,1 +1,95 @@
-# CRILAR_LNDLM
+# La Noche de los Museos: visita virtual a la muestra del CRILAR
+
+Micrositio para recorrer la muestra del CRILAR desde el celular o la computadora. El visitante abre la puerta, pasa al hall, elige una sala y explora con una linterna. Cada objeto abre una ficha con foto, infografía o video. Al terminar el recorrido se abre el formulario del sorteo.
+
+Es un sitio estático (HTML, CSS y JavaScript, sin instalar nada), así que funciona en GitHub Pages.
+
+## Verlo en tu computadora
+
+Hacé doble clic en `index.html`. Para abrir una sala directamente, agregá `?escena=sala2_L` a la dirección (los nombres de escena están en `datos/muestra.js`).
+
+## Carpetas
+
+```
+index.html          página principal
+css/estilos.css     colores, tipografías y animaciones
+js/nucleo.js        escenas, linterna, puerta y barras
+js/ventanas.js      fichas, mapa y sorteo
+js/inicio.js        arranque y carga de fotos
+js/editor.js        modo edición (solo se carga con ?editar=1)
+datos/muestra.js    textos, salas, puntos y fichas: el archivo que más vas a tocar
+images/escenas/     las fotos del recorrido (entrada, hall, salas y sus alas)
+images/fichas/      fotos, infografías y videos de cada objeto
+images/logo/        logo del CRILAR en SVG y PDF (el original, una versión a trazos y una clara)
+fonts/              tipografías del sitio, con sus licencias
+```
+
+## Cambiar las fotos
+
+Reemplazá los archivos de `images/escenas/` conservando el nombre. El sitio se adapta solo al tamaño de cada foto. Para que cargue rápido en el celular, conviene que cada panorámica mida unos 2500 px de ancho y pese menos de 500 KB.
+
+Las fotos de `sala1.jpeg` y `sala2.jpeg` son la vista de cada sala antes de elegir el ala izquierda o derecha.
+
+## Acomodar los puntos sobre las fotos
+
+Los puntos de partida están en posiciones aproximadas. Para ubicarlos bien:
+
+1. Abrí `index.html?editar=1` (o, para ir directo a una sala, `index.html?editar=1&escena=sala2_L`).
+2. Arrastrá cada punto hasta su vitrina u objeto. Con "Nuevo objeto" agregás uno tocando la foto. Con Supr quitás el que tengas seleccionado.
+3. Tocá "Copiar datos", abrí `datos/muestra.js`, borrá todo y pegá.
+
+Los cambios quedan guardados en ese navegador hasta que los pegues en el archivo. Si no querés conservarlos, usá "Descartar cambios".
+
+## Completar las fichas
+
+Cada objeto tiene su `ficha` en `datos/muestra.js`:
+
+- `tipo: "foto"` con `media: {"src": "images/fichas/vitrina1.jpg", "alt": "descripción"}`. Si dejás `{"recorte": true}`, muestra un acercamiento de la propia foto de la sala.
+- `tipo: "infografia"` con `media: {"src": "images/fichas/infografia1.png", "alt": "..."}`.
+- `tipo: "video"` con `media: {"youtube": "ID_DEL_VIDEO"}` o `media: {"mp4": "images/fichas/video1.mp4"}`. Para videos largos conviene YouTube, porque GitHub limita el tamaño de los archivos.
+
+Los textos que dicen "de ejemplo" son provisorios.
+
+## Sorteo
+
+El formulario solo se abre cuando se visitaron todos los objetos que figuran como `"tipo": "objeto"`. Los de tipo `"info"` no cuentan.
+
+Mientras `sorteo.endpoint` esté vacío, los datos de cada participante quedan solo en el navegador de quien los cargó y vos no los recibís. Para recibirlos en una planilla de Google:
+
+1. Creá una hoja de cálculo nueva y abrí Extensiones, Apps Script.
+2. Pegá este código:
+
+```js
+function doPost(e) {
+  const d = JSON.parse(e.postData.contents);
+  SpreadsheetApp.getActiveSheet().appendRow([new Date(), d.nombre, d.email, d.telefono, d.codigo, d.objetos]);
+  return ContentService.createTextOutput('ok');
+}
+```
+
+3. Elegí Implementar, Nueva implementación, tipo Aplicación web. Ejecutar como "Yo" y acceso para "Cualquier persona".
+4. Copiá la dirección que te da y pegala en `sorteo.endpoint`, dentro de `datos/muestra.js`.
+5. Si tenés las bases y condiciones en línea, pegá su dirección en `sorteo.bases` y el formulario enlazará el texto.
+
+El número de recorrido (CR-XXXXXX) se calcula con los objetos visitados. Alcanza para un sorteo informal, pero no es a prueba de personas con conocimientos técnicos. Conviene revisar con el instituto qué requisitos formales tiene un sorteo y el manejo de datos personales.
+
+## Publicar en GitHub Pages
+
+1. Cloná el repositorio, copiá adentro el contenido de esta carpeta (reemplazá el `README.md`) y subí los cambios:
+
+```
+git clone https://github.com/Segon03/CRILAR_LNDLM.git
+cd CRILAR_LNDLM
+git add .
+git commit -m "Primera versión del micrositio"
+git push
+```
+
+2. En GitHub, entrá a Settings, Pages. En "Build and deployment" elegí "Deploy from a branch", rama `main` y carpeta `/ (root)`.
+3. En uno o dos minutos el sitio queda en `https://segon03.github.io/CRILAR_LNDLM/`. Con una cuenta gratuita, el repositorio tiene que ser público.
+
+GitHub distingue mayúsculas de minúsculas: `Hall.jpeg` y `hall.jpeg` son archivos distintos. Si reemplazás una foto, usá exactamente el mismo nombre.
+
+## Licencias
+
+Las tipografías IM Fell English y Atkinson Hyperlegible se distribuyen con licencia SIL Open Font License. Los textos de cada licencia están en `fonts/`.

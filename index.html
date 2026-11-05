@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>La Noche de los Museos | CRILAR</title>
+  <meta name="description" content="Visita virtual a la muestra del CRILAR en La Noche de los Museos. Recorré las salas desde tu celular o tu computadora.">
+  <meta name="theme-color" content="#050814">
+  <meta property="og:title" content="La Noche de los Museos | CRILAR">
+  <meta property="og:description" content="Recorré la muestra del CRILAR con una linterna y descubrí cada objeto de cerca.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="images/logo/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/im-fell-english-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/atkinson-hyperlegible-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#escenario">Saltar al recorrido</a>
+
+  <div class="cargando" id="cargando" role="status" aria-live="polite">
+    <img class="cargando__logo" src="images/logo/logo_CRILAR_CONICET_claro.svg" alt="CRILAR, CONICET">
+    <p class="cargando__texto">Encendiendo las luces de la sala</p>
+    <div class="cargando__barra" aria-hidden="true"><i id="cargando-barra"></i></div>
+  </div>
+
+  <main class="escenario" id="escenario" tabindex="-1" aria-label="Recorrido virtual por la muestra"></main>
+
+  <header class="hud hud--arriba hud--oculto" id="hud-arriba">
+    <img class="hud__logo" src="images/logo/logo_CRILAR_CONICET_claro.svg" alt="CRILAR, CONICET">
+    <p class="hud__lugar" id="lugar" aria-live="polite"></p>
+    <div class="hud__acciones">
+      <button class="boton" id="btn-luz" type="button" aria-pressed="false" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21h6M10 17.5h4M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.2 1.1 2.1v1.6h5v-1.6c0-.9.4-1.6 1.1-2.1A6 6 0 0 0 12 3z"/></svg>
+        <span id="btn-luz-txt">Encender luces</span>
+      </button>
+      <button class="boton" id="btn-mapa" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5zM9 4v13.5M15 6.5V20"/></svg>
+        <span>Mapa</span>
+      </button>
+    </div>
+  </header>
+
+  <footer class="hud hud--abajo hud--oculto" id="hud-abajo">
+    <div class="progreso" id="progreso">
+      <div class="pines" id="pines" aria-hidden="true"></div>
+      <span class="progreso__txt" id="progreso-txt"></span>
+    </div>
+    <div class="hud__acciones">
+      <button class="boton" id="btn-volver" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        <span>Volver</span>
+      </button>
+      <button class="boton boton--oro bloqueado" id="btn-sorteo" type="button" aria-disabled="true">Sorteo</button>
+    </div>
+  </footer>
+
+  <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+  <div class="cortina" id="cortina" aria-hidden="true"></div>
+
+  <div class="modal" id="mod-ficha" role="dialog" aria-modal="true" aria-labelledby="ficha-titulo" aria-hidden="true">
+    <div class="hoja-papel">
+      <button class="modal__cerrar" type="button" data-cerrar aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <div id="ficha-contenido"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="mod-mapa" role="dialog" aria-modal="true" aria-labelledby="mapa-titulo" aria-hidden="true">
+    <div class="hoja-papel">
+      <button class="modal__cerrar" type="button" data-cerrar aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <p class="ficha__area">Plano del museo</p>
+      <h2 class="ficha__titulo" id="mapa-titulo">Adónde querés ir</h2>
+      <ul class="mapa" id="mapa-lista"></ul>
+      <div class="mapa__pie">
+        <button class="boton boton--papel" id="btn-reiniciar" type="button">Volver a empezar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="mod-sorteo" role="dialog" aria-modal="true" aria-labelledby="sorteo-titulo" aria-hidden="true">
+    <div class="hoja-papel">
+      <button class="modal__cerrar" type="button" data-cerrar aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <div id="sorteo-contenido"></div>
+    </div>
+  </div>
+
+  <script src="datos/muestra.js"></script>
+  <script src="js/nucleo.js"></script>
+  <script src="js/ventanas.js"></script>
+  <script src="js/inicio.js"></script>
+</body>
+</html>
