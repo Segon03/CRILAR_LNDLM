@@ -100,6 +100,16 @@ window.MUESTRA = {
           "detalle": "Entomología, Botánica, Geociencias y más"
         },
         {
+          "id": "ir-auditorio",
+          "tipo": "ir",
+          "x": 41.9,
+          "y": 47,
+          "destino": "auditorio",
+          "direccion": "adelante",
+          "titulo": "Auditorio",
+          "detalle": "Video institucional"
+        },
+        {
           "id": "dino-hall",
           "tipo": "info",
           "x": 10.5,
@@ -519,6 +529,39 @@ window.MUESTRA = {
               "alt": ""
             }
           }
+        }
+      ]
+    },
+    "auditorio": {
+      "tipo": "video",
+      "titulo": "Auditorio",
+      "corto": "Auditorio",
+      "luz": false,
+      "padre": "hall",
+      "video": {
+        "src1080": "videos/auditorio-1080-web.mp4",
+        "src480": "videos/auditorio480.mp4",
+        "final": "videos/auditorio-final.jpg",
+        "w": 1920,
+        "h": 1080,
+        "duracion": 21.3
+      },
+      "pantalla": {
+        "x": 28.9,
+        "y": 6.9,
+        "w": 36.7,
+        "h": 52.8,
+        "youtube": "p9ovj7YuJns"
+      },
+      "puntos": [
+        {
+          "id": "ir-hall-auditorio",
+          "tipo": "ir",
+          "x": 50,
+          "y": 86,
+          "destino": "hall",
+          "direccion": "atras",
+          "titulo": "Hall"
         }
       ]
     }

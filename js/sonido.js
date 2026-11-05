@@ -26,7 +26,7 @@
   const AC = window.AudioContext || window.webkitAudioContext;
   const conWebAudio = !!AC && /^https?:$/.test(window.location.protocol);
   let encendido = memoria.leer('sonido', true) !== false;
-  let ctx = null, iniciado = false, tPasos = 0, pasosSonando = false;
+  let ctx = null, iniciado = false, tPasos = 0, pasosSonando = false, bajada = false;
 
   function canal(url, max) {
     if (!url) return null;
@@ -68,7 +68,7 @@
     musica.nivel = 0;
     aplicar(musica);
     jugar(musica);
-    fundir(musica, 1, 3500);
+    fundir(musica, bajada ? 0 : 1, 3500);
   }
 
   function iniciar() {
@@ -107,6 +107,7 @@
     pasosSonando = true;
     clearTimeout(tPasos);
     try { pasos.el.currentTime = 0; } catch (e) { /* nada */ }
+    pasos.el.loop = ms > 6200;
     pasos.nivel = 0;
     aplicar(pasos);
     jugar(pasos);
@@ -114,9 +115,23 @@
     if (musica && !musica.el.paused) fundir(musica, 0.4, 600);
     const dur = Math.max(800, ms || 2500);
     tPasos = setTimeout(() => {
-      fundir(pasos, 0, 500, () => { pasos.el.pause(); pasosSonando = false; });
-      if (musica && encendido && !musica.el.paused) fundir(musica, 1, 1500);
+      fundir(pasos, 0, 500, () => { pasos.el.pause(); pasos.el.loop = false; pasosSonando = false; });
+      if (musica && encendido && !musica.el.paused) fundir(musica, bajada ? 0 : 1, 1500);
     }, dur - 500);
+  }
+
+  /* Corta los pasos antes de tiempo (por ejemplo, al saltar el recorrido en video). */
+  function parar() {
+    if (!pasos || !pasosSonando) return;
+    clearTimeout(tPasos);
+    fundir(pasos, 0, 500, () => { pasos.el.pause(); pasos.el.loop = false; pasosSonando = false; });
+    if (musica && encendido && !musica.el.paused) fundir(musica, bajada ? 0 : 1, 1500);
+  }
+
+  /* Baja del todo la música mientras suena otro video (el de YouTube) y la devuelve después. */
+  function musicaBaja(si) {
+    bajada = !!si;
+    if (musica && encendido && !musica.el.paused && !pasosSonando) fundir(musica, bajada ? 0 : 1, 900);
   }
 
   /* La música se repite sola, con entrada suave en cada vuelta. */
@@ -173,6 +188,8 @@
 
   C.sonido = {
     pasos: caminar,
+    parar: parar,
+    musicaBaja: musicaBaja,
     alternar: alternar,
     activo: () => encendido,
     diagnostico: () => ({

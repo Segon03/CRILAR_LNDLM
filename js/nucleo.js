@@ -143,11 +143,113 @@
   }
 
   /* ---------- escenas ---------- */
-  function montarEscena(id) {
+  /* Quita la escena actual; si era un video, lo detiene y devuelve el sonido a su estado normal. */
+  function limpiarVista() {
+    const v = estado.vista;
+    if (!v) return;
+    const vid = $('video', v);
+    if (vid) { try { vid.pause(); vid.removeAttribute('src'); vid.load(); } catch (err) { /* nada */ } }
+    if (v._yt) { window.removeEventListener('message', v._yt); v._yt = null; }
+    if (v.classList.contains('vista--video') && CR.sonido) { CR.sonido.parar(); CR.sonido.musicaBaja(false); }
+    v.remove();
+  }
+
+  /* ---------- escena de video: caminata hacia el auditorio y pantalla con YouTube ---------- */
+  function montarVideo(id, e, opc) {
+    const vd = e.video, pa = e.pantalla || { x: 30, y: 10, w: 36, h: 50 };
+    estado.escena = id;
+    limpiarVista();
+    const v = crear('div', 'vista vista--video vista--noche');
+    v.dataset.escena = id;
+    const fondo = crear('div', 'fondo');
+    fondo.style.backgroundImage = 'url("' + vd.final + '")';
+    const caja = crear('div', 'mundo mundo--video');
+    const liviano = tactil || innerWidth < 900 || (navigator.connection && navigator.connection.saveData);
+    const fuente = liviano && vd.src480 ? vd.src480 : vd.src1080;
+    caja.innerHTML =
+      '<img class="video__final" src="' + esc(vd.final) + '" alt="' + esc(e.titulo || '') + '" draggable="false">' +
+      '<video class="video__cam" muted playsinline preload="auto" aria-label="Recorrido hacia el auditorio"></video>' +
+      '<div class="video__luz" style="left:' + (pa.x + pa.w / 2) + '%;top:' + (pa.y + pa.h / 2) + '%"></div>' +
+      '<div class="pantalla" style="left:' + pa.x + '%;top:' + pa.y + '%;width:' + pa.w + '%;height:' + pa.h + '%"><div class="pantalla__video"></div></div>' +
+      (pa.youtube ? '<a class="video__yt" style="left:' + pa.x + '%;top:' + (pa.y + pa.h + 1.5) + '%" href="https://www.youtube.com/watch?v=' + esc(pa.youtube) + '" target="_blank" rel="noopener">Ver en YouTube</a>' : '');
+    const mundoPuntos = crear('div', 'mundo mundo--puntos');
+    (e.puntos || []).forEach((p) => mundoPuntos.appendChild(crearPunto(p)));
+    const saltar = crear('button', 'boton video__saltar', 'Saltar el recorrido');
+    saltar.type = 'button';
+    v.appendChild(fondo);
+    v.appendChild(caja);
+    v.appendChild(crear('div', 'vineta'));
+    v.appendChild(mundoPuntos);
+    v.appendChild(saltar);
+    escenario.insertBefore(v, escenario.firstChild);
+    estado.vista = v;
+    estado.mundos = [caja, mundoPuntos];
+    estado.puntosDatos = [];
+    estado.dims = { w: vd.w || 1920, h: vd.h || 1080 };
+    estado.pan = estado.panObj = 0;
+    calcular();
+    actualizarHUD();
+
+    const vid = $('video', caja);
+    let fin = false;
+    const terminar = () => {
+      if (fin || estado.vista !== v) return;
+      fin = true;
+      saltar.hidden = true;
+      v.classList.add('video--fin');
+      if (CR.sonido) CR.sonido.parar();
+      mostrarPantalla(v, pa);
+    };
+    vid.addEventListener('ended', terminar);
+    vid.addEventListener('error', terminar);
+    saltar.addEventListener('click', () => {
+      try { vid.pause(); vid.currentTime = Math.max(0, (vid.duration || 0) - 0.05); } catch (err) { /* nada */ }
+      vid.addEventListener('seeked', terminar, { once: true });
+      setTimeout(terminar, 700);
+    });
+    vid.src = fuente;
+    const jugar = vid.play();
+    if (jugar && jugar.catch) jugar.catch(terminar);
+    if (!opc || opc.pasos !== false) { if (CR.sonido) CR.sonido.pasos((vd.duracion || 21) * 1000 + 600); }
+    setTimeout(() => { if (!fin && estado.vista === v && vid.currentTime < 0.05) terminar(); }, 9000);
+  }
+
+  /* Al llegar al final se enciende la pantalla: el video de YouTube y la luz suave sobre la sala. */
+  function mostrarPantalla(v, pa) {
+    const marco = $('.pantalla__video', v);
+    if (!marco || !pa.youtube) return;
+    const origen = /^https?:$/.test(location.protocol) ? '&origin=' + encodeURIComponent(location.origin) : '';
+    const ifr = crear('iframe');
+    ifr.title = 'Video institucional: Ciencia es Cultura';
+    ifr.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    ifr.setAttribute('allowfullscreen', '');
+    ifr.referrerPolicy = 'strict-origin-when-cross-origin';
+    ifr.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(pa.youtube) + '?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1' + origen;
+    /* Mientras el video de YouTube suena, la música de ambiente se apaga. */
+    v._yt = (ev) => {
+      if (ev.source !== ifr.contentWindow || typeof ev.data !== 'string') return;
+      let d; try { d = JSON.parse(ev.data); } catch (err) { return; }
+      let st = null;
+      if (d.event === 'onStateChange') st = d.info;
+      else if (d.event === 'infoDelivery' && d.info && d.info.playerState != null) st = d.info.playerState;
+      if (st != null && CR.sonido) CR.sonido.musicaBaja(st === 1 || st === 3);
+    };
+    window.addEventListener('message', v._yt);
+    ifr.addEventListener('load', () => {
+      try {
+        ifr.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), '*');
+        ifr.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
+      } catch (err) { /* sin conexión con el reproductor */ }
+    });
+    marco.appendChild(ifr);
+  }
+
+  function montarEscena(id, opc) {
     const e = escenas[id];
     if (!e || e.tipo === 'puerta') return;
+    if (e.tipo === 'video') { montarVideo(id, e, opc); return; }
     estado.escena = id;
-    if (estado.vista) estado.vista.remove();
+    limpiarVista();
     const luz = !!e.luz;
     const v = crear('div', 'vista vista--' + e.tipo + (luz ? ' vista--luz' : ' vista--noche') + (luz && estado.luzApagada ? ' vista--apagada' : ''));
     v.dataset.escena = id;
@@ -205,6 +307,7 @@
     if (!e || e.tipo === 'puerta' || !estado.vista) return;
     const vw = innerWidth, vh = innerHeight;
     estado.vw = vw; estado.vh = vh;
+    if (e.tipo === 'video') { calcularVideo(e, vw, vh); return; }
     const iw = estado.dims.w, ih = estado.dims.h;
     const libre = Math.max(200, vh - 170);
     let s, top;
@@ -228,6 +331,28 @@
     aplicar();
   }
 
+  /* El video se ve entero. En celular vertical se agranda y se centra en la pantalla del auditorio. */
+  function calcularVideo(e, vw, vh) {
+    const ar = estado.dims.w / estado.dims.h, pa = e.pantalla || { x: 30, w: 36 };
+    let H, W, left;
+    if (vw < vh) {
+      H = Math.max(240, (vh - 170) * 0.8);
+      W = H * ar;
+      left = vw / 2 - W * ((pa.x + pa.w / 2) / 100);
+    } else {
+      H = Math.min(vh, vw / ar);
+      W = H * ar;
+      left = (vw - W) / 2;
+    }
+    const top = (vh - H) / 2;
+    estado.mundo = { W: W, H: H, top: top, max: 0, offX: left };
+    estado.mundos.forEach((m) => { m.style.width = W + 'px'; m.style.height = H + 'px'; });
+    estado.esc = 1;
+    if (estado.mundos[1]) estado.mundos[1].style.setProperty('--esc', '1');
+    estado.pan = estado.panObj = 0;
+    aplicar();
+  }
+
   function aplicar() {
     const m = estado.mundo;
     const t = 'translate3d(' + (m.offX - estado.pan) + 'px,' + m.top + 'px,0)';
@@ -244,7 +369,8 @@
   const ACERCAR_MS = 2300;
   function irConAcercamiento(id, o) {
     const v = estado.vista;
-    if (CR.sonido) CR.sonido.pasos(ACERCAR_MS + 600);
+    const aVideo = escenas[id].tipo === 'video';
+    if (CR.sonido) CR.sonido.pasos(ACERCAR_MS + 600 + (aVideo ? ((escenas[id].video.duracion || 21) * 1000 + 600) : 0));
     v.classList.add('vista--caminando');
     v.style.transformOrigin = Math.round(o.x) + 'px ' + Math.round(o.y) + 'px';
     v.style.transition = 'transform ' + ACERCAR_MS + 'ms cubic-bezier(.4,.1,.55,1)';
@@ -252,9 +378,9 @@
     v.style.transform = 'scale(3.4)';
     setTimeout(() => cortina.classList.add('activa'), ACERCAR_MS - 600);
     setTimeout(() => {
-      montarEscena(id);
+      montarEscena(id, { pasos: false });
       const nueva = estado.vista;
-      nueva.classList.add('vista--llegando');
+      if (!aVideo) nueva.classList.add('vista--llegando');
       mostrarPistas();
       requestAnimationFrame(() => cortina.classList.remove('activa'));
       setTimeout(() => { nueva.classList.remove('vista--llegando'); estado.cambiando = false; }, 1250);
@@ -283,7 +409,7 @@
   /* ---------- pistas ---------- */
   function mostrarPistas() {
     const e = escenas[estado.escena];
-    if (!e || bloqueado() || !CR.aviso) return;
+    if (!e || e.tipo === 'video' || bloqueado() || !CR.aviso) return;
     const vistas = memoria.leer('pistas', {});
     const clave = e.luz ? 'luz' : 'flechas';
     if (!vistas[clave]) {

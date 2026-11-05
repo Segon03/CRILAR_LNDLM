@@ -104,3 +104,9 @@ Las tipografías IM Fell English y Atkinson Hyperlegible se distribuyen con lice
 
 ### Si el navegador muestra una versión vieja
 Los archivos del `index.html` llevan `?v=5` al final. Cada vez que se cambie algo importante, subir ese número (5, 6, 7…) en las seis líneas para que Edge, Chrome y Safari descarguen la versión nueva sin tener que vaciar la caché.
+
+## Auditorio (escena con video)
+
+- En el hall, el cartel **Auditorio** lleva a una caminata en video (`videos/auditorio-1080-web.mp4`, o `auditorio480.mp4` en celulares). Al terminar queda el último fotograma y sobre la pantalla se reproduce el video de YouTube "Ciencia es Cultura". La flecha **Hall** vuelve; mientras camina hay un botón para saltar el recorrido.
+- Todo se configura en `datos/muestra.js`, escena `auditorio`: archivos de video, `pantalla` (posición y tamaño en % sobre el fotograma final) e identificador de YouTube.
+- Los videos pesados originales van en `videos/originales/`, que no se sube a GitHub. GitHub no acepta archivos de más de 100 MB (25 MB si se suben desde la web), por eso se usan versiones comprimidas.

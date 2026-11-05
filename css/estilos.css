@@ -248,3 +248,20 @@ img{max-width:100%}
 .boton:disabled{opacity:.65;cursor:default}
 .creditos{position:fixed;left:0;right:0;bottom:max(4px,calc(env(safe-area-inset-bottom)*.4));z-index:16;margin:0;padding:0 12px;text-align:center;font-size:10.5px;line-height:1.25;color:var(--luna-2);opacity:.62;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.85)}
 @media (max-width:480px){#btn-mapa span{display:none}#btn-mapa{padding:.45rem .65rem}.creditos{font-size:9.5px}}
+
+/* ---------- Escena de video (auditorio) ---------- */
+.vista--video{background:#03050e}
+.mundo--video{z-index:1;overflow:hidden;background:#05070f}
+.video__final,.video__cam{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;filter:brightness(.62) saturate(.9) contrast(1.05);transition:filter 2.4s ease;pointer-events:none}
+.video--fin .video__final,.video--fin .video__cam{filter:brightness(.4) saturate(.85) contrast(1.08)}
+.video__luz{position:absolute;width:150%;height:150%;transform:translate(-50%,-50%);pointer-events:none;opacity:0;transition:opacity 2.4s ease;background:radial-gradient(ellipse 34% 34% at 50% 50%,rgba(176,208,255,.62),rgba(120,160,235,.26) 55%,rgba(60,90,170,0) 100%);mix-blend-mode:screen}
+.video--fin .video__luz{opacity:1;animation:proyector 5s ease-in-out 2.4s infinite alternate}
+@keyframes proyector{from{filter:brightness(.88)}to{filter:brightness(1.1)}}
+.pantalla{position:absolute;display:grid;place-items:center;overflow:hidden;opacity:0;pointer-events:none;background:#000;transition:opacity 1.2s ease .6s;box-shadow:0 0 60px rgba(150,190,255,.45)}
+.video--fin .pantalla{opacity:1;pointer-events:auto}
+.pantalla__video{width:100%;aspect-ratio:16/9;background:#000}
+.pantalla__video iframe{display:block;width:100%;height:100%;border:0}
+.vista--video:not(.video--fin) .mundo--puntos{visibility:hidden}
+.video__saltar{position:fixed;left:50%;bottom:max(84px,calc(env(safe-area-inset-bottom) + 70px));transform:translateX(-50%);z-index:12;font-size:.9rem;background:rgba(8,14,34,.6)}
+.video__yt{position:absolute;z-index:3;opacity:0;pointer-events:none;font-size:.78rem;color:var(--luna-2);text-decoration:underline;text-underline-offset:3px;transition:opacity 1s ease 1.8s}
+.video--fin .video__yt{opacity:.8;pointer-events:auto}
