@@ -240,7 +240,7 @@
   }
 
   /* Acercamiento hacia el cartel tocado: la escena se agranda desde ese punto, suenan los pasos
-     y al final aparece la sala nueva asentándose. Con "reducir movimiento" se usa el fundido simple. */
+     y al final aparece la sala nueva asentándose. Se muestra también con "reducir movimiento" (en Windows suele venir activado sin que se sepa): es el movimiento central de la visita y es breve. */
   const ACERCAR_MS = 2300;
   function irConAcercamiento(id, o) {
     const v = estado.vista;
@@ -264,7 +264,7 @@
   function irA(id, opc) {
     if (!escenas[id] || estado.cambiando) return;
     estado.cambiando = true;
-    if (opc && opc.origen && !reducir && estado.vista && escenas[id].tipo !== 'puerta') { irConAcercamiento(id, opc.origen); return; }
+    if (opc && opc.origen && estado.vista && escenas[id].tipo !== 'puerta') { irConAcercamiento(id, opc.origen); return; }
     cortina.classList.add('activa');
     setTimeout(() => {
       if (escenas[id].tipo === 'puerta') {
@@ -456,9 +456,9 @@
     if (!p || estado.abriendo) return;
     estado.abriendo = true;
     p.classList.add('abierta');
-    if (!reducir && CR.sonido) CR.sonido.pasos(PUERTA_MS);
+    if (CR.sonido) CR.sonido.pasos(PUERTA_MS);
     const hall = estado.vista;
-    setTimeout(() => { if (hall && hall === estado.vista) hall.classList.add('vista--llegando'); }, reducir ? 0 : 2000);
+    setTimeout(() => { if (hall && hall === estado.vista) hall.classList.add('vista--llegando'); }, 2000);
     setTimeout(() => {
       p.remove();
       estado.puerta = null;
@@ -467,7 +467,7 @@
       if (hall) hall.classList.remove('vista--llegando');
       actualizarHUD();
       mostrarPistas();
-    }, reducir ? 60 : PUERTA_MS);
+    }, PUERTA_MS);
   }
 
   /* ---------- botones de las barras ---------- */
