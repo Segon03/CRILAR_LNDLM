@@ -101,3 +101,6 @@ Las tipografías IM Fell English y Atkinson Hyperlegible se distribuyen con lice
 - **Sonido**: música suave de ambiente (`sounds/ambiente-museo.mp3`) y pasos durante los acercamientos (`sounds/pasos.mp3`). Botón de parlante arriba a la derecha para silenciar. Volúmenes y créditos en `datos/muestra.js`, bloque `sonido`.
 - **Créditos** (al pie): Música "Museums", de Silent Partner; pasos "Soggy Steps". Biblioteca de audio de YouTube. Conviene confirmar en la biblioteca si la licencia pide atribución.
 - Los archivos originales sin procesar están en `sounds/originales/` y no se suben a GitHub.
+
+### Si el navegador muestra una versión vieja
+Los archivos del `index.html` llevan `?v=5` al final. Cada vez que se cambie algo importante, subir ese número (5, 6, 7…) en las seis líneas para que Edge, Chrome y Safari descarguen la versión nueva sin tener que vaciar la caché.
