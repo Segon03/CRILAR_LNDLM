@@ -12,7 +12,7 @@
   const W = DEF.ancho, H = DEF.alto;
   const PASO = 4;                 // tamaño de celda de las máscaras (px de escenario)
   const GIRO_RUEDA = 5, GIRO_TOQUE = 15;
-  const TOL_ROT = 12, TOL_POS = 42;
+  const TOL_ROT = 10, TOL_POS = 36;
   const rad = (d) => d * Math.PI / 180;
   const norm = (d) => { d = ((d + 180) % 360 + 360) % 360 - 180; return d; };
 
@@ -105,7 +105,7 @@
   // ¿el conjunto "ms" está en una posición válida (dentro de la mesa y sin tapar a las demás)?
   function valido(ms, ignorar, tope) {
     for (const p of ms) {
-      if (p.x < 24 || p.x > W - 24 || p.y < 24 || p.y > H - 24) return false;
+      if (p.x < 12 || p.x > W - 12 || p.y < 12 || p.y > H - 12) return false;
     }
     for (const p of ses.piezas) {
       if (ms.indexOf(p) >= 0 || (ignorar !== undefined && p.g === ignorar)) continue;
@@ -143,7 +143,7 @@
     for (const a of ms) {
       const fa = a.th - a.d.rot;
       for (const b of ses.piezas) {
-        if (b.g === g) continue;
+        if (b.g === g || a.d.vec.indexOf(b.id) < 0) continue;
         const fb = b.th - b.d.rot, er = norm(fa - fb);
         if (Math.abs(er) > TOL_ROT) continue;
         const rb = rad(fb), mx = a.d.meta[0] - b.d.meta[0], my = a.d.meta[1] - b.d.meta[1];
@@ -160,10 +160,11 @@
     girar(ms, mejor.a.x, mejor.a.y, norm(mejor.fb - fa));
     const dx = mejor.ex - mejor.a.x, dy = mejor.ey - mejor.a.y;
     ms.forEach((p) => pose(p, p.x + dx, p.y + dy, p.th));
-    if (!dentro(ms)) { restaurar(ms, base); return false; }
     const gb = mejor.b.g;
     ses.piezas.forEach((p) => { if (p.g === g) p.g = gb; });
+    meter(miembros(gb));
     ms.forEach((p) => { ponerEl(p); p.el.classList.remove('encaja'); void p.el.offsetWidth; p.el.classList.add('encaja'); });
+    intentarEncaje(gb);          // el conjunto ya unido puede encastrar con otros vecinos
     despejar(gb);
     revisarFinal();
     return true;
@@ -171,9 +172,18 @@
 
   /* ---------- "levantar y apoyar": las piezas pasan unas sobre otras al arrastrar,
      pero al soltarlas nunca quedan superpuestas ---------- */
-  const TOPE_REPOSO = 24;
+  const TOPE_REPOSO = 4;
   function dentro(ms) {
-    return ms.every((p) => p.x >= 24 && p.x <= W - 24 && p.y >= 24 && p.y <= H - 24);
+    return ms.every((p) => p.x >= 12 && p.x <= W - 12 && p.y >= 12 && p.y <= H - 12);
+  }
+  // si el conjunto asoma de la mesa, lo corre hacia adentro (siempre que entre)
+  function meter(ms) {
+    let dx = 0, dy = 0;
+    ms.forEach((p) => {
+      if (p.x < 12) dx = Math.max(dx, 12 - p.x); if (p.x > W - 12) dx = Math.min(dx, W - 12 - p.x);
+      if (p.y < 12) dy = Math.max(dy, 12 - p.y); if (p.y > H - 12) dy = Math.min(dy, H - 12 - p.y);
+    });
+    if (dx || dy) { ms.forEach((p) => pose(p, p.x + dx, p.y + dy, p.th)); ms.forEach(ponerEl); }
   }
   function deslizar(ms) {
     ms.forEach((p) => { p.el.classList.add('desliza'); });
@@ -210,8 +220,10 @@
     otros.forEach((og) => {
       const os = miembros(og);
       if (!os.some((o) => ms.some((m) => chocan(m, o, TOPE_REPOSO)))) return;
+      if (os.length >= ms.length) return;           // no se mueve lo que ya estaba más armado
       if (buscarLibre(os)) { deslizar(os); os.forEach(ponerEl); }
     });
+    asentar(g, null);
   }
 
   function revisarFinal() {
@@ -275,13 +287,13 @@
       // la pieza levantada no sale de la mesa
       let ex = 0, ey = 0;
       arr.ms.forEach((p) => {
-        ex = Math.max(ex, 24 - p.x, p.x - (W - 24)); ey = Math.max(ey, 24 - p.y, p.y - (H - 24));
+        ex = Math.max(ex, 12 - p.x, p.x - (W - 12)); ey = Math.max(ey, 12 - p.y, p.y - (H - 12));
       });
       if (ex || ey) {
         let cx = 0, cy = 0;
         arr.ms.forEach((p) => {
-          if (p.x < 24) cx = Math.max(cx, 24 - p.x); if (p.x > W - 24) cx = Math.min(cx, W - 24 - p.x);
-          if (p.y < 24) cy = Math.max(cy, 24 - p.y); if (p.y > H - 24) cy = Math.min(cy, H - 24 - p.y);
+          if (p.x < 12) cx = Math.max(cx, 12 - p.x); if (p.x > W - 12) cx = Math.min(cx, W - 12 - p.x);
+          if (p.y < 12) cy = Math.max(cy, 12 - p.y); if (p.y > H - 12) cy = Math.min(cy, H - 12 - p.y);
         });
         mover(arr.ms, arr.base, tx + cx, ty + cy);
       }
@@ -406,5 +418,5 @@
     vista = null;
   }
 
-  C.juego = { iniciar: iniciar, detener: detener, _ses: () => ses, _vista: () => vista, _encajar: (g) => intentarEncaje(g), _dibujar: () => dibujarTodo() };
+  C.juego = { iniciar: iniciar, detener: detener, _ses: () => ses, _vista: () => vista, _encajar: (g) => intentarEncaje(g), _dibujar: () => dibujarTodo(), _chocan: (a, b, t) => chocan(ses.piezas.find((p) => p.id === a), ses.piezas.find((p) => p.id === b), t), _valido: (g) => valido(miembros(g), undefined, TOPE_REPOSO), _libre: (g) => { const ms = miembros(g); const b = guardar(ms); const ok = buscarLibre(ms); restaurar(ms, b); return ok; } };
 })();
