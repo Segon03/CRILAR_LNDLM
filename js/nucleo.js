@@ -106,16 +106,17 @@
     b.style.top = p.y + '%';
     b.dataset.id = p.id;
     b.addEventListener('click', () => {
-      if (edicion() || bloqueado()) return;
+      if (edicion() || bloqueado() || estado.cambiando) return;
       if (performance.now() - estado.ultimoArrastre < 280) return;
-      activar(p);
+      const r = b.getBoundingClientRect();
+      activar(p, { x: r.left + r.width / 2, y: r.top + r.height / 2 });
     });
     b.addEventListener('focus', () => { if (!bloqueado()) centrarEn(p.x); });
     return b;
   }
 
-  function activar(p) {
-    if (p.tipo === 'ir') irA(p.destino);
+  function activar(p, origen) {
+    if (p.tipo === 'ir') irA(p.destino, p.direccion && p.direccion !== 'atras' ? { origen: origen } : null);
     else if (CR.abrirFicha) CR.abrirFicha(p);
   }
 
@@ -238,9 +239,32 @@
     estado.panObj = limitar((xPct / 100) * m.W - estado.vw / 2, 0, m.max);
   }
 
-  function irA(id) {
+  /* Acercamiento hacia el cartel tocado: la escena se agranda desde ese punto, suenan los pasos
+     y al final aparece la sala nueva asentándose. Con "reducir movimiento" se usa el fundido simple. */
+  const ACERCAR_MS = 1500;
+  function irConAcercamiento(id, o) {
+    const v = estado.vista;
+    if (CR.sonido) CR.sonido.pasos(ACERCAR_MS + 900);
+    v.classList.add('vista--caminando');
+    v.style.transformOrigin = Math.round(o.x) + 'px ' + Math.round(o.y) + 'px';
+    v.style.transition = 'transform ' + ACERCAR_MS + 'ms cubic-bezier(.5,.05,.8,.45)';
+    void v.offsetWidth;
+    v.style.transform = 'scale(3)';
+    setTimeout(() => cortina.classList.add('activa'), ACERCAR_MS - 450);
+    setTimeout(() => {
+      montarEscena(id);
+      const nueva = estado.vista;
+      nueva.classList.add('vista--llegando');
+      mostrarPistas();
+      requestAnimationFrame(() => cortina.classList.remove('activa'));
+      setTimeout(() => { nueva.classList.remove('vista--llegando'); estado.cambiando = false; }, 1250);
+    }, ACERCAR_MS);
+  }
+
+  function irA(id, opc) {
     if (!escenas[id] || estado.cambiando) return;
     estado.cambiando = true;
+    if (opc && opc.origen && !reducir && estado.vista && escenas[id].tipo !== 'puerta') { irConAcercamiento(id, opc.origen); return; }
     cortina.classList.add('activa');
     setTimeout(() => {
       if (escenas[id].tipo === 'puerta') {
@@ -284,7 +308,7 @@
   escenario.addEventListener('pointerenter', () => { estado.ptr.dentro = true; });
   escenario.addEventListener('pointerleave', () => { estado.ptr.dentro = false; });
   escenario.addEventListener('pointerdown', (ev) => {
-    if (bloqueado() || estado.modal) return;
+    if (bloqueado() || estado.cambiando || estado.modal) return;
     estado.ptr = { x: ev.clientX, y: ev.clientY, tipo: ev.pointerType, dentro: true };
     mirarLuz(ev.clientX, ev.clientY);
     if (ev.pointerType === 'touch') { estado.lx = ev.clientX; estado.ly = ev.clientY; }
@@ -397,6 +421,7 @@
     escenario.appendChild(p);
     estado.puerta = p;
     const caja = $('.puerta__caja', p);
+    caja.style.transformOrigin = pu.x + '% ' + pu.y + '%';
     caja.addEventListener('click', abrirPuerta);
     caja.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); abrirPuerta(); } });
     $('.puerta__entrar', p).addEventListener('click', abrirPuerta);
@@ -425,20 +450,24 @@
     caja.style.height = Math.floor(e.imagen.h * s) + 'px';
   }
 
+  const PUERTA_MS = 3400;
   function abrirPuerta() {
     const p = estado.puerta;
     if (!p || estado.abriendo) return;
     estado.abriendo = true;
     p.classList.add('abierta');
-    setTimeout(() => { estado.enEntrada = false; actualizarHUD(); }, reducir ? 0 : 1100);
+    if (!reducir && CR.sonido) CR.sonido.pasos(PUERTA_MS);
+    const hall = estado.vista;
+    setTimeout(() => { if (hall && hall === estado.vista) hall.classList.add('vista--llegando'); }, reducir ? 0 : 2000);
     setTimeout(() => {
       p.remove();
       estado.puerta = null;
       estado.abriendo = false;
       estado.enEntrada = false;
+      if (hall) hall.classList.remove('vista--llegando');
       actualizarHUD();
       mostrarPistas();
-    }, reducir ? 60 : 2000);
+    }, reducir ? 60 : PUERTA_MS);
   }
 
   /* ---------- botones de las barras ---------- */

@@ -93,3 +93,11 @@ GitHub distingue mayúsculas de minúsculas: `Hall.jpeg` y `hall.jpeg` son archi
 ## Licencias
 
 Las tipografías IM Fell English y Atkinson Hyperlegible se distribuyen con licencia SIL Open Font License. Los textos de cada licencia están en `fonts/`.
+
+## Pantalla de bienvenida, acercamientos y sonido
+
+- **Bienvenida**: el logo, las indicaciones de la visita y el botón "Comenzar la visita" se quedan unos 9 segundos (o hasta que la persona toque el botón). Textos y duración en `datos/muestra.js`, bloque `intro`. Para saltarla al probar: `?sinintro=1`.
+- **Acercamientos**: al abrir la puerta y al tocar el cartel de una sala, la imagen se acerca y recién después aparece la escena nueva. Si el dispositivo tiene activado "reducir movimiento", se usa un fundido simple.
+- **Sonido**: música suave de ambiente (`sounds/ambiente-museo.mp3`) y pasos durante los acercamientos (`sounds/pasos.mp3`). Botón de parlante arriba a la derecha para silenciar. Volúmenes y créditos en `datos/muestra.js`, bloque `sonido`.
+- **Créditos** (al pie): Música "Museums", de Silent Partner; pasos "Soggy Steps". Biblioteca de audio de YouTube. Conviene confirmar en la biblioteca si la licencia pide atribución.
+- Los archivos originales sin procesar están en `sounds/originales/` y no se suben a GitHub.

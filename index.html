@@ -17,10 +17,22 @@
 <body>
   <a class="saltar" href="#escenario">Saltar al recorrido</a>
 
-  <div class="cargando" id="cargando" role="status" aria-live="polite">
-    <img class="cargando__logo" src="images/logo/logo_CRILAR_CONICET_claro.svg" alt="CRILAR, CONICET">
-    <p class="cargando__texto">Encendiendo las luces de la sala</p>
-    <div class="cargando__barra" aria-hidden="true"><i id="cargando-barra"></i></div>
+  <div class="cargando" id="cargando" role="region" aria-label="Bienvenida a la visita virtual">
+    <div class="intro">
+      <header class="intro__cabecera">
+        <img class="intro__logo" src="images/logo/logo_CRILAR_CONICET_claro.svg" alt="CRILAR, CONICET">
+        <h2 class="intro__titulo" id="intro-titulo">La Noche de los Museos</h2>
+        <p class="intro__sub" id="intro-sub">Visita virtual a la muestra del CRILAR</p>
+      </header>
+      <div class="intro__cuerpo">
+        <ol class="intro__lista" id="intro-lista"></ol>
+        <p class="intro__sonido" id="intro-sonido"></p>
+        <div class="intro__pie">
+          <div class="cargando__barra" aria-hidden="true"><i id="cargando-barra"></i></div>
+          <button class="boton boton--oro" id="intro-boton" type="button" disabled>Cargando la muestra…</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <main class="escenario" id="escenario" tabindex="-1" aria-label="Recorrido virtual por la muestra"></main>
@@ -36,6 +48,10 @@
       <button class="boton" id="btn-mapa" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5zM9 4v13.5M15 6.5V20"/></svg>
         <span>Mapa</span>
+      </button>
+      <button class="boton boton--icono" id="btn-sonido" type="button" aria-label="Silenciar el sonido" title="Silenciar el sonido">
+        <svg class="ico-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+        <svg class="ico-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
       </button>
     </div>
   </header>
@@ -54,6 +70,7 @@
     </div>
   </footer>
 
+  <p class="creditos" id="creditos"></p>
   <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
   <div class="cortina" id="cortina" aria-hidden="true"></div>
 
@@ -92,6 +109,7 @@
   <script src="datos/muestra.js"></script>
   <script src="js/nucleo.js"></script>
   <script src="js/ventanas.js"></script>
+  <script src="js/sonido.js"></script>
   <script src="js/inicio.js"></script>
 </body>
 </html>

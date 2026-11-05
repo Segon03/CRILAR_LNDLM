@@ -15,6 +15,8 @@
                 (con {"recorte": true} se muestra un acercamiento de la propia escena)
                 video: {"youtube": "ID_DEL_VIDEO"} o {"mp4": "images/fichas/video.mp4"}
    sorteo.endpoint  dirección que recibe los datos del formulario (ver README)
+   intro        pantalla de bienvenida: segundos que permanece, indicaciones y botón
+   sonido       archivos de audio, volúmenes (0 a 1) y texto de créditos que se muestra al pie
 
    Para mover los puntos con el mouse: abrí el sitio con ?editar=1 al final
    de la dirección, acomodalos y usá "Copiar datos". Pegá el resultado acá.
@@ -24,6 +26,24 @@ window.MUESTRA = {
     "nombre": "La Noche de los Museos",
     "subtitulo": "Visita virtual a la muestra del CRILAR",
     "institucion": "CRILAR"
+  },
+  "intro": {
+    "segundos": 9,
+    "indicaciones": [
+      "Abrí la puerta y elegí una sala tocando su cartel.",
+      "En las salas, mové la linterna con el mouse o con el dedo para descubrir los objetos.",
+      "Tocá los puntos dorados para ver la ficha de cada objeto.",
+      "Arrastrá la foto para mirar hacia los costados."
+    ],
+    "sonido": "Para vivir la visita completa, activá el sonido de tu dispositivo.",
+    "boton": "Comenzar la visita"
+  },
+  "sonido": {
+    "musica": "sounds/ambiente-museo.mp3",
+    "pasos": "sounds/pasos.mp3",
+    "volumenMusica": 0.7,
+    "volumenPasos": 0.6,
+    "creditos": "Música: “Museums”, de Silent Partner. Pasos: “Soggy Steps”. Biblioteca de audio de YouTube."
   },
   "inicio": "entrada",
   "sorteo": {
