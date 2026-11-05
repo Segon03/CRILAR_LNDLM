@@ -94,7 +94,7 @@
     let b;
     if (p.tipo === 'ir') {
       const dir = p.direccion || 'adelante';
-      b = crear('button', 'salto salto--' + dir);
+      b = crear('button', 'salto salto--' + dir + (p.compacto ? ' salto--compacto' : ''));
       b.innerHTML = '<span class="salto__flecha">' + ICONOS.flecha + '</span><span class="salto__cartela"><span class="salto__nombre">' + esc(p.titulo) + '</span>' +
         (p.detalle ? '<span class="salto__detalle">' + esc(p.detalle) + '</span>' : '') + '</span>';
       b.setAttribute('aria-label', 'Ir a ' + p.titulo + (p.detalle ? ': ' + p.detalle : ''));
@@ -513,6 +513,7 @@
     estado.mundos.forEach((m) => { m.style.width = W + 'px'; m.style.height = H + 'px'; });
     estado.esc = Math.max(s, 1);
     if (estado.mundos[1]) estado.mundos[1].style.setProperty('--esc', estado.esc.toFixed(3));
+    estado.mundos.forEach((m) => m.style.setProperty('--W', W.toFixed(0) + 'px'));
     estado.r = limitar(Math.min(vw, vh) * 0.3, 150, 300);
     estado.panObj = limitar(estado.panObj, 0, max);
     estado.pan = limitar(estado.pan, 0, max);

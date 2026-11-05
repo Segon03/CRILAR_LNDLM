@@ -82,8 +82,9 @@ window.MUESTRA = {
         {
           "id": "ir-sala1",
           "tipo": "ir",
-          "x": 34,
-          "y": 33,
+          "x": 40.1,
+          "y": 37.5,
+          "compacto": true,
           "destino": "sala1",
           "direccion": "izquierda",
           "titulo": "Sala 1",
@@ -92,8 +93,9 @@ window.MUESTRA = {
         {
           "id": "ir-sala2",
           "tipo": "ir",
-          "x": 76,
-          "y": 33,
+          "x": 67.8,
+          "y": 38.6,
+          "compacto": true,
           "destino": "sala2",
           "direccion": "derecha",
           "titulo": "Sala 2",
@@ -110,8 +112,8 @@ window.MUESTRA = {
         {
           "id": "dino-hall",
           "tipo": "info",
-          "x": 21.9,
-          "y": 47.5,
+          "x": 19.2,
+          "y": 59.3,
           "titulo": "Dinosaurio",
           "ficha": {
             "area": "Paleontología",
@@ -122,6 +124,42 @@ window.MUESTRA = {
               "alt": "Detalle del dinosaurio del hall"
             },
             "texto": "Texto de ejemplo. Acá va la descripción del dinosaurio: qué especie representa, de dónde viene y por qué está en el hall.",
+            "credito": ""
+          }
+        },
+        {
+          "id": "fosil-hall",
+          "tipo": "info",
+          "x": 8.6,
+          "y": 79.6,
+          "titulo": "Fósil sobre la mesa",
+          "ficha": {
+            "area": "Paleontología",
+            "titulo": "Fósil sobre la mesa",
+            "tipo": "foto",
+            "media": {
+              "recorte": true,
+              "alt": "Fósil expuesto sobre la mesa del hall"
+            },
+            "texto": "Texto de ejemplo. Acá va la descripción de la pieza que está sobre la mesa del hall.",
+            "credito": ""
+          }
+        },
+        {
+          "id": "vitrina-hall",
+          "tipo": "info",
+          "x": 90.6,
+          "y": 47.1,
+          "titulo": "Estante de reconocimientos",
+          "ficha": {
+            "area": "Institucional",
+            "titulo": "Estante de reconocimientos",
+            "tipo": "foto",
+            "media": {
+              "recorte": true,
+              "alt": "Estante con placas y reconocimientos del instituto"
+            },
+            "texto": "Texto de ejemplo. Acá va la descripción de lo que se exhibe en este estante.",
             "credito": ""
           }
         },
@@ -563,5 +601,5 @@ window.MUESTRA = {
       ]
     }
   },
-  "version": 5
+  "version": 6
 };
