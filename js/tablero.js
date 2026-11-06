@@ -164,9 +164,24 @@
       cuenta.textContent = est.hechos.size + ' de ' + pares.length;
       cuenta.setAttribute('aria-label', est.hechos.size + ' de ' + pares.length + ' luces encendidas');
       btn.hidden = !est.hechos.size;
+      leer(est.sel);
       tab.classList.toggle('tab--completo', est.final);
       if (!msg.dataset.fijo) msg.textContent = est.final ? '' : '';
     }
+    const lector = document.createElement('p');
+    lector.className = 'tab__lector'; lector.hidden = true; lector.setAttribute('aria-hidden', 'true');
+    raiz.after(lector);
+    if (vista === null || true) window.__tabLector = lector;
+    function leer(i) {
+      const t = i >= 0 ? (pares[i] && pares[i].p) : '';
+      lector.textContent = t || ''; lector.hidden = !t;
+    }
+    [qs, rs].forEach((cont) => {
+      cont.addEventListener('mouseover', (e) => { const b = e.target.closest('.tab__carta--p'); if (b) leer(+b.dataset.i); });
+      cont.addEventListener('mouseout', () => leer(est.sel));
+      cont.addEventListener('focusin', (e) => { const b = e.target.closest('.tab__carta--p'); if (b) leer(+b.dataset.i); });
+      cont.addEventListener('focusout', () => leer(est.sel));
+    });
     function mostrarFin() {
       finTxt.textContent = c.final || '¡Completaste el tablero!';
       fin.hidden = false;
@@ -243,7 +258,7 @@
   function caberDentro(carta) {
     const t = carta.querySelector('.tab__txt');
     if (!carta.style.getPropertyValue('--d')) return true;
-    const d = parseFloat(carta.style.getPropertyValue('--d')), R = d / 2, lim = R - 16;
+    const d = parseFloat(carta.style.getPropertyValue('--d')), R = d / 2, lim = R - 12;
     const rg = document.createRange(); rg.selectNodeContents(t);
     const o = carta.getBoundingClientRect(), esc = o.width / d || 1;
     return Array.prototype.every.call(rg.getClientRects(), (q) => [[q.left, q.top], [q.right, q.top], [q.left, q.bottom], [q.right, q.bottom]].every((p) => Math.hypot((p[0] - o.left) / esc - R, (p[1] - o.top) / esc - R) <= lim));
@@ -274,7 +289,7 @@
           let e = 1;
           geom(b, g, e);
           b.style.fontSize = fmin + 'px';
-          while (!entra(b) && e < 1.35) { e += 0.025; geom(b, g, e); b.style.fontSize = fmin + 'px'; }
+          while (!entra(b) && e < 1.1) { e += 0.02; geom(b, g, e); b.style.fontSize = fmin + 'px'; }
           const f = caber(b, 6, b.classList.contains('tab__carta--p') ? 40 : 44);
           b.style.fontSize = f + 'px';
         });
@@ -289,7 +304,7 @@
     const modo = ancho >= ANCHO_PIZARRA ? 'pizarra' : 'lista';
     let k = 1;
     if (modo === 'pizarra') {
-      const lado = Math.min(Math.max(ancho, 1020), 1500);
+      const lado = Math.min(Math.max(ancho, 1300), 1500);
       k = lado / S;
       v.tab.style.width = lado + 'px'; v.tab.style.height = lado + 'px';
       const h = v.raiz.querySelector('.tab__hint'); if (h) h.hidden = lado <= ancho + 2;
@@ -313,6 +328,7 @@
   }
 
   function detener() {
+    if (window.__tabLector) { window.__tabLector.remove(); window.__tabLector = null; }
     window.removeEventListener('resize', ajustar);
     if (vista) { clearTimeout(vista.tMsg); if (vista.cv) { cancelAnimationFrame(vista.cv._anim); vista.cv._anim = 0; vista.cv._ps = []; } }
     if (est) { est.ocupado = false; est.sel = -1; }
