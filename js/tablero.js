@@ -262,8 +262,8 @@
       });
       const fq = Math.min.apply(null, v.bq.map((b) => caber(b, 6, 24)));
       const fr = Math.min.apply(null, v.br.map((b) => caber(b, 8, 30)));
-      v.bq.forEach((b) => { b.style.fontSize = Math.min(caber(b, 6, 24), fq + 3) + 'px'; });
-      v.br.forEach((b) => { b.style.fontSize = caber(b, 6, 34) + 'px'; });
+      v.bq.forEach((b) => { b.style.fontSize = Math.min(caber(b, 6, 40), fq + 6) + 'px'; });
+      v.br.forEach((b) => { b.style.fontSize = caber(b, 6, 44) + 'px'; });
     } else {
       todas.forEach((b) => { b.style.cssText = ''; });
     }
