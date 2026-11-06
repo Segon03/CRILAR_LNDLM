@@ -107,6 +107,7 @@
     const pares = c.pares || [];
     if (!est || est.n !== pares.length) est = nuevoEstado(c);
     raiz.innerHTML =
+      '<p class="tab__hint" hidden>Arrastrá el tablero o usá la barra inferior para ver el resto.</p>' +
       '<div class="tab" role="group" aria-label="Tablero de luz con preguntas y respuestas sobre insectos">' +
         '<div class="tab__stage">' +
           '<div class="tab__qs" role="list"></div>' +
@@ -126,6 +127,10 @@
     const msg = raiz.querySelector('.tab__msg'), btn = raiz.querySelector('.tab__reiniciar');
     const fin = raiz.querySelector('.tab__fin'), finTxt = raiz.querySelector('.tab__fin-txt');
     const cv = raiz.querySelector('.tab__confeti');
+    let arr = null;
+    raiz.onpointerdown = (e) => { if (e.pointerType === 'mouse' && !e.target.closest('button')) arr = { x: e.clientX, y: e.clientY, sl: raiz.scrollLeft, st: raiz.parentElement ? raiz.closest('.hoja-papel') : null }; };
+    raiz.onpointermove = (e) => { if (!arr) return; raiz.scrollLeft = arr.sl - (e.clientX - arr.x); };
+    raiz.onpointerup = raiz.onpointerleave = () => { arr = null; };
 
     const bq = [], br = [];
     pares.forEach((p, i) => {
@@ -284,11 +289,13 @@
     const modo = ancho >= ANCHO_PIZARRA ? 'pizarra' : 'lista';
     let k = 1;
     if (modo === 'pizarra') {
-      const lado = Math.min(ancho, 1500);
+      const lado = Math.min(Math.max(ancho, 1020), 1500);
       k = lado / S;
       v.tab.style.width = lado + 'px'; v.tab.style.height = lado + 'px';
+      const h = v.raiz.querySelector('.tab__hint'); if (h) h.hidden = lado <= ancho + 2;
       v.stage.style.transform = 'scale(' + k + ')';
     } else {
+      const h = v.raiz.querySelector('.tab__hint'); if (h) h.hidden = true;
       v.tab.style.width = ''; v.tab.style.height = '';
       v.stage.style.transform = '';
     }

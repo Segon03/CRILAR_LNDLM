@@ -308,7 +308,12 @@ img{max-width:100%}
 @media (max-height:520px){.hoja-papel:has(.media--juego){padding-top:12px;padding-bottom:12px}.hoja-papel:has(.media--juego) .ficha__titulo{font-size:1.25rem}.hoja-papel:has(.media--juego) .media--juego{margin-top:.5rem}.hoja-papel:has(.media--juego) .modal__cerrar{width:38px;height:38px;right:10px;top:10px}}
 
 /* ---------- Tablero de luz ---------- */
-.media--tablero{margin:1rem 0 0;border:0;background:none;overflow:visible}
+.media--tablero{margin:1rem 0 0;border:0;background:none;overflow-x:auto;overflow-y:hidden;max-width:100%;-webkit-overflow-scrolling:touch}
+.media--tablero .tab{flex:none}
+.tab__hint{position:sticky;left:0;margin:0 0 6px;font-size:.85rem;color:#4a4a4a;font-style:italic}
+.media--tablero{cursor:default}
+.tab--pizarra{cursor:grab}
+.tab--pizarra .tab__carta{cursor:pointer}
 .hoja-papel:has(.media--tablero){width:min(100%,1560px);padding:clamp(16px,2.6vw,30px) clamp(12px,2.2vw,28px) clamp(14px,2.4vw,26px)}
 .hoja-papel:has(.media--tablero) .ficha__titulo{font-size:clamp(1.35rem,3.2vw,2rem);margin-bottom:0}
 .tab{position:relative;margin:0 auto;overflow:hidden;border:1px solid rgba(27,32,54,.55);border-radius:4px;color:#111;font-family:var(--f-texto);user-select:none;-webkit-user-select:none;background:#0a1a24 var(--fondo) center/cover no-repeat;box-shadow:inset 0 0 70px rgba(0,0,0,.45)}
