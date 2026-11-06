@@ -11,8 +11,8 @@
   const C = window.CRILAR;
   if (!C) return;
 
-  const W = 1600, H = 1000;              // medidas del tablero en modo "pizarra"
-  const ANCHO_PIZARRA = 760;             // por debajo de este ancho se usa la lista
+  const S = 1600;                        // lado del tablero (cuadrado) en las coordenadas de datos/muestra.js
+  const ANCHO_PIZARRA = 700;             // por debajo de este ancho se usa la lista
   const reducir = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   let vista = null;                      // lo que está abierto ahora
@@ -96,8 +96,8 @@
 
   function nuevoEstado(cfg) {
     const pares = cfg.pares || [];
-    let orden = (cfg.ordenRespuestas && cfg.ordenRespuestas.length === pares.length) ? cfg.ordenRespuestas.slice() : pares.map((_, i) => i);
-    return { hechos: new Set(), orden: orden, sel: -1, ocupado: false, final: false };
+    const orden = (cfg.ordenRespuestas && cfg.ordenRespuestas.length === pares.length) ? cfg.ordenRespuestas.slice() : pares.map((_, i) => i);
+    return { hechos: new Set(), orden: orden, sel: -1, ocupado: false, final: false, n: pares.length };
   }
 
   function iniciar(raiz, cfg) {
@@ -105,26 +105,26 @@
     if (!raiz) return;
     const c = cfg || {};
     const pares = c.pares || [];
-    if (!est || est.n !== pares.length) { est = nuevoEstado(c); est.n = pares.length; }
-    const fotos = (c.fotos || []).map((f) => '<img src="' + esc(f.src) + '" alt="' + esc(f.alt || '') + '" loading="lazy" draggable="false">').join('');
+    if (!est || est.n !== pares.length) est = nuevoEstado(c);
     raiz.innerHTML =
       '<div class="tab" role="group" aria-label="Tablero de luz con preguntas y respuestas sobre insectos">' +
         '<div class="tab__stage">' +
           '<div class="tab__qs" role="list"></div>' +
           '<div class="tab__rs" role="list"></div>' +
-          '<div class="tab__centro">' +
-            '<div class="tab__estado"><div class="tab__luces" aria-hidden="true"></div><p class="tab__cuenta"></p></div>' +
-            '<div class="tab__fotos" aria-hidden="true">' + fotos + '</div>' +
-            '<div class="tab__ayuda"><p class="tab__msg" aria-live="polite"></p>' +
-              '<button type="button" class="tab__reiniciar">Volver a empezar</button></div>' +
-          '</div>' +
+          '<div class="tab__estado"><div class="tab__luces" aria-hidden="true"></div><p class="tab__cuenta"></p>' +
+            '<button type="button" class="tab__reiniciar">Volver a empezar</button></div>' +
+          '<p class="tab__msg" aria-live="polite"></p>' +
+          '<p class="tab__barra">' + esc(c.barra || '') + '</p>' +
+          '<div class="tab__fin" hidden><p class="tab__fin-txt"></p><button type="button" class="tab__fin-otra">Volver a jugar</button><button type="button" class="tab__fin-ver">Ver el tablero</button></div>' +
         '</div>' +
         '<canvas class="tab__confeti" aria-hidden="true"></canvas>' +
       '</div>';
     const tab = raiz.querySelector('.tab'), stage = raiz.querySelector('.tab__stage');
+    if (c.fondo) tab.style.setProperty('--fondo', 'url("' + new URL(c.fondo, document.baseURI).href + '")');
     const qs = raiz.querySelector('.tab__qs'), rs = raiz.querySelector('.tab__rs');
     const luces = raiz.querySelector('.tab__luces'), cuenta = raiz.querySelector('.tab__cuenta');
     const msg = raiz.querySelector('.tab__msg'), btn = raiz.querySelector('.tab__reiniciar');
+    const fin = raiz.querySelector('.tab__fin'), finTxt = raiz.querySelector('.tab__fin-txt');
     const cv = raiz.querySelector('.tab__confeti');
 
     const bq = [], br = [];
@@ -143,7 +143,7 @@
       rs.appendChild(b); br[i] = b;
     });
 
-    vista = { raiz: raiz, tab: tab, stage: stage, qs: qs, rs: rs, cv: cv, bq: bq, br: br, luces: luces, cuenta: cuenta, msg: msg, cfg: c, pares: pares, k: 1, modo: '' };
+    vista = { raiz: raiz, tab: tab, stage: stage, cv: cv, bq: bq, br: br, pares: pares, cfg: c, k: 1, modo: '', fin: fin };
 
     function pintar() {
       bq.forEach((b, i) => {
@@ -156,11 +156,15 @@
         b.setAttribute('aria-pressed', on ? 'true' : 'false');
       });
       Array.prototype.forEach.call(luces.children, (l, i) => l.classList.toggle('on', i < est.hechos.size));
-      cuenta.textContent = est.hechos.size + ' de ' + pares.length + ' luces encendidas';
-      tab.classList.toggle('tab--completo', est.final);
-      if (est.final) msg.textContent = c.final || '¡Completaste el tablero!';
-      else if (!msg.dataset.fijo) msg.textContent = c.ayuda || '';
+      cuenta.textContent = est.hechos.size + ' de ' + pares.length;
+      cuenta.setAttribute('aria-label', est.hechos.size + ' de ' + pares.length + ' luces encendidas');
       btn.hidden = !est.hechos.size;
+      tab.classList.toggle('tab--completo', est.final);
+      if (!msg.dataset.fijo) msg.textContent = est.final ? '' : '';
+    }
+    function mostrarFin() {
+      finTxt.textContent = c.final || '¡Completaste el tablero!';
+      fin.hidden = false;
     }
 
     function centro(el) {
@@ -168,16 +172,15 @@
       return { x: r.left - t.left + r.width / 2, y: r.top - t.top + r.height / 2 };
     }
     function avisar(texto, ms) {
-      msg.textContent = texto; msg.dataset.fijo = '1';
+      msg.textContent = texto; msg.dataset.fijo = '1'; msg.classList.add('ver');
       clearTimeout(vista && vista.tMsg);
-      if (vista) vista.tMsg = setTimeout(() => { if (!vista) return; delete msg.dataset.fijo; pintar(); }, ms || 1800);
+      if (vista) vista.tMsg = setTimeout(() => { if (!vista) return; delete msg.dataset.fijo; msg.classList.remove('ver'); }, ms || 1800);
     }
 
     function elegirPregunta(i) {
       if (est.ocupado || est.hechos.has(i)) return;
       if (est.sel === i) { est.sel = -1; pintar(); return; }
       est.sel = i; sonido.elegir(); pintar();
-      avisar('Ahora elegí la respuesta.', 2600);
     }
     function elegirRespuesta(j) {
       if (est.ocupado || est.hechos.has(j)) return;
@@ -192,19 +195,17 @@
         est.hechos.add(i); est.sel = -1;
         pintar();
         [q, r].forEach((e) => { e.classList.remove('prende'); void e.offsetWidth; e.classList.add('prende'); });
-        const a = centro(q), b = centro(r);
-        const fin = est.hechos.size === pares.length;
-        if (fin) {
+        const a = centro(q), b = centro(r), k = cv._k || 1;
+        if (est.hechos.size === pares.length) {
           est.final = true; pintar();
           sonido.acierto(); setTimeout(sonido.final, 380);
-          const ch = cv.height / (cv._k || 1);
-          confeti(cv, [{ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, ang: -Math.PI / 2, abre: 3 },
-            { x: 20 * cv._k, y: cv.height * 0.85, ang: -1.1, abre: 0.9 }, { x: cv.width - 20 * cv._k, y: cv.height * 0.85, ang: -2.04, abre: 0.9 }], 240, 15 * cv._k);
-          setTimeout(() => { if (vista && vista.cv === cv) confeti(cv, [{ x: cv.width * 0.3, y: -10, ang: Math.PI / 2, abre: 2.6 }, { x: cv.width * 0.7, y: -10, ang: Math.PI / 2, abre: 2.6 }], 160, 5 * cv._k); }, 700);
+          confeti(cv, [{ x: cv.width / 2, y: cv.height * 0.45, ang: -Math.PI / 2, abre: 3.4 },
+            { x: 20 * k, y: cv.height * 0.85, ang: -1.1, abre: 0.9 }, { x: cv.width - 20 * k, y: cv.height * 0.85, ang: -2.04, abre: 0.9 }], 260, 15 * k);
+          setTimeout(() => { if (vista && vista.cv === cv) confeti(cv, [{ x: cv.width * 0.3, y: -10, ang: Math.PI / 2, abre: 2.6 }, { x: cv.width * 0.7, y: -10, ang: Math.PI / 2, abre: 2.6 }], 160, 5 * k); }, 700);
+          setTimeout(() => { if (vista && vista.cv === cv && est.final) mostrarFin(); }, 1300);
         } else {
           sonido.acierto();
-          confeti(cv, [{ x: a.x, y: a.y, ang: -Math.PI / 2, abre: 2.8 }, { x: b.x, y: b.y, ang: -Math.PI / 2, abre: 2.8 }], 90, 9 * cv._k);
-          avisar('¡Correcto! Se encendió una luz.', 1700);
+          confeti(cv, [{ x: a.x * k, y: a.y * k, ang: -Math.PI / 2, abre: 2.8 }, { x: b.x * k, y: b.y * k, ang: -Math.PI / 2, abre: 2.8 }], 90, 9 * k);
         }
         return;
       }
@@ -220,46 +221,39 @@
 
     qs.addEventListener('click', (e) => { const b = e.target.closest('.tab__carta'); if (b) elegirPregunta(+b.dataset.i); });
     rs.addEventListener('click', (e) => { const b = e.target.closest('.tab__carta'); if (b) elegirRespuesta(+b.dataset.i); });
-    btn.addEventListener('click', () => {
-      est = nuevoEstado(c); est.n = pares.length;
-      delete msg.dataset.fijo; pintar();
-    });
+    const reiniciar = () => { est = nuevoEstado(c); fin.hidden = true; delete msg.dataset.fijo; pintar(); };
+    btn.addEventListener('click', reiniciar);
+    raiz.querySelector('.tab__fin-otra').addEventListener('click', reiniciar);
+    raiz.querySelector('.tab__fin-ver').addEventListener('click', () => { fin.hidden = true; });
 
-    vista.pintar = pintar;
     pintar();
+    if (est.final) mostrarFin();
     ajustar();
     window.addEventListener('resize', ajustar);
   }
 
   /* ---------- tamaño y modo ---------- */
-  function ajustarTexto(carta) {
+  function caber(carta, min, max, caja) {
     const t = carta.querySelector('.tab__txt');
-    const esR = carta.classList.contains('tab__carta--r');
-    let f = esR ? 34 : 23;
-    const min = esR ? 22 : 14;
+    let f = max;
     carta.style.fontSize = f + 'px';
-    while (f > min && (t.offsetHeight > carta.clientHeight - 20 || t.scrollWidth > t.clientWidth + 1)) { f -= 1; carta.style.fontSize = f + 'px'; }
+    while (f > min && (t.scrollHeight > t.clientHeight + 1 || t.scrollWidth > t.clientWidth + 1)) { f -= 0.5; carta.style.fontSize = f + 'px'; }
+    return f;
   }
   function colocar(modo) {
     const v = vista;
     const todas = v.bq.concat(v.br);
     if (modo === 'pizarra') {
-      const n = v.bq.length;
-      const filasA = Math.ceil(n / 2), filasB = n - filasA;
-      const h = 148, paso = 160, x1 = 18, x2 = 408, w = 372;
-      v.bq.forEach((b, i) => {
-        const col = i < filasA ? 0 : 1, fila = col ? i - filasA : i;
-        const y0 = col ? 24 + (filasA - filasB) * paso / 2 : 24;
-        b.style.cssText = 'left:' + (col ? x2 : x1) + 'px;top:' + (y0 + fila * paso) + 'px;width:' + w + 'px;height:' + h + 'px';
+      v.pares.forEach((p, i) => {
+        [[v.bq[i], p.pc], [v.br[i], p.rc]].forEach((par) => {
+          const b = par[0], g = par[1] || [0, 0, 150], d = g[2];
+          b.style.cssText = 'left:' + (g[0] - d / 2) + 'px;top:' + (g[1] - d / 2) + 'px;width:' + d + 'px;height:' + d + 'px;--d:' + d + 'px';
+        });
       });
-      const m = v.br.length, ph = 74, pp = (H - 40 - ph) / Math.max(1, m - 1);
-      let k = 0;
-      Array.prototype.forEach.call(v.rs.children, (b) => { b.style.cssText = 'left:' + (W - 18 - 360) + 'px;top:' + (20 + k * pp) + 'px;width:360px;height:' + ph + 'px'; k++; });
-      todas.forEach(ajustarTexto);
-      [v.bq, v.br].forEach((g) => {
-        const m = Math.min.apply(null, g.map((b) => parseFloat(b.style.fontSize)));
-        g.forEach((b) => { b.style.fontSize = m + 'px'; });
-      });
+      const fq = Math.min.apply(null, v.bq.map((b) => caber(b, 8, 22)));
+      const fr = Math.min.apply(null, v.br.map((b) => caber(b, 8, 30)));
+      v.bq.forEach((b) => { b.style.fontSize = fq + 'px'; });
+      v.br.forEach((b) => { b.style.fontSize = caber(b, 8, 34) + 'px'; });
     } else {
       todas.forEach((b) => { b.style.cssText = ''; });
     }
@@ -275,10 +269,10 @@
       colocar(modo);
     }
     if (modo === 'pizarra') {
-      const altoMax = Math.max(260, Math.min(innerHeight - v.raiz.offsetTop - 40, 1000));
-      const k = Math.min(ancho / W, Math.max(altoMax / H, 0.72));
+      const lado = Math.min(ancho, 1100);
+      const k = lado / S;
       v.k = k;
-      v.tab.style.width = (W * k) + 'px'; v.tab.style.height = (H * k) + 'px';
+      v.tab.style.width = lado + 'px'; v.tab.style.height = lado + 'px';
       v.stage.style.transform = 'scale(' + k + ')';
     } else {
       v.k = 1;
@@ -295,8 +289,7 @@
   function detener() {
     window.removeEventListener('resize', ajustar);
     if (vista) { clearTimeout(vista.tMsg); if (vista.cv) { cancelAnimationFrame(vista.cv._anim); vista.cv._anim = 0; vista.cv._ps = []; } }
-    if (est) est.ocupado = false;
-    if (est) est.sel = -1;
+    if (est) { est.ocupado = false; est.sel = -1; }
     vista = null;
   }
 
