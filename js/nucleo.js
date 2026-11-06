@@ -153,6 +153,7 @@
   function limpiarVista() {
     const v = estado.vista;
     if (!v) return;
+    quitarAviso();
     const vid = $('video', v);
     if (vid) { try { vid.pause(); vid.removeAttribute('src'); vid.load(); } catch (err) { /* nada */ } }
     if (estado.rec) { cancelAnimationFrame(estado.rec.raf); estado.rec = null; estado.parada = null; }
@@ -169,13 +170,12 @@
     const v = crear('div', 'vista vista--video vista--noche');
     v.dataset.escena = id;
     const fondo = crear('div', 'fondo');
-    fondo.style.backgroundImage = 'url("' + vd.final + '")';
+    fondo.style.backgroundImage = 'url("' + (vd.inicio || vd.final) + '")';
     const caja = crear('div', 'mundo mundo--video');
-    const liviano = tactil || innerWidth < 900 || (navigator.connection && navigator.connection.saveData);
-    const fuente = liviano && vd.src480 ? vd.src480 : vd.src1080;
+    const fuente = fuenteAuditorio(vd);
     caja.innerHTML =
       '<img class="video__final" src="' + esc(vd.final) + '" alt="' + esc(e.titulo || '') + '" draggable="false">' +
-      '<video class="video__cam" muted playsinline preload="auto" aria-label="Recorrido hacia el auditorio"></video>' +
+      '<video class="video__cam" muted playsinline preload="auto"' + (vd.inicio ? ' poster="' + esc(vd.inicio) + '"' : '') + ' aria-label="Recorrido hacia el auditorio"></video>' +
       '<div class="video__luz" style="left:' + (pa.x + pa.w / 2) + '%;top:' + (pa.y + pa.h / 2) + '%"></div>' +
       '<div class="pantalla" style="left:' + pa.x + '%;top:' + pa.y + '%;width:' + pa.w + '%;height:' + pa.h + '%"><div class="pantalla__video"></div></div>' +
       (pa.youtube ? '<a class="video__yt" style="left:' + pa.x + '%;top:' + (pa.y + pa.h + 1.5) + '%" href="https://www.youtube.com/watch?v=' + esc(pa.youtube) + '" target="_blank" rel="noopener">Ver en YouTube</a>' : '');
@@ -214,11 +214,34 @@
       vid.addEventListener('seeked', terminar, { once: true });
       setTimeout(terminar, 700);
     });
-    vid.src = fuente;
-    const jugar = vid.play();
-    if (jugar && jugar.catch) jugar.catch(terminar);
-    if (!opc || opc.pasos !== false) { if (CR.sonido) CR.sonido.pasos((vd.pasosSeg || 10) * 1000); }
-    setTimeout(() => { if (!fin && estado.vista === v && vid.currentTime < 0.05) terminar(); }, 9000);
+    /* No se arranca hasta tener el video listo: así la imagen, la música y los pasos van juntos. */
+    let arranco = false;
+    const arrancar = () => {
+      if (arranco || fin || estado.vista !== v) return;
+      arranco = true;
+      quitarAviso();
+      const jugar = vid.play();
+      if (jugar && jugar.catch) jugar.catch(terminar);
+      if (!opc || opc.pasos !== false) { if (CR.sonido) CR.sonido.pasos((vd.pasosSeg || 10) * 1000); }
+      setTimeout(() => { if (!fin && estado.vista === v && vid.currentTime < 0.05) terminar(); }, 9000);
+    };
+    const esperarListo = () => {
+      const t0 = performance.now();
+      const sondeo = setInterval(() => {
+        if (estado.vista !== v || arranco || fin) { clearInterval(sondeo); quitarAviso(); return; }
+        const pc = avance[fuente];
+        if (vid.readyState >= 4 || (vid.duration && cubierto(vid, 0, vid.duration))) { clearInterval(sondeo); arrancar(); return; }
+        if (performance.now() - t0 > 20000 && vid.readyState >= 3) { clearInterval(sondeo); arrancar(); return; }
+        if (performance.now() - t0 > 40000) { clearInterval(sondeo); arrancar(); return; }
+        avisoCarga('Preparando el recorrido…' + (pc && pc < 1 ? ' ' + Math.round(pc * 100) + ' %' : ''));
+      }, 150);
+    };
+    avisoCarga('Preparando el recorrido…');
+    bajarVideo(fuente).then((u) => {
+      if (estado.vista !== v) return;
+      vid.src = u || fuente;
+      esperarListo();
+    });
   }
 
   /* Al llegar al final se enciende la pantalla: el video de YouTube y la luz suave sobre la sala. */
@@ -254,14 +277,43 @@
   /* ---------- recorrido en video (salas): el video avanza por tramos con las flechas laterales ---------- */
   /* Los videos de las salas se bajan enteros a la memoria: así el avance rápido y el retroceso no se
      traban esperando datos de la red. Mientras tanto el video arranca igual, directo desde el servidor. */
-  const blobs = {};
+  const blobs = {}, avance = {};
   function bajarVideo(src) {
     if (!blobs[src]) {
       blobs[src] = (window.fetch && /^https?:$/.test(location.protocol))
-        ? fetch(src).then((r) => { if (!r.ok) throw new Error('video'); return r.blob(); }).then((b) => URL.createObjectURL(b)).catch(() => null)
+        ? fetch(src).then((r) => {
+          if (!r.ok) throw new Error('video');
+          const total = +r.headers.get('content-length') || 0;
+          if (!r.body || !r.body.getReader || !total) return r.blob();
+          const lector = r.body.getReader(), trozos = [];
+          let n = 0;
+          const leer = () => lector.read().then((x) => {
+            if (x.done) return new Blob(trozos, { type: 'video/mp4' });
+            trozos.push(x.value); n += x.value.length; avance[src] = n / total;
+            return leer();
+          });
+          return leer();
+        }).then((b) => { avance[src] = 1; return URL.createObjectURL(b); }).catch(() => null)
         : Promise.resolve(null);
     }
     return blobs[src];
+  }
+  /* Aviso "Preparando…" con el porcentaje de descarga. */
+  function avisoCarga(texto) {
+    let el = $('.carga');
+    if (!el) { el = crear('div', 'carga'); el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.hidden = false; el.textContent = texto;
+    return el;
+  }
+  function quitarAviso() { const el = $('.carga'); if (el) el.remove(); }
+  function cubierto(vid, a, b) {
+    const bf = vid.buffered;
+    for (let i = 0; i < bf.length; i++) if (bf.start(i) <= a + 0.15 && bf.end(i) >= b - 0.05) return true;
+    return false;
+  }
+  function fuenteAuditorio(vd) {
+    const liviano = tactil || innerWidth < 900 || (navigator.connection && navigator.connection.saveData);
+    return liviano && vd.src480 ? vd.src480 : vd.src1080;
   }
   function fuenteRecorrido(vd) {
     const px = Math.min(innerHeight, innerWidth / ((vd.w || 720) / (vd.h || 1280))) * (window.devicePixelRatio || 1);
@@ -271,7 +323,10 @@
   /* En el hall, con la red libre, se adelanta la descarga de los videos de las salas. */
   function adelantarVideos() {
     if (navigator.connection && navigator.connection.saveData) return;
-    Object.keys(escenas).forEach((k) => { if (escenas[k].tipo === 'recorrido' && escenas[k].video) bajarVideo(fuenteRecorrido(escenas[k].video)); });
+    Object.keys(escenas).forEach((k) => {
+      if (escenas[k].tipo === 'recorrido' && escenas[k].video) bajarVideo(fuenteRecorrido(escenas[k].video));
+      if (escenas[k].tipo === 'video' && escenas[k].video) bajarVideo(fuenteAuditorio(escenas[k].video));
+    });
   }
 
   function montarRecorrido(id, e) {
@@ -327,6 +382,7 @@
     actualizarParada();
 
     const fuente = fuenteRecorrido(vd);
+    r.fuente = fuente;
     vid.src = fuente;
     /* cuando el video ya está entero en memoria, se cambia (en una parada) para que no haya esperas */
     r.cambiarAMemoria = () => {
@@ -374,7 +430,7 @@
 
   function moverParada(delta) {
     const r = estado.rec;
-    if (!r || r.jugando || estado.cambiando || bloqueado() || estado.modal) return;
+    if (!r || r.jugando || r.cargando || estado.cambiando || bloqueado() || estado.modal) return;
     const j = r.i + delta;
     if (j < 0 || j >= r.P.length) return;
     const e = r.e, vid = r.vid, v = estado.vista;
@@ -383,51 +439,70 @@
     const continuo = (e.continuos || []).some((c) => lo >= c[0] - 0.05 && hi <= c[1] + 0.05);
     const vel = continuo ? (e.video.velocidadContinuo || 1.8) : (e.video.velocidad || 3);
     const dur = Math.abs(hasta - desde) / vel;
-    r.jugando = true;
-    r.i = j;
-    actualizarParada();
-    if (CR.sonido) CR.sonido.pasos(dur * 1000 + 300);
-    let hecho = false;
-    const fin = () => {
-      if (hecho || estado.vista !== v) return;
-      hecho = true;
-      cancelAnimationFrame(r.raf);
-      r.jugando = false;
-      vid.pause();
-      try { vid.currentTime = hasta; } catch (err) { /* nada */ }
-      pintarBruma();
+
+    /* Antes de mover: el tramo tiene que estar ya descargado. Si no, se espera y se avisa. */
+    const listo = () => (r.enMemoria ? vid.readyState >= 3 : cubierto(vid, lo, hi + 0.3));
+    const iniciar = () => {
+      if (estado.vista !== v || estado.rec !== r) return;
+      r.jugando = true;
+      r.i = j;
       actualizarParada();
-      r.cambiarAMemoria();
+      if (CR.sonido) CR.sonido.pasos(dur * 1000 + 300);
+      let hecho = false;
+      const fin = () => {
+        if (hecho || estado.vista !== v) return;
+        hecho = true;
+        cancelAnimationFrame(r.raf);
+        r.jugando = false;
+        vid.pause();
+        try { vid.currentTime = hasta; } catch (err) { /* nada */ }
+        pintarBruma();
+        actualizarParada();
+        r.cambiarAMemoria();
+      };
+      setTimeout(fin, dur * 1000 * 1.6 + 9000);
+      let ultBruma = 0;
+      const bruma = (ts) => { if (ts - ultBruma > 160) { ultBruma = ts; pintarBruma(); } };
+      if (delta > 0) {
+        if (Math.abs(vid.currentTime - desde) > 0.05) { try { vid.currentTime = desde; } catch (err) { /* nada */ } }
+        vid.playbackRate = vel;
+        const jg = vid.play();
+        if (jg && jg.catch) jg.catch(fin);
+        const paso = (ts) => {
+          if (estado.vista !== v || hecho) return;
+          bruma(ts);
+          if (vid.currentTime >= hasta - 0.03 || vid.ended) { fin(); return; }
+          r.raf = requestAnimationFrame(paso);
+        };
+        r.raf = requestAnimationFrame(paso);
+      } else {
+        /* hacia atrás: el navegador no reproduce al revés, así que se retrocede cuadro a cuadro */
+        vid.pause();
+        let t = desde, ult = performance.now();
+        const paso = (ts) => {
+          if (estado.vista !== v || hecho) return;
+          const dt = Math.min(0.1, (ts - ult) / 1000);
+          ult = ts;
+          t = Math.max(hasta, t - dt * vel);
+          if (!vid.seeking) { try { vid.currentTime = t; } catch (err) { /* nada */ } }
+          bruma(ts);
+          if (t <= hasta) { fin(); return; }
+          r.raf = requestAnimationFrame(paso);
+        };
+        r.raf = requestAnimationFrame(paso);
+      }
     };
-    setTimeout(fin, dur * 1000 * 1.6 + 9000);
-    if (delta > 0) {
-      try { vid.currentTime = desde; } catch (err) { /* nada */ }
-      vid.playbackRate = vel;
-      const jg = vid.play();
-      if (jg && jg.catch) jg.catch(fin);
-      const paso = () => {
-        if (estado.vista !== v || hecho) return;
-        pintarBruma();
-        if (vid.currentTime >= hasta - 0.03 || vid.ended) { fin(); return; }
-        r.raf = requestAnimationFrame(paso);
-      };
-      r.raf = requestAnimationFrame(paso);
-    } else {
-      /* hacia atrás: el navegador no reproduce al revés, así que se retrocede cuadro a cuadro */
-      vid.pause();
-      let t = desde, ult = performance.now();
-      const paso = (ts) => {
-        if (estado.vista !== v || hecho) return;
-        const dt = Math.min(0.1, (ts - ult) / 1000);
-        ult = ts;
-        t = Math.max(hasta, t - dt * vel);
-        if (!vid.seeking) { try { vid.currentTime = t; } catch (err) { /* nada */ } }
-        pintarBruma();
-        if (t <= hasta) { fin(); return; }
-        r.raf = requestAnimationFrame(paso);
-      };
-      r.raf = requestAnimationFrame(paso);
-    }
+
+    if (listo()) { iniciar(); return; }
+    r.cargando = true;
+    const t0 = performance.now();
+    const sondeo = setInterval(() => {
+      if (estado.vista !== v || estado.rec !== r) { clearInterval(sondeo); quitarAviso(); return; }
+      if (r.blob && !r.enMemoria) r.cambiarAMemoria();
+      if (listo() || performance.now() - t0 > 30000) { clearInterval(sondeo); r.cargando = false; quitarAviso(); iniciar(); return; }
+      const pc = avance[r.fuente];
+      avisoCarga('Cargando el recorrido…' + (pc && pc < 1 ? ' ' + Math.round(pc * 100) + ' %' : ''));
+    }, 150);
   }
 
   function montarEscena(id, opc) {

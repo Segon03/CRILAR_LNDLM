@@ -585,6 +585,7 @@ window.MUESTRA = {
       "video": {
         "src1080": "videos/auditorio-1080-web.mp4",
         "src480": "videos/auditorio480.mp4",
+        "inicio": "videos/auditorio-inicio.jpg",
         "final": "videos/auditorio-final.jpg",
         "w": 1920,
         "h": 1080,

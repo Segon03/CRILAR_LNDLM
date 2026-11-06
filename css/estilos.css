@@ -260,6 +260,8 @@ img{max-width:100%}
 .vista--video{background:#03050e}
 .mundo--video{z-index:1;overflow:hidden;background:#05070f}
 .video__final,.video__cam{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;filter:brightness(.62) saturate(.9) contrast(1.05);transition:filter 2.4s ease;pointer-events:none}
+.vista--video:not(.video--fin) .video__final{opacity:0}
+.video__final{transition:filter 2.4s ease,opacity .6s ease}
 .video--fin .video__final,.video--fin .video__cam{filter:brightness(.4) saturate(.85) contrast(1.08)}
 .video__luz{position:absolute;width:150%;height:150%;transform:translate(-50%,-50%);pointer-events:none;opacity:0;transition:opacity 2.4s ease;background:radial-gradient(ellipse 34% 34% at 50% 50%,rgba(176,208,255,.62),rgba(120,160,235,.26) 55%,rgba(60,90,170,0) 100%);mix-blend-mode:screen}
 .video--fin .video__luz{opacity:1;animation:proyector 5s ease-in-out 2.4s infinite alternate}
@@ -395,3 +397,9 @@ img{max-width:100%}
 .tab--lista .tab__carta--r.mal{background:#ff2a2a;border-color:#ffc4c4;color:#fff;box-shadow:0 0 16px 4px rgba(255,28,28,.85);animation:sacude .45s ease}
 .tab--lista .tab__carta.avisa:not(.bien){animation:avisa .6s ease}
 @media (prefers-reduced-motion:reduce){.tab__c,.tab__carta{animation:none!important;transition:none!important}}
+
+/* aviso mientras se descarga un video */
+.carga{position:fixed;left:50%;bottom:max(84px,calc(env(safe-area-inset-bottom) + 70px));transform:translateX(-50%);z-index:13;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.1rem;border-radius:999px;background:rgba(8,14,34,.78);color:var(--luna-2,#e9ecff);font-size:.95rem;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.45)}
+.carga[hidden]{display:none}
+.carga::before{content:"";width:.9rem;height:.9rem;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:giro .8s linear infinite}
+@keyframes giro{to{transform:rotate(360deg)}}
