@@ -348,12 +348,12 @@ window.MUESTRA = {
           "tipo": "objeto",
           "x": 55.4,
           "y": 40.8,
-          "titulo": "Video de entomología",
+          "titulo": "Descubre qué es la Entomología",
           "ficha": {
             "area": "Entomología",
-            "titulo": "Video de entomología",
+            "titulo": "Descubre qué es la Entomología",
             "tipo": "video",
-            "texto": "Texto de ejemplo. Acá va la descripción del video.",
+            "texto": "Te invitamos a conocer qué estudian los entomólogos y la importancia de sus investigaciones.",
             "credito": "",
             "media": {
               "mp4": "videos/entomo-720.mp4",

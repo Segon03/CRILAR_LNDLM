@@ -112,6 +112,7 @@
       const baja = (si) => () => C.sonido.musicaBaja(si);
       vid.addEventListener('play', baja(true)); vid.addEventListener('pause', baja(false)); vid.addEventListener('ended', baja(false));
     }
+    if (vid) vid.play().catch(() => { /* si el navegador no deja arrancar solo, queda el botón de play */ });
     if (f.tipo === 'tablero' && C.tablero) C.tablero.iniciar(document.getElementById('tablero-raiz'), f.tablero);
     if (f.tipo === 'juego' && C.juego) C.juego.iniciar(document.getElementById('juego-raiz'), f.juego);
     if (p.tipo === 'objeto') C.marcarVisto(p.id);
