@@ -230,6 +230,8 @@
     if (est.final) mostrarFin();
     ajustar();
     window.addEventListener('resize', ajustar);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (vista) { vista.modo = ''; ajustar(); } });
+    setTimeout(() => { if (vista) { vista.modo = ''; ajustar(); } }, 600);
   }
 
   /* ---------- tamaño y modo ---------- */
@@ -237,7 +239,15 @@
     const t = carta.querySelector('.tab__txt');
     let f = max;
     carta.style.fontSize = f + 'px';
-    while (f > min && (t.scrollHeight > t.clientHeight + 1 || t.scrollWidth > t.clientWidth + 1)) { f -= 0.5; carta.style.fontSize = f + 'px'; }
+    const dentro = () => {
+      if (!carta.style.getPropertyValue('--d')) return true;
+      const d = parseFloat(carta.style.getPropertyValue('--d')), R = d / 2, lim = R - 16;
+      const cx = carta.offsetLeft + R, cy = carta.offsetTop + R;
+      const rg = document.createRange(); rg.selectNodeContents(t);
+      const o = carta.getBoundingClientRect(), esc = o.width / d || 1;
+      return Array.prototype.every.call(rg.getClientRects(), (q) => [[q.left, q.top], [q.right, q.top], [q.left, q.bottom], [q.right, q.bottom]].every((p) => Math.hypot((p[0] - o.left) / esc - R, (p[1] - o.top) / esc - R) <= lim));
+    };
+    while (f > min && (t.scrollHeight > t.clientHeight + 1 || t.scrollWidth > t.clientWidth + 1 || !dentro())) { f -= 0.5; carta.style.fontSize = f + 'px'; }
     return f;
   }
   function colocar(modo) {
@@ -250,10 +260,10 @@
           b.style.cssText = 'left:' + (g[0] - d / 2) + 'px;top:' + (g[1] - d / 2) + 'px;width:' + d + 'px;height:' + d + 'px;--d:' + d + 'px';
         });
       });
-      const fq = Math.min.apply(null, v.bq.map((b) => caber(b, 8, 22)));
+      const fq = Math.min.apply(null, v.bq.map((b) => caber(b, 6, 24)));
       const fr = Math.min.apply(null, v.br.map((b) => caber(b, 8, 30)));
-      v.bq.forEach((b) => { b.style.fontSize = fq + 'px'; });
-      v.br.forEach((b) => { b.style.fontSize = caber(b, 8, 34) + 'px'; });
+      v.bq.forEach((b) => { b.style.fontSize = Math.min(caber(b, 6, 24), fq + 3) + 'px'; });
+      v.br.forEach((b) => { b.style.fontSize = caber(b, 6, 34) + 'px'; });
     } else {
       todas.forEach((b) => { b.style.cssText = ''; });
     }

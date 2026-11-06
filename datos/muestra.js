@@ -363,10 +363,10 @@ window.MUESTRA = {
           "parada": 0
         },
         {
-          "id": "s2L-2",
+          "id": "s2L-3",
           "tipo": "objeto",
-          "x": 63.5,
-          "y": 59.3,
+          "x": 54.3,
+          "y": 52.3,
           "titulo": "Objeto de ejemplo de Entomología médica",
           "ficha": {
             "area": "Entomología médica",
@@ -379,13 +379,13 @@ window.MUESTRA = {
               "alt": ""
             }
           },
-          "parada": 1
+          "parada": 2
         },
         {
-          "id": "s2L-3",
+          "id": "s2L-2",
           "tipo": "objeto",
-          "x": 54.3,
-          "y": 52.3,
+          "x": 63.5,
+          "y": 59.3,
           "titulo": "Tablero de luz",
           "ficha": {
             "area": "Tablero de luz",
@@ -412,7 +412,7 @@ window.MUESTRA = {
               "ordenRespuestas": [9, 2, 5, 7, 4, 0, 10, 6, 8, 1, 3]
             }
           },
-          "parada": 2
+          "parada": 1
         },
         {
           "id": "s2L-4",
