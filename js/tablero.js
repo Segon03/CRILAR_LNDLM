@@ -273,6 +273,35 @@
     while (f > min && !entra(carta)) { f -= 0.5; carta.style.fontSize = f + 'px'; }
     return f;
   }
+  /* mayor tamaño de letra (en unidades del tablero) con que el texto entra dentro del círculo de diámetro d */
+  const LIENZO = document.createElement('canvas').getContext('2d');
+  function tamLetra(texto, d, unaLinea, max) {
+    const R = d / 2, lim = R - 14;
+    const ancho = d * (unaLinea ? 0.9 : 0.78), alto = d * 0.78;
+    const palabras = String(texto).split(/\s+/);
+    for (let f = max; f >= 6; f -= 0.5) {
+      LIENZO.font = '700 ' + f + 'px "Times New Roman", Times, serif';
+      const lh = f * 1.1;
+      let lineas = [];
+      if (unaLinea) lineas = [LIENZO.measureText(String(texto)).width];
+      else {
+        let act = '';
+        palabras.forEach((w) => {
+          const t = act ? act + ' ' + w : w;
+          if (act && LIENZO.measureText(t).width > ancho) { lineas.push(LIENZO.measureText(act).width); act = w; } else act = t;
+        });
+        if (act) lineas.push(LIENZO.measureText(act).width);
+      }
+      const H = lineas.length * lh;
+      if (H > alto || lineas.some((w) => w > ancho)) continue;
+      const ok = lineas.every((w, n) => {
+        const y0 = -H / 2 + n * lh, y1 = y0 + lh;
+        return Math.hypot(w / 2, Math.max(Math.abs(y0), Math.abs(y1))) <= lim;
+      });
+      if (ok) return f - 0.5;
+    }
+    return 6;
+  }
   function geom(b, g, e) {
     const d = g[2] * e;
     b.style.cssText = 'left:' + (g[0] - d / 2) + 'px;top:' + (g[1] - d / 2) + 'px;width:' + d + 'px;height:' + d + 'px;--d:' + d + 'px';
@@ -286,9 +315,10 @@
         geom(v.bq[i], p.pc || [0, 0, 250], 1);
         geom(v.br[i], p.rc || [0, 0, 150], 1);
       });
-      /* un solo tamaño de letra para todas las preguntas y otro para todas las respuestas */
-      const fq = Math.min.apply(null, v.bq.map((b) => caber(b, 6, 30)));
-      const fr = Math.min.apply(null, v.br.map((b) => caber(b, 6, 40)));
+      /* Se calcula con un lienzo (sin depender de cómo el navegador mida el DOM):
+         un solo tamaño de letra para todas las preguntas y otro para todas las respuestas. */
+      const fq = Math.min.apply(null, v.pares.map((p, i) => tamLetra(p.pt || p.p, (p.pc || [0, 0, 250])[2], false, 30)));
+      const fr = Math.min.apply(null, v.pares.map((p) => tamLetra(p.r, (p.rc || [0, 0, 150])[2], true, 40)));
       v.bq.forEach((b) => { b.style.fontSize = fq + 'px'; });
       v.br.forEach((b) => { b.style.fontSize = fr + 'px'; });
     } else {
