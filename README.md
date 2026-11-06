@@ -128,3 +128,9 @@ El punto de la mesa, abajo a la izquierda en el Hall, abre un rompecabezas con l
 - Piezas y mesa: `images/juego/` (recortadas de las fotos de la mesa).
 - Datos de cada pieza (posición de encaje, giro, máscara): `datos/rompecabezas.js`.
 - Lógica: `js/juego.js`. Texto final: `ficha.juego.texto` en `datos/muestra.js`.
+
+## Tablero de luz (Sala 2)
+
+Juego de unir las 11 preguntas con sus respuestas, como el tablero de la muestra. Se elige una pregunta (queda encendida en amarillo) y después una respuesta: si es correcta se encienden las dos en verde, suena un aviso y cae confeti; si no, las dos se ponen rojas, suena un error y se puede volver a elegir. Al completar las 11 hay festejo y un mensaje corto. En celulares angostos se muestra como lista en dos columnas.
+
+Las preguntas, las respuestas, el orden de las respuestas y las fotos están en `datos/muestra.js`, en la ficha del punto `tablero-luz` (tipo `"tablero"`). El punto está provisoriamente en la primera parada de la Sala 2: se mueve cambiando `x`, `y` y `parada`. Los sonidos los genera el navegador. Cuenta como objeto visitado con solo abrirlo.

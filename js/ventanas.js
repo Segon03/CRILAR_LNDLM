@@ -86,6 +86,7 @@
       if (t === 'foto' && m.recorte) return recorteHTML(p, m);
       return vacio(t === 'foto' ? 'Foto de ejemplo' : 'Infografía de ejemplo', 'Subí el archivo a images/fichas/ y escribí su ruta en media.src, dentro de datos/muestra.js.');
     }
+    if (t === 'tablero') return '<div class="media media--tablero" id="tablero-raiz"></div>';
     if (t === 'juego') return '<div class="media media--juego" id="juego-raiz"></div>';
     if (t === 'video') {
       if (m.youtube) return '<div class="media media--video"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(m.youtube) + '?rel=0" title="' + esc(f.titulo || 'Video') + '" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>';
@@ -106,6 +107,7 @@
       (f.credito ? '<p class="ficha__credito">' + esc(f.credito) + '</p>' : '');
     estado.fichaActual = p;
     abrirModal(modFicha);
+    if (f.tipo === 'tablero' && C.tablero) C.tablero.iniciar(document.getElementById('tablero-raiz'), f.tablero);
     if (f.tipo === 'juego' && C.juego) C.juego.iniciar(document.getElementById('juego-raiz'), f.juego);
     if (p.tipo === 'objeto') C.marcarVisto(p.id);
   }
@@ -114,6 +116,7 @@
     cerrarModal(modFicha);
     estado.fichaActual = null;
     if (C.juego) C.juego.detener();
+    if (C.tablero) C.tablero.detener();
     setTimeout(() => { if (!estado.fichaActual) fichaCont.innerHTML = ''; }, 320);
     if (C.completo() && !estado.sorteoOfrecido && !estado.registrado) setTimeout(abrirSorteo, 550);
   }

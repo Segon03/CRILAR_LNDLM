@@ -344,6 +344,41 @@ window.MUESTRA = {
       "padre": "hall",
       "puntos": [
         {
+          "id": "tablero-luz",
+          "tipo": "objeto",
+          "x": 24.0,
+          "y": 50.0,
+          "titulo": "Tablero de luz: ¿Cuánto sabes sobre los insectos?",
+          "ficha": {
+            "area": "Tablero de luz",
+            "titulo": "¿Cuánto sabes sobre los insectos?",
+            "tipo": "tablero",
+            "tablero": {
+              "ayuda": "Elegí una pregunta y después su respuesta. La luz se enciende cuando las unís bien.",
+              "final": "¡Completaste el tablero! Las 11 luces están encendidas.",
+              "pares": [
+                { "p": "Los insectos son el grupo de animales más diversos del mundo. ¿Cuántas especies fueron descriptas hasta el momento?", "r": "1.000.000" },
+                { "p": "Las mariposas, además de ser bellas, pueden llegar a ser de gran tamaño. ¿Cuántos centímetros de una punta a la otra de las alas mide la mariposa más grande del mundo?", "r": "29,8" },
+                { "p": "Las abejas son conocidas por la rica miel que producen, pero también por sus picaduras. ¿Cuántas veces puede picarnos una abeja?", "r": "1 sola vez" },
+                { "p": "Una avispa también podría picarnos. ¿Cuántas veces podría picarnos?", "r": "Más de 1 vez" },
+                { "p": "Las pulgas pueden llegar a ser molestas, pero... ¡no dejan de ser asombrosas! Pueden saltar hasta 130 veces su propia altura. ¿Cuántos centímetros de altura alcanzan en un salto vertical?", "r": "20" },
+                { "p": "El insecto más grande del mundo es un bicho palo. ¡Es realmente grande! ¿Cuántos centímetros mide?", "r": "62,4" },
+                { "p": "Las mariposas monarcas vuelan gran cantidad de kilómetros entre Canadá y México para reproducirse. ¿Cuántos km se desplazan por día?", "r": "120" },
+                { "p": "Se calcula que todas las hormigas del mundo pesan una quinta parte de todos los humanos juntos. ¿Cuántos billones de hormigas se calcula que hay en el mundo?", "r": "20.000" },
+                { "p": "¡Los insectos aparecieron en la faz de la Tierra antes que los dinosaurios! ¿A cuántos millones de años se remonta su origen?", "r": "480.000.000" },
+                { "p": "Las alas anteriores de los escarabajos son duras y no se usan para el vuelo. ¿Cómo se llama este tipo de alas?", "r": "Élitros" },
+                { "p": "Las alas posteriores de las moscas y mosquitos se reducen a unas estructuras en forma de clava. ¿Cómo se llaman estas estructuras?", "r": "Halterios" }
+              ],
+              "ordenRespuestas": [9, 2, 5, 7, 4, 0, 10, 6, 8, 1, 3],
+              "fotos": [
+                { "src": "images/tablero/avispa.jpg", "alt": "Cara de una avispa en primer plano" },
+                { "src": "images/tablero/bicho_palo.jpg", "alt": "Bicho palo gigante sobre una mano" }
+              ]
+            }
+          },
+          "parada": 0
+        },
+        {
           "id": "s2L-1",
           "tipo": "objeto",
           "x": 55.4,
@@ -597,5 +632,5 @@ window.MUESTRA = {
       ]
     }
   },
-  "version": 7
+  "version": 8
 };
