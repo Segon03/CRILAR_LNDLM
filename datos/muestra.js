@@ -225,7 +225,7 @@ window.MUESTRA = {
             "area": "Paleontología",
             "titulo": "Fósil de ejemplo 3",
             "tipo": "video",
-            "texto": "Texto de ejemplo. Acá va la descripción del objeto: qué es, de dónde viene y por qué forma parte de la muestra.",
+            "texto": "Texto de ejemplo. Acá va la descripción del video.",
             "credito": "",
             "media": {
               "youtube": "",
@@ -348,16 +348,16 @@ window.MUESTRA = {
           "tipo": "objeto",
           "x": 55.4,
           "y": 40.8,
-          "titulo": "Objeto de ejemplo de Entomología",
+          "titulo": "Video de entomología",
           "ficha": {
             "area": "Entomología",
-            "titulo": "Objeto de ejemplo de Entomología",
-            "tipo": "foto",
-            "texto": "Texto de ejemplo. Acá va la descripción del objeto: qué es, de dónde viene y por qué forma parte de la muestra.",
+            "titulo": "Video de entomología",
+            "tipo": "video",
+            "texto": "Texto de ejemplo. Acá va la descripción del video.",
             "credito": "",
             "media": {
-              "recorte": true,
-              "alt": "Detalle de objeto de ejemplo de entomología"
+              "mp4": "videos/entomo-720.mp4",
+              "poster": "videos/entomo-poster.jpg"
             }
           },
           "parada": 0

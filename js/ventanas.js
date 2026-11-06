@@ -90,7 +90,7 @@
     if (t === 'juego') return '<div class="media media--juego" id="juego-raiz"></div>';
     if (t === 'video') {
       if (m.youtube) return '<div class="media media--video"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(m.youtube) + '?rel=0" title="' + esc(f.titulo || 'Video') + '" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>';
-      if (m.mp4) return '<div class="media media--video"><video src="' + esc(m.mp4) + '" controls playsinline preload="metadata"></video></div>';
+      if (m.mp4) return '<div class="media media--video"><video src="' + esc(m.mp4) + '"' + (m.poster ? ' poster="' + esc(m.poster) + '"' : '') + ' controls playsinline preload="metadata"></video></div>';
       return vacio('Video de ejemplo', 'Pegá el ID de YouTube en media.youtube, o la ruta de un archivo en media.mp4, dentro de datos/muestra.js.');
     }
     return '';
@@ -107,6 +107,11 @@
       (f.credito ? '<p class="ficha__credito">' + esc(f.credito) + '</p>' : '');
     estado.fichaActual = p;
     abrirModal(modFicha);
+    const vid = fichaCont.querySelector('.media--video video');
+    if (vid && C.sonido) {
+      const baja = (si) => () => C.sonido.musicaBaja(si);
+      vid.addEventListener('play', baja(true)); vid.addEventListener('pause', baja(false)); vid.addEventListener('ended', baja(false));
+    }
     if (f.tipo === 'tablero' && C.tablero) C.tablero.iniciar(document.getElementById('tablero-raiz'), f.tablero);
     if (f.tipo === 'juego' && C.juego) C.juego.iniciar(document.getElementById('juego-raiz'), f.juego);
     if (p.tipo === 'objeto') C.marcarVisto(p.id);
@@ -116,6 +121,8 @@
     cerrarModal(modFicha);
     estado.fichaActual = null;
     if (C.juego) C.juego.detener();
+    const vid = fichaCont.querySelector('video');
+    if (vid) { vid.pause(); if (C.sonido) C.sonido.musicaBaja(false); }
     if (C.tablero) C.tablero.detener();
     setTimeout(() => { if (!estado.fichaActual) fichaCont.innerHTML = ''; }, 320);
     if (C.completo() && !estado.sorteoOfrecido && !estado.registrado) setTimeout(abrirSorteo, 550);
