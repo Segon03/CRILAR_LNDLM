@@ -57,13 +57,13 @@ window.MUESTRA = {
       "tipo": "puerta",
       "titulo": "Entrada",
       "imagen": {
-        "src": "images/escenas/Entrada.jpeg",
-        "w": 1600,
-        "h": 1200
+        "src": "images/escenas/CRILAR_frente2_nocturna.jpg",
+        "w": 2576,
+        "h": 1054
       },
       "puerta": {
-        "x": 50,
-        "y": 60
+        "x": 51,
+        "y": 76
       },
       "siguiente": "hall"
     },
