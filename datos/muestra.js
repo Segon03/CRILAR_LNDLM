@@ -476,6 +476,25 @@ window.MUESTRA = {
           "parada": 6
         },
         {
+          "id": "s2L-8",
+          "tipo": "objeto",
+          "x": 49.0,
+          "y": 53.0,
+          "titulo": "Olivo variedad Coratina",
+          "ficha": {
+            "area": "Botánica",
+            "titulo": "Olivo variedad Coratina",
+            "tipo": "foto",
+            "texto": "Coratina es una variedad italiana común en las fincas comerciales de Argentina. Su aceite es muy buscado porque tiene un sabor intenso y por sus altos niveles de polifenoles (antioxidantes que contribuyen a nuestra salud).",
+            "credito": "",
+            "media": {
+              "src": "images/fichas/olivo-coratina.jpg",
+              "alt": "Olivo variedad Coratina en una maceta negra sobre una mesita de madera"
+            }
+          },
+          "parada": 7
+        },
+        {
           "id": "s2R-1",
           "tipo": "objeto",
           "x": 48.3,
@@ -492,7 +511,7 @@ window.MUESTRA = {
               "alt": "Detalle de objeto de ejemplo de botánica"
             }
           },
-          "parada": 7
+          "parada": 8
         },
         {
           "id": "s2R-2",
@@ -511,7 +530,7 @@ window.MUESTRA = {
               "alt": ""
             }
           },
-          "parada": 8
+          "parada": 9
         },
         {
           "id": "s2R-3",
@@ -530,7 +549,7 @@ window.MUESTRA = {
               "alt": "Detalle de objeto de ejemplo de entomología"
             }
           },
-          "parada": 9
+          "parada": 10
         }
       ],
       "video": {
@@ -541,7 +560,7 @@ window.MUESTRA = {
         "velocidad": 1,
         "duracion": 21.87
       },
-      "paradas": [0.0, 2.4333, 4.4333, 7.2667, 10.1333, 11.8333, 12.8, 16.1667, 18.7333, 21.3667]
+      "paradas": [0.0, 2.4333, 4.4333, 7.2667, 10.1333, 11.8333, 12.8, 14.5333, 16.1667, 18.7333, 21.3667]
     },
     "auditorio": {
       "tipo": "video",
