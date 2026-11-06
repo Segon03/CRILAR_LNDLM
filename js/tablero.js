@@ -137,7 +137,7 @@
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'tab__carta tab__carta--p'; b.setAttribute('role', 'listitem');
       b.setAttribute('aria-pressed', 'false'); b.dataset.i = i;
-      b.innerHTML = BOMBILLA + '<span class="tab__txt">' + esc(p.p) + '</span>';
+      b.innerHTML = BOMBILLA + '<span class="tab__txt">' + esc(p.pt || p.p) + '</span>';
       qs.appendChild(b); bq[i] = b;
       luces.appendChild(Object.assign(document.createElement('i'), { className: 'tab__luz' }));
     });
@@ -282,18 +282,15 @@
     const v = vista;
     const todas = v.bq.concat(v.br);
     if (modo === 'pizarra') {
-      const fmin = 14.67 / (k || 1);
       v.pares.forEach((p, i) => {
-        [[v.bq[i], p.pc], [v.br[i], p.rc]].forEach((par) => {
-          const b = par[0], g = par[1] || [0, 0, 150];
-          let e = 1;
-          geom(b, g, e);
-          b.style.fontSize = fmin + 'px';
-          while (!entra(b) && e < 1.1) { e += 0.02; geom(b, g, e); b.style.fontSize = fmin + 'px'; }
-          const f = caber(b, 6, b.classList.contains('tab__carta--p') ? 40 : 44);
-          b.style.fontSize = f + 'px';
-        });
+        geom(v.bq[i], p.pc || [0, 0, 250], 1);
+        geom(v.br[i], p.rc || [0, 0, 150], 1);
       });
+      /* un solo tamaño de letra para todas las preguntas y otro para todas las respuestas */
+      const fq = Math.min.apply(null, v.bq.map((b) => caber(b, 6, 30)));
+      const fr = Math.min.apply(null, v.br.map((b) => caber(b, 6, 40)));
+      v.bq.forEach((b) => { b.style.fontSize = fq + 'px'; });
+      v.br.forEach((b) => { b.style.fontSize = fr + 'px'; });
     } else {
       todas.forEach((b) => { b.style.cssText = ''; });
     }

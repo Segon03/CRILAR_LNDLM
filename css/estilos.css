@@ -339,7 +339,7 @@ img{max-width:100%}
 .tab--pizarra .tab__qs,.tab--pizarra .tab__rs{display:contents}
 .tab--pizarra .tab__carta{position:absolute;border-radius:50%;font-size:18px;font-family:'Times New Roman',Times,serif}
 .tab--pizarra .tab__txt{width:calc(var(--d)*.78);max-height:calc(var(--d)*.74);height:auto;font-weight:700;overflow-wrap:normal;word-break:keep-all}
-.tab--pizarra .tab__carta--r .tab__txt{white-space:nowrap}
+.tab--pizarra .tab__carta--r .tab__txt{white-space:nowrap;width:calc(var(--d)*.9)}
 .tab--pizarra .tab__carta--p{background:#fff;border:10px solid #00ff00;color:#111}
 .tab--pizarra .tab__carta--r{background:#00ff00;border:9px solid #fff;color:#0b250b}
 .tab--pizarra .tab__carta:hover:not(:disabled):not(.bien){transform:scale(1.04);box-shadow:0 0 22px 4px rgba(255,255,255,.55)}
