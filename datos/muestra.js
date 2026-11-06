@@ -316,25 +316,10 @@ window.MUESTRA = {
         "src480": "videos/sala1-480.mp4",
         "w": 720,
         "h": 1280,
-        "velocidad": 3,
-        "duracion": 60.39,
-        "velocidadContinuo": 1.8
+        "velocidad": 1,
+        "duracion": 21.33
       },
-      "paradas": [
-        0.0,
-        14.91,
-        23.92,
-        30.5,
-        38.51,
-        50.78,
-        59.59
-      ],
-      "continuos": [
-        [
-          23.92,
-          30.5
-        ]
-      ]
+      "paradas": [0.0, 4.9667, 7.9667, 11.6333, 14.3, 18.4, 21.3333]
     },
     "sala2": {
       "tipo": "recorrido",
@@ -553,28 +538,10 @@ window.MUESTRA = {
         "src480": "videos/sala2-480.mp4",
         "w": 720,
         "h": 1280,
-        "velocidad": 3,
-        "duracion": 61.93,
-        "velocidadContinuo": 1.8
+        "velocidad": 1,
+        "duracion": 21.87
       },
-      "paradas": [
-        0.53,
-        7.81,
-        13.78,
-        22.32,
-        30.96,
-        36.1,
-        38.97,
-        45.01,
-        52.75,
-        60.66
-      ],
-      "continuos": [
-        [
-          38.97,
-          45.01
-        ]
-      ]
+      "paradas": [0.0, 2.4333, 4.4333, 7.2667, 10.1333, 11.8333, 12.8, 16.1667, 18.7333, 21.3667]
     },
     "auditorio": {
       "tipo": "video",
