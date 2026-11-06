@@ -235,35 +235,45 @@
   }
 
   /* ---------- tamaño y modo ---------- */
-  function caber(carta, min, max, caja) {
+  function caberDentro(carta) {
     const t = carta.querySelector('.tab__txt');
+    if (!carta.style.getPropertyValue('--d')) return true;
+    const d = parseFloat(carta.style.getPropertyValue('--d')), R = d / 2, lim = R - 16;
+    const rg = document.createRange(); rg.selectNodeContents(t);
+    const o = carta.getBoundingClientRect(), esc = o.width / d || 1;
+    return Array.prototype.every.call(rg.getClientRects(), (q) => [[q.left, q.top], [q.right, q.top], [q.left, q.bottom], [q.right, q.bottom]].every((p) => Math.hypot((p[0] - o.left) / esc - R, (p[1] - o.top) / esc - R) <= lim));
+  }
+  function entra(carta) {
+    const t = carta.querySelector('.tab__txt');
+    return t.scrollHeight <= t.clientHeight + 1 && t.scrollWidth <= t.clientWidth + 1 && caberDentro(carta);
+  }
+  function caber(carta, min, max) {
     let f = max;
     carta.style.fontSize = f + 'px';
-    const dentro = () => {
-      if (!carta.style.getPropertyValue('--d')) return true;
-      const d = parseFloat(carta.style.getPropertyValue('--d')), R = d / 2, lim = R - 16;
-      const cx = carta.offsetLeft + R, cy = carta.offsetTop + R;
-      const rg = document.createRange(); rg.selectNodeContents(t);
-      const o = carta.getBoundingClientRect(), esc = o.width / d || 1;
-      return Array.prototype.every.call(rg.getClientRects(), (q) => [[q.left, q.top], [q.right, q.top], [q.left, q.bottom], [q.right, q.bottom]].every((p) => Math.hypot((p[0] - o.left) / esc - R, (p[1] - o.top) / esc - R) <= lim));
-    };
-    while (f > min && (t.scrollHeight > t.clientHeight + 1 || t.scrollWidth > t.clientWidth + 1 || !dentro())) { f -= 0.5; carta.style.fontSize = f + 'px'; }
+    while (f > min && !entra(carta)) { f -= 0.5; carta.style.fontSize = f + 'px'; }
     return f;
   }
-  function colocar(modo) {
+  function geom(b, g, e) {
+    const d = g[2] * e;
+    b.style.cssText = 'left:' + (g[0] - d / 2) + 'px;top:' + (g[1] - d / 2) + 'px;width:' + d + 'px;height:' + d + 'px;--d:' + d + 'px';
+  }
+  /* 11 pt = 14,67 px en pantalla: si no entra, el círculo crece un poco (sin pasarse de 1,35 veces) */
+  function colocar(modo, k) {
     const v = vista;
     const todas = v.bq.concat(v.br);
     if (modo === 'pizarra') {
+      const fmin = 14.67 / (k || 1);
       v.pares.forEach((p, i) => {
         [[v.bq[i], p.pc], [v.br[i], p.rc]].forEach((par) => {
-          const b = par[0], g = par[1] || [0, 0, 150], d = g[2];
-          b.style.cssText = 'left:' + (g[0] - d / 2) + 'px;top:' + (g[1] - d / 2) + 'px;width:' + d + 'px;height:' + d + 'px;--d:' + d + 'px';
+          const b = par[0], g = par[1] || [0, 0, 150];
+          let e = 1;
+          geom(b, g, e);
+          b.style.fontSize = fmin + 'px';
+          while (!entra(b) && e < 1.35) { e += 0.025; geom(b, g, e); b.style.fontSize = fmin + 'px'; }
+          const f = caber(b, 6, b.classList.contains('tab__carta--p') ? 40 : 44);
+          b.style.fontSize = f + 'px';
         });
       });
-      const fq = Math.min.apply(null, v.bq.map((b) => caber(b, 6, 24)));
-      const fr = Math.min.apply(null, v.br.map((b) => caber(b, 8, 30)));
-      v.bq.forEach((b) => { b.style.fontSize = Math.min(caber(b, 6, 40), fq + 6) + 'px'; });
-      v.br.forEach((b) => { b.style.fontSize = caber(b, 6, 44) + 'px'; });
     } else {
       todas.forEach((b) => { b.style.cssText = ''; });
     }
@@ -272,22 +282,21 @@
     const v = vista; if (!v) return;
     const ancho = Math.max(220, v.raiz.clientWidth);
     const modo = ancho >= ANCHO_PIZARRA ? 'pizarra' : 'lista';
-    if (modo !== v.modo) {
-      v.modo = modo;
-      v.tab.classList.toggle('tab--pizarra', modo === 'pizarra');
-      v.tab.classList.toggle('tab--lista', modo === 'lista');
-      colocar(modo);
-    }
+    let k = 1;
     if (modo === 'pizarra') {
-      const lado = Math.min(ancho, 1100);
-      const k = lado / S;
-      v.k = k;
+      const lado = Math.min(ancho, 1500);
+      k = lado / S;
       v.tab.style.width = lado + 'px'; v.tab.style.height = lado + 'px';
       v.stage.style.transform = 'scale(' + k + ')';
     } else {
-      v.k = 1;
       v.tab.style.width = ''; v.tab.style.height = '';
       v.stage.style.transform = '';
+    }
+    if (modo !== v.modo || Math.abs(k - (v.k || 0)) > 0.002) {
+      v.modo = modo; v.k = k;
+      v.tab.classList.toggle('tab--pizarra', modo === 'pizarra');
+      v.tab.classList.toggle('tab--lista', modo === 'lista');
+      colocar(modo, k);
     }
     const r = v.tab.getBoundingClientRect();
     const dpr = Math.min(2, window.devicePixelRatio || 1);

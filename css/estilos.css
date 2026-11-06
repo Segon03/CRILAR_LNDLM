@@ -309,7 +309,7 @@ img{max-width:100%}
 
 /* ---------- Tablero de luz ---------- */
 .media--tablero{margin:1rem 0 0;border:0;background:none;overflow:visible}
-.hoja-papel:has(.media--tablero){width:min(100%,1180px);padding:clamp(16px,2.6vw,30px) clamp(12px,2.2vw,28px) clamp(14px,2.4vw,26px)}
+.hoja-papel:has(.media--tablero){width:min(100%,1560px);padding:clamp(16px,2.6vw,30px) clamp(12px,2.2vw,28px) clamp(14px,2.4vw,26px)}
 .hoja-papel:has(.media--tablero) .ficha__titulo{font-size:clamp(1.35rem,3.2vw,2rem);margin-bottom:0}
 .tab{position:relative;margin:0 auto;overflow:hidden;border:1px solid rgba(27,32,54,.55);border-radius:4px;color:#111;font-family:var(--f-texto);user-select:none;-webkit-user-select:none;background:#0a1a24 var(--fondo) center/cover no-repeat;box-shadow:inset 0 0 70px rgba(0,0,0,.45)}
 .tab__carta{position:relative;display:flex;align-items:center;justify-content:center;text-align:center;margin:0;padding:0;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s ease,box-shadow .2s ease,background .2s ease,filter .2s}
