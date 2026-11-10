@@ -438,7 +438,7 @@
     if (r.der.classList.contains('pan--salida') !== salida) {
       r.der.classList.toggle('pan--salida', salida);
       const nombre = padre ? (padre.corto || padre.titulo || 'hall').toLowerCase() : '';
-      r.der.innerHTML = salida ? ICONOS.salida + '<span>Volver al ' + esc(nombre) + '</span>' : ICONOS.der;
+      r.der.innerHTML = salida ? ICONOS.salida : ICONOS.der;
       r.der.setAttribute('aria-label', salida ? 'Volver al ' + (padre.titulo || nombre) : 'Avanzar por la sala');
     }
     estado.vista.classList.toggle('recorriendo', r.jugando);

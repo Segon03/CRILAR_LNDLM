@@ -129,11 +129,9 @@ img{max-width:100%}
 .pan:hover{background:rgba(253,190,15,.16);border-color:var(--oro)}
 .pan svg{width:24px;height:24px}
 @media (pointer:coarse){.pan{display:none}}
-/* al final de cada sala: salida al hall (visible también en pantallas táctiles) */
-.vista--recorrido .pan.pan--salida{width:auto;height:auto;margin-top:-26px;padding:.75rem 1rem .75rem 1.1rem;display:flex;align-items:center;gap:.5rem;border-color:var(--oro);border-radius:999px;background:rgba(8,14,34,.78);color:var(--papel);font-size:.95rem;font-weight:600;white-space:nowrap;animation:salida-latido 2.4s ease-in-out infinite}
-.vista--recorrido .pan.pan--salida svg{width:20px;height:20px;color:var(--oro)}
-@keyframes salida-latido{0%,100%{box-shadow:0 0 0 0 rgba(253,190,15,0)}50%{box-shadow:0 0 0 6px rgba(253,190,15,.18)}}
-@media (prefers-reduced-motion:reduce){.vista--recorrido .pan.pan--salida{animation:none}}
+/* al final de cada sala: la flecha derecha pasa a ser la salida al hall (mismo botón, icono de casa) */
+.pan--salida{border-color:var(--oro)}
+.pan--salida svg{color:var(--oro)}
 
 /* ---------- Barras superior e inferior ---------- */
 .hud{position:fixed;left:0;right:0;z-index:15;display:flex;align-items:center;gap:.75rem;padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 10px max(12px,env(safe-area-inset-left));pointer-events:none;transition:opacity .7s ease}
@@ -298,7 +296,6 @@ img{max-width:100%}
 .vista--recorrido.recorriendo .pan{opacity:.35;pointer-events:none}
 
 @media (pointer:coarse){.vista--recorrido .pan{display:grid;width:40px;height:64px;margin-top:-32px}}
-@media (pointer:coarse){.vista--recorrido .pan.pan--salida{display:flex;width:auto;height:auto;margin-top:-24px;padding:.65rem .85rem .65rem .9rem;font-size:.9rem}}
 
 /* ---------- Rompecabezas de La Rioja ---------- */
 .media--juego{margin:1rem 0 0;border:0;background:none;overflow:visible}
