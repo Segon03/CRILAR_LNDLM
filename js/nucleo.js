@@ -24,7 +24,8 @@
     mano: '<svg class="punto__mano" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#efe6cf" stroke="#0a1128" stroke-width="1.2" stroke-linejoin="round" d="M9 3.2a1.6 1.6 0 0 1 3.2 0V11l.9-.3a1.5 1.5 0 0 1 1.9.9l.1.2.5-.2a1.4 1.4 0 0 1 1.8.9l.2.5.4-.1a1.4 1.4 0 0 1 1.7 1.3V17c0 3-2.2 5.2-5.2 5.2h-1.4c-1.6 0-3-.7-4-1.9L5 16.7a1.5 1.5 0 0 1 2.3-1.9L9 16.5z"/></svg>',
     flecha: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#fdbe0f" stroke="#0a1128" stroke-width="1.3" stroke-linejoin="round" d="M12 3.5 20 13h-5v7.5H9V13H4z"/></svg>',
     izq: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
-    der: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>'
+    der: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
+    salida: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>'
   };
 
   /* ---------- estado ---------- */
@@ -128,7 +129,13 @@
     b.type = 'button';
     b.setAttribute('aria-label', dir < 0 ? 'Mirar hacia la izquierda' : 'Mirar hacia la derecha');
     b.addEventListener('click', () => {
-      if (estado.rec) { moverParada(dir); return; }
+      if (estado.rec) {
+        const r = estado.rec;
+        /* en la última parada, la flecha derecha lleva de vuelta al hall */
+        if (dir > 0 && r.i >= r.P.length - 1 && r.e.padre && escenas[r.e.padre] && !r.jugando && !r.cargando) { irA(r.e.padre); return; }
+        moverParada(dir);
+        return;
+      }
       estado.panObj = limitar(estado.panObj + dir * estado.vw * 0.55, 0, estado.mundo.max);
     });
     return b;
@@ -424,7 +431,16 @@
       if (fuera && d.cerca) { d.cerca = false; d.el.classList.remove('cerca'); }
     });
     r.izq.hidden = r.i <= 0;
-    r.der.hidden = r.i >= r.P.length - 1;
+    const padre = r.e.padre && escenas[r.e.padre];
+    const ultima = r.i >= r.P.length - 1;
+    const salida = ultima && !!padre;
+    r.der.hidden = ultima && !padre;
+    if (r.der.classList.contains('pan--salida') !== salida) {
+      r.der.classList.toggle('pan--salida', salida);
+      const nombre = padre ? (padre.corto || padre.titulo || 'hall').toLowerCase() : '';
+      r.der.innerHTML = salida ? ICONOS.salida + '<span>Volver al ' + esc(nombre) + '</span>' : ICONOS.der;
+      r.der.setAttribute('aria-label', salida ? 'Volver al ' + (padre.titulo || nombre) : 'Avanzar por la sala');
+    }
     estado.vista.classList.toggle('recorriendo', r.jugando);
   }
 
@@ -631,8 +647,9 @@
     const r = estado.rec;
     if (r) {
       r.izq.style.left = Math.round((vw - W) / 2 + 8) + 'px';
-      r.der.style.left = Math.round((vw + W) / 2 - 8 - (r.der.offsetWidth || 46)) + 'px';
-      r.der.style.right = 'auto';
+      /* anclada a la derecha: así el botón de salida, más ancho, no se sale de la pantalla */
+      r.der.style.left = 'auto';
+      r.der.style.right = Math.round((vw - W) / 2 + 8) + 'px';
     }
     if (r) { r.bruma.width = 40; r.bruma.height = Math.max(24, Math.round(40 * vh / vw)); pintarBruma(); }
     aplicar();
@@ -769,7 +786,12 @@
   window.addEventListener('keydown', (ev) => {
     if (estado.modal || bloqueado()) return;
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return;
-    if (estado.rec) { if (ev.key === 'ArrowLeft') moverParada(-1); else if (ev.key === 'ArrowRight') moverParada(1); return; }
+    if (estado.rec) {
+      const r = estado.rec;
+      if (ev.key === 'ArrowLeft') moverParada(-1);
+      else if (ev.key === 'ArrowRight') { if (r.der.classList.contains('pan--salida')) r.der.click(); else moverParada(1); }
+      return;
+    }
     if (ev.key === 'ArrowLeft') estado.panObj = limitar(estado.panObj - 140, 0, estado.mundo.max);
     else if (ev.key === 'ArrowRight') estado.panObj = limitar(estado.panObj + 140, 0, estado.mundo.max);
   });

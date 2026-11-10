@@ -16,6 +16,7 @@
                 video: {"youtube": "ID_DEL_VIDEO"} o {"mp4": "images/fichas/video.mp4"}
    sorteo.endpoint  dirección que recibe los datos del formulario (ver README)
    intro        pantalla de bienvenida: segundos que permanece, indicaciones y botón
+   evento.apertura  fecha y hora en que se habilita la visita (antes se ve la cuenta regresiva)
    sonido       archivos de audio, volúmenes (0 a 1) y texto de créditos que se muestra al pie
 
    Para mover los puntos con el mouse: abrí el sitio con ?editar=1 al final
@@ -25,15 +26,19 @@ window.MUESTRA = {
   "evento": {
     "nombre": "La Noche de los Museos",
     "subtitulo": "Visita virtual a la muestra del CRILAR",
-    "institucion": "CRILAR"
+    "institucion": "CRILAR",
+    "apertura": "2026-11-30T18:00:00-03:00",
+    "aperturaTexto": "La visita se abre el lunes 30 de noviembre a las 18:00 h.",
+    "aperturaNota": "Si dejás esta página abierta, la visita se habilita sola a esa hora."
   },
   "intro": {
     "segundos": 9,
     "indicaciones": [
       "Abrí la puerta y elegí una sala tocando su cartel.",
-      "En las salas, mové la linterna con el mouse o con el dedo para descubrir los objetos.",
-      "Tocá los puntos dorados para ver la ficha de cada objeto.",
-      "Arrastrá la foto para mirar hacia los costados."
+      "En las salas, mové la linterna con el mouse o con el dedo y descubrí los objetos interactivos.",
+      "Tocá los puntos dorados para ver la ficha de cada interacción.",
+      "Arrastrá la foto para mirar hacia los costados.",
+      "¡Si terminás el recorrido con sus interacciones, participás de un SORTEO!"
     ],
     "sonido": "Para vivir la visita completa, activá el sonido de tu dispositivo.",
     "boton": "Comenzar la visita"
