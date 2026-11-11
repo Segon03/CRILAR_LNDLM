@@ -27,8 +27,8 @@ window.MUESTRA = {
     "nombre": "La Noche de los Museos",
     "subtitulo": "Visita virtual a la muestra del CRILAR",
     "institucion": "CRILAR",
-    "apertura": "2026-11-30T18:00:00-03:00",
-    "aperturaTexto": "La visita se abre el lunes 30 de noviembre a las 18:00 h.",
+    "apertura": "2026-11-27T18:00:00-03:00",
+    "aperturaTexto": "La visita se abre el viernes 27 de noviembre a las 18:00 h.",
     "aperturaNota": "Si dejás esta página abierta, la visita se habilita sola a esa hora."
   },
   "intro": {
