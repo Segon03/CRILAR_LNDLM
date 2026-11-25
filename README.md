@@ -139,6 +139,6 @@ Los renglones y el tamaño de letra de los círculos no los calcula el navegador
 
 ## Estadísticas de uso
 
-El sitio puede registrar de forma anónima cuántas visitas tiene, cuánto duran, a qué hora entran y desde qué provincia y país, con un panel privado para consultarlo. Están apagadas hasta que se configure la dirección del servicio en `js/estadisticas.js`. El plan está en `PLAN_ESTADISTICAS.md` y los pasos para publicarlas, en `estadisticas/LEEME.md`.
+El micrositio puede registrar de forma anónima cuántas visitas tiene, cuánto duran, a qué hora entran y desde qué provincia y país, con un panel privado para consultarlo. Están apagadas hasta que se configure la dirección del servicio en `js/estadisticas.js`. El plan está en `PLAN_ESTADISTICAS.md` y los pasos para publicarlas, en `estadisticas/LEEME.md`.
 
 Para entrar antes de la apertura sin que la visita cuente, usá `?previa=1`. Para que un equipo de prueba no cuente nunca, abrí la página una vez con `?sinstats=1`.

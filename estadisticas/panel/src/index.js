@@ -16,7 +16,7 @@ export async function visitas(url, env, ahora = Math.floor(Date.now() / 1000)) {
   if (!Number.isFinite(desde)) desde = hasta - 7 * 86400;
   if (desde >= hasta || hasta - desde > MAX_RANGO_S) return respuesta({ error: 'rango inválido' }, 400);
   const { results } = await env.DB
-    .prepare('SELECT sitio AS s, visitante AS v, inicio AS i, ultimo AS u, pais AS p, provincia AS r FROM visitas WHERE inicio >= ?1 AND inicio < ?2 ORDER BY inicio LIMIT ?3')
+    .prepare('SELECT visitante AS v, inicio AS i, ultimo AS u, pais AS p, provincia AS r FROM visitas WHERE inicio >= ?1 AND inicio < ?2 ORDER BY inicio LIMIT ?3')
     .bind(desde, hasta, MAX_FILAS + 1)
     .all();
   const truncado = results.length > MAX_FILAS;

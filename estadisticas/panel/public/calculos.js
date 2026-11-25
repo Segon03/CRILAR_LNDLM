@@ -1,8 +1,7 @@
-// Cálculos del panel. Funciones puras (sin tocar la página) para poder probarlas en Node.
-// Una fila de visita es { s: sitio, v: visitante, i: inicio, u: último aviso, p: país, r: provincia }, con las horas en segundos desde 1970.
+// Cálculos del panel de estadísticas del micrositio. Funciones puras (sin tocar la página) para poder probarlas en Node.
+// Una fila de visita es { v: visitante, i: inicio, u: último aviso, p: país, r: provincia }, con las horas en segundos desde 1970.
 // Todas las horas del panel están en hora de Argentina (UTC-3, sin horario de verano).
 
-export const SITIOS = { museo: 'Visita virtual', vitrina: 'Vitrina (realidad aumentada)' };
 export const TOPE_S = 3600; // una visita no cuenta más de una hora
 export const OFFSET_AR_S = -3 * 3600;
 export const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
@@ -17,17 +16,6 @@ export const TRAMOS = [
 export const EVENTO = { desde: 1795748400, hasta: 1795856400 };
 
 const pad = (n) => String(n).padStart(2, '0');
-
-export function nombreSitio(s) { return SITIOS[s] || 'Sin dato'; }
-
-// "todos" devuelve todas las filas; si no, solo las de ese sitio
-export function filtrarSitio(filas, sitio) {
-  return !sitio || sitio === 'todos' ? filas : filas.filter((f) => f.s === sitio);
-}
-
-export function porSitio(filas) {
-  return contar(filas.map((f) => f.s || '')).map((x) => ({ clave: x.clave, etiqueta: nombreSitio(x.clave), n: x.n }));
-}
 
 export function duracion(f) { return Math.max(0, Math.min(f.u - f.i, TOPE_S)); }
 
@@ -136,8 +124,8 @@ function celda(x) { return `"${String(x ?? '').replace(/"/g, '""')}"`; }
 
 // CSV con punto y coma y BOM, para que Excel en español lo abra bien
 export function aCSV(filas) {
-  const cab = ['Fecha y hora (Argentina)', 'Sitio', 'Duración (segundos)', 'País', 'Provincia', 'Visitante (anónimo)'];
-  const lineas = filas.map((f) => [textoAR(f.i), nombreSitio(f.s), duracion(f), f.p || '', f.r || '', String(f.v || '').slice(0, 8)].map(celda).join(';'));
+  const cab = ['Fecha y hora (Argentina)', 'Duración (segundos)', 'País', 'Provincia', 'Visitante (anónimo)'];
+  const lineas = filas.map((f) => [textoAR(f.i), duracion(f), f.p || '', f.r || '', String(f.v || '').slice(0, 8)].map(celda).join(';'));
   return '﻿' + [cab.map(celda).join(';'), ...lineas].join('\r\n') + '\r\n';
 }
 

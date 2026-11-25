@@ -5,7 +5,6 @@ const $ = (id) => document.getElementById(id);
 const REFRESCO_MS = 30000;
 let actual = { nombre: 'evento', ...C.EVENTO };
 let datos = null;
-let sitio = 'todos'; // todos, museo o vitrina
 
 function esc(t) { return String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function fmtN(n) { return n.toLocaleString('es-AR'); }
@@ -54,11 +53,7 @@ function mapaCalor(el, grilla) {
 }
 
 function pintar() {
-  const todas = datos.filas;
-  const filas = C.filtrarSitio(todas, sitio);
-  $('sitio-texto').textContent = sitio === 'todos' ? 'Ambas páginas' : C.nombreSitio(sitio);
-  $('t-sitio').hidden = sitio !== 'todos';
-  barrasHorizontales($('g-sitio'), C.porSitio(todas));
+  const filas = datos.filas;
   $('rango-texto').textContent = `${C.textoAR(datos.desde)} a ${C.textoAR(datos.hasta)} (hora de Argentina)`;
   const r = C.resumen(filas);
   $('k-ingresos').textContent = fmtN(r.ingresos);
@@ -106,23 +101,15 @@ function aplicarFechas() {
 
 function descargarCSV() {
   if (!datos) return;
-  const blob = new Blob([C.aCSV(C.filtrarSitio(datos.filas, sitio))], { type: 'text/csv;charset=utf-8' });
+  const blob = new Blob([C.aCSV(datos.filas)], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `estadisticas_${sitio === 'todos' ? '' : sitio + '_'}${C.partesAR(datos.desde).fecha}_a_${C.partesAR(datos.hasta - 1).fecha}.csv`;
+  a.download = `estadisticas_${C.partesAR(datos.desde).fecha}_a_${C.partesAR(datos.hasta - 1).fecha}.csv`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-function elegirSitio(nombre) {
-  sitio = nombre;
-  document.querySelectorAll('[data-sitio]').forEach((b) => b.classList.toggle('activo', b.dataset.sitio === nombre));
-  if (datos) pintar();
-}
-
 document.querySelectorAll('[data-rango]').forEach((b) => b.addEventListener('click', () => elegir(b.dataset.rango)));
-document.querySelectorAll('[data-sitio]').forEach((b) => b.addEventListener('click', () => elegirSitio(b.dataset.sitio)));
-elegirSitio('todos');
 $('aplicar').addEventListener('click', aplicarFechas);
 $('csv').addEventListener('click', descargarCSV);
 $('imprimir').addEventListener('click', () => window.print());

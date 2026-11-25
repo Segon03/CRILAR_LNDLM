@@ -1,11 +1,8 @@
-// Validaciones puras que usa el Worker de recepción. Sin dependencias, para poder probarlas en Node.
+// Validaciones puras que usa el Worker de recepción del micrositio. Sin dependencias, para poder probarlas en Node.
 
 export const TOPE_PERMANENCIA_S = 3600; // una visita no cuenta más de una hora
 export const MIN_ENTRE_AVISOS_S = 5; // avisos de "sigue acá" más seguidos que esto se ignoran
 export const MAX_CUERPO = 512; // bytes
-
-// Páginas que pueden enviar avisos. Las dos están en https://segon03.github.io, así que el origen no alcanza para distinguirlas.
-export const SITIOS = ['museo', 'vitrina'];
 
 const RE_ID = /^[0-9a-zA-Z-]{16,40}$/;
 
@@ -21,7 +18,7 @@ export function origenPermitido(origen, permitido) {
   return typeof permitido === 'string' && permitido !== '' && origen === permitido;
 }
 
-// Devuelve { t, s, v, si } o null si el pedido no es válido. "si" (sitio) es opcional: si falta queda null.
+// Devuelve { t, s, v } o null si el pedido no es válido.
 export function leerPedido(texto) {
   if (typeof texto !== 'string' || texto.length === 0 || texto.length > MAX_CUERPO) return null;
   let o;
@@ -29,8 +26,7 @@ export function leerPedido(texto) {
   if (!o || typeof o !== 'object') return null;
   if (o.t !== 'i' && o.t !== 'l') return null;
   if (!idValido(o.s) || !idValido(o.v)) return null;
-  if (o.si !== undefined && !SITIOS.includes(o.si)) return null;
-  return { t: o.t, s: o.s, v: o.v, si: o.si === undefined ? null : o.si };
+  return { t: o.t, s: o.s, v: o.v };
 }
 
 export function limpiarTexto(x, max = 60) {

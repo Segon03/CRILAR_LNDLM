@@ -1,8 +1,8 @@
-// Pruebas del script de estadísticas de la visita virtual (js/estadisticas.js). Uso: node tests/estadisticas_cliente.test.cjs
+// Pruebas del script de estadísticas del micrositio (js/estadisticas.js). Uso: node tests/estadisticas_cliente.test.cjs
 const assert = require('node:assert/strict');
 const E = require('../js/estadisticas.js');
 
-const URL_OK = 'https://crilar-recepcion.ejemplo.workers.dev/api/e';
+const URL_OK = 'https://micrositio-recepcion.ejemplo.workers.dev/api/e';
 const p = (q) => new URLSearchParams(q);
 const base = { endpoint: URL_OK, params: p(''), protocolo: 'https:', host: 'segon03.github.io', marcaExcluir: null };
 
@@ -23,12 +23,11 @@ assert.equal(E.debeContar({ ...base, params: p('?escena=sala2_L') }), true, 'un 
 function almacen() { const m = new Map(); return { m, getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)) }; }
 const ses = almacen();
 const a = E.idDeVisita(ses, 1000);
-ses.setItem('crilar_museo_t', '1000');
+ses.setItem('micrositio_est_ultimo', '1000');
 assert.equal(E.idDeVisita(ses, 1000 + 10 * 60 * 1000), a, 'misma visita dentro de 30 min');
 const b = E.idDeVisita(ses, 1000 + 31 * 60 * 1000);
 assert.notEqual(b, a, 'visita nueva después de 30 min sin actividad');
 assert.match(a, /^[0-9a-zA-Z-]{16,40}$/);
-assert.ok(!ses.m.has('crilar_sid'), 'no pisa la clave de la app de la vitrina');
 
 // ---------- arranque completo con una ventana falsa ----------
 function ventana(search, { host = 'segon03.github.io', localFalla = false } = {}) {
@@ -56,9 +55,8 @@ function ventana(search, { host = 'segon03.github.io', localFalla = false } = {}
 let w = ventana('');
 assert.equal(E.iniciar(w.win, URL_OK), true);
 assert.equal(w.enviados.length, 1);
-assert.deepEqual(Object.keys(w.enviados[0].cuerpo).sort(), ['s', 'si', 't', 'v']);
+assert.deepEqual(Object.keys(w.enviados[0].cuerpo).sort(), ['s', 't', 'v']);
 assert.equal(w.enviados[0].cuerpo.t, 'i');
-assert.equal(w.enviados[0].cuerpo.si, 'museo');
 assert.equal(w.aviso.hidden, false, 'muestra el aviso de privacidad');
 assert.equal(w.intervalos[0].ms, 15000);
 w.intervalos[0].fn();
@@ -83,7 +81,7 @@ assert.equal(E.iniciar(w.win, URL_OK), false); assert.equal(w.enviados.length, 0
 // ?sinstats=1 marca el navegador y se recuerda; ?sinstats=0 lo desmarca
 w = ventana('?sinstats=1');
 assert.equal(E.iniciar(w.win, URL_OK), false);
-assert.equal(w.local.getItem('crilar_sinstats'), '1');
+assert.equal(w.local.getItem('micrositio_est_excluir'), '1');
 w.win.location.search = '';
 assert.equal(E.iniciar(w.win, URL_OK), false, 'sigue excluido sin el parámetro');
 w.win.location.search = '?sinstats=0';
@@ -102,4 +100,4 @@ assert.equal(E.iniciar(w.win, URL_OK), true);
 const fuente = require('node:fs').readFileSync(require('node:path').join(__dirname, '../js/estadisticas.js'), 'utf8');
 assert.match(fuente, /var ENDPOINT = '';/, 'ENDPOINT tiene que estar vacío hasta configurar Cloudflare');
 
-console.log('estadisticas (cliente de la visita virtual): todas las pruebas pasaron');
+console.log('estadisticas (cliente del micrositio): todas las pruebas pasaron');

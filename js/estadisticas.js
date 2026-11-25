@@ -1,10 +1,10 @@
 /* =====================================================================
-   Estadísticas de uso anónimas: cuántas visitas, cuánto tiempo se queda
+   Estadísticas de uso anónimas del micrositio: cuántas visitas, cuánto tiempo se queda
    cada una y a qué hora. Ver estadisticas/LEEME.md.
 
    APAGADAS mientras ENDPOINT esté vacío. Para encenderlas, poné la
    dirección de la recepción de Cloudflare terminada en /api/e, por ejemplo
-   'https://crilar-recepcion.TU-SUBDOMINIO.workers.dev/api/e'.
+   'https://micrositio-recepcion.TU-SUBDOMINIO.workers.dev/api/e'.
 
    No guarda datos personales: usa dos identificadores al azar guardados en
    el propio navegador. Cualquier fallo se ignora: nunca afecta la visita.
@@ -20,12 +20,11 @@
 
   var ENDPOINT = '';
 
-  var SITIO = 'museo';
   var INTERVALO_MS = 15000;             /* aviso de "sigue acá" mientras la página está visible */
   var INACTIVIDAD_MS = 30 * 60 * 1000;  /* pasado este tiempo sin avisos, es una visita nueva */
-  /* claves propias: la app de la vitrina comparte el dominio y usa crilar_sid en la misma pestaña */
-  var CLAVE_SID = 'crilar_museo_sid', CLAVE_T = 'crilar_museo_t';
-  var CLAVE_VID = 'crilar_vid', CLAVE_EXCLUIR = 'crilar_sinstats';
+  /* claves en el navegador, propias del micrositio */
+  var CLAVE_SID = 'micrositio_est_visita', CLAVE_T = 'micrositio_est_ultimo';
+  var CLAVE_VID = 'micrositio_est_visitante', CLAVE_EXCLUIR = 'micrositio_est_excluir';
   var PARAMS_PRUEBA = ['previa', 'cuenta', 'editar'];
 
   var NADA = { getItem: function () { return null; }, setItem: function () {} };
@@ -78,7 +77,7 @@
       var enviar = function (t, beacon) {
         try {
           guardar(sesion, CLAVE_T, String(Date.now()));
-          var cuerpo = JSON.stringify({ t: t, s: sid, v: vid, si: SITIO });
+          var cuerpo = JSON.stringify({ t: t, s: sid, v: vid });
           if (beacon && win.navigator && win.navigator.sendBeacon) {
             win.navigator.sendBeacon(endpoint, new win.Blob([cuerpo], { type: 'text/plain' }));
           } else if (win.fetch) {
@@ -105,7 +104,7 @@
     }
   }
 
-  var api = { debeContar: debeContar, idDeVisita: idDeVisita, iniciar: iniciar, SITIO: SITIO };
+  var api = { debeContar: debeContar, idDeVisita: idDeVisita, iniciar: iniciar };
   if (typeof module !== 'undefined' && module.exports) { module.exports = api; return; }
   window.CRILAR_ESTADISTICAS = api;
   iniciar(window, ENDPOINT);

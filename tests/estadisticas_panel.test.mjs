@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import * as C from '../estadisticas/panel/public/calculos.js';
 
 const E0 = C.EVENTO.desde; // 27/11/2026 00:00 hora de Argentina
-const fila = (seg, dur, v, p = 'AR', r = 'La Rioja', s = 'museo') => ({ s, v, i: E0 + seg, u: E0 + seg + dur, p, r });
+const fila = (seg, dur, v, p = 'AR', r = 'La Rioja') => ({ v, i: E0 + seg, u: E0 + seg + dur, p, r });
 
 // ---------- horas de Argentina ----------
 assert.deepEqual(C.partesAR(E0), { fecha: '2026-11-27', hora: 0, minuto: 0, dia: 5 }); // viernes
@@ -48,17 +48,9 @@ assert.equal(C.enVivo([fila(0, 30, 'a'), fila(0, 200, 'b'), fila(0, 200, 'b')], 
 
 // ---------- CSV ----------
 const csv = C.aCSV([fila(21 * 3600, 90, '3f2b8c1e-9d4a', 'AR', 'La "Rioja"')]);
-assert.ok(csv.startsWith('﻿"Fecha y hora (Argentina)";"Sitio";"Duración (segundos)"'));
-assert.ok(csv.includes('"27/11/2026 21:00";"Visita virtual";"90";"AR";"La ""Rioja""";"3f2b8c1e"'), csv);
+assert.ok(csv.startsWith('﻿"Fecha y hora (Argentina)";"Duración (segundos)"'));
+assert.ok(csv.includes('"27/11/2026 21:00";"90";"AR";"La ""Rioja""";"3f2b8c1e"'), csv);
 assert.ok(!csv.includes('9d4a'), 'el identificador se acorta');
-
-// ---------- sitios ----------
-const mezcla = [fila(0, 10, 'a'), fila(5, 10, 'b', 'AR', 'Córdoba', 'vitrina'), fila(9, 10, 'c', 'AR', 'Salta', null)];
-assert.equal(C.filtrarSitio(mezcla, 'todos').length, 3);
-assert.deepEqual(C.filtrarSitio(mezcla, 'museo').map((f) => f.v), ['a']);
-assert.deepEqual(C.filtrarSitio(mezcla, 'vitrina').map((f) => f.v), ['b']);
-assert.deepEqual(C.porSitio(mezcla).map((x) => x.etiqueta).sort(), ['Sin dato', 'Visita virtual', 'Vitrina (realidad aumentada)']);
-assert.equal(C.nombreSitio('museo'), 'Visita virtual');
 
 // ---------- rangos ----------
 const ahora = E0 + 15 * 3600 + 1234; // 27/11 15:20

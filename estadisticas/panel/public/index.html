@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Estadísticas de uso · Noche de los Museos CRILAR</title>
+  <title>Estadísticas de uso · Micrositio Noche de los Museos</title>
   <link rel="stylesheet" href="panel.css">
 </head>
 <body>
   <header class="encabezado">
     <div>
       <h1>Estadísticas de uso</h1>
-      <p class="sub">Noche de los Museos · CRILAR · <span id="sitio-texto">Ambas páginas</span> · <span id="rango-texto">Cargando…</span></p>
+      <p class="sub">Micrositio de la Noche de los Museos · CRILAR · <span id="rango-texto">Cargando…</span></p>
     </div>
     <div class="vivo" id="vivo" hidden title="Visitantes con actividad en el último minuto"><span class="punto"></span><b id="vivo-n">0</b> conectados ahora</div>
   </header>
@@ -22,11 +22,6 @@
       <button type="button" data-rango="7d">Últimos 7 días</button>
       <button type="button" data-rango="evento">Noche de los Museos</button>
       <button type="button" data-rango="todo">Todo</button>
-    </div>
-    <div class="grupo" role="group" aria-label="Página">
-      <button type="button" data-sitio="todos">Ambas páginas</button>
-      <button type="button" data-sitio="museo">Visita virtual</button>
-      <button type="button" data-sitio="vitrina">Vitrina</button>
     </div>
     <div class="grupo fechas">
       <label>Desde <input type="datetime-local" id="desde"></label>
@@ -50,7 +45,6 @@
       <div class="kpi"><span>Hora pico</span><b id="k-pico">–</b><small id="k-pico-n">ingresos</small></div>
     </section>
 
-    <section class="tarjeta" id="t-sitio"><h2>Ingresos por página</h2><div id="g-sitio" class="barras h"></div></section>
     <section class="tarjeta"><h2>Ingresos por hora del día</h2><div id="g-hora" class="barras horas"></div></section>
     <section class="tarjeta" id="t-dia"><h2>Ingresos por día</h2><div id="g-dia" class="barras dias"></div></section>
     <section class="tarjeta"><h2>Tiempo de permanencia</h2><div id="g-tramo" class="barras h"></div></section>

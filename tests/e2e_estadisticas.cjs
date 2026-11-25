@@ -1,4 +1,4 @@
-// Prueba de punta a punta de la visita virtual con las estadísticas.
+// Prueba de punta a punta del micrositio con las estadísticas.
 // Sirve los archivos del repositorio como si estuvieran en https://segon03.github.io/CRILAR_LNDLM/
 // (así el origen es el real) y simula la recepción de Cloudflare.
 // Uso: node tests/e2e_estadisticas.cjs [carpeta del sitio]   (por defecto, la raíz del repositorio)
@@ -9,7 +9,7 @@ const assert = require('node:assert/strict');
 
 const RAIZ = path.resolve(process.argv[2] || path.join(__dirname, '..'));
 const SITIO = 'https://segon03.github.io/CRILAR_LNDLM/';
-const RECEPCION = 'https://crilar-recepcion.prueba.workers.dev/api/e';
+const RECEPCION = 'https://micrositio-recepcion.prueba.workers.dev/api/e';
 const TIPOS = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.woff2': 'font/woff2', '.json': 'application/json' };
 
 async function abrir(navegador, { query = '', endpoint = '', abierta = false, recepcionCaida = false, movil = false } = {}) {
@@ -72,7 +72,7 @@ async function entrar(page) {
   assert.equal(e.aviso, true, 'encendidas: muestra el aviso');
   assert.equal(r.avisos.length, 1);
   assert.equal(r.avisos[0].cuerpo.t, 'i');
-  assert.equal(r.avisos[0].cuerpo.si, 'museo');
+  assert.deepEqual(Object.keys(r.avisos[0].cuerpo).sort(), ['s', 't', 'v']);
   assert.equal(r.avisos[0].origen, 'https://segon03.github.io');
   await entrar(r.page);
   await r.page.waitForTimeout(15600);
@@ -80,7 +80,7 @@ async function entrar(page) {
   await r.page.screenshot({ path: path.join(process.env.CAPTURAS || '/tmp', 'e2e_recorrido.png') });
   assert.deepEqual(r.errores, []); assert.deepEqual(r.faltantes, []);
   await r.ctx.close();
-  console.log('ok 2: encendidas, envía ingreso y latido con sitio "museo", la visita entra normal');
+  console.log('ok 2: encendidas, envía ingreso y latido, la visita entra normal');
 
   // 3. Encendidas, pero la recepción no responde: la visita sigue igual
   r = await abrir(nav, { endpoint: RECEPCION, abierta: true, recepcionCaida: true });
@@ -114,5 +114,5 @@ async function entrar(page) {
   console.log('ok 5: portada en celular');
 
   await nav.close();
-  console.log('e2e de la visita virtual: todas las pruebas pasaron');
+  console.log('e2e del micrositio: todas las pruebas pasaron');
 })().catch((err) => { console.error(err); process.exit(1); });

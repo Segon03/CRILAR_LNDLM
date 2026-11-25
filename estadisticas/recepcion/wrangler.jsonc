@@ -1,16 +1,16 @@
 {
-  // Worker público que recibe los avisos de las páginas (visita virtual y app de la vitrina). Solo escribe en la base.
-  "name": "crilar-recepcion",
+  // Worker público que recibe los avisos del micrositio de la Noche de los Museos. Solo escribe en la base.
+  "name": "micrositio-recepcion",
   "main": "src/index.js",
   "compatibility_date": "2025-01-01",
   "vars": {
-    // Único origen autorizado a enviar avisos (las dos páginas están en este dominio).
+    // Único origen autorizado a enviar avisos.
     "ORIGEN_PERMITIDO": "https://segon03.github.io"
   },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "crilar-estadisticas",
+      "database_name": "micrositio-estadisticas",
       // No es un secreto. Se reemplaza por el ID de la base creada en Cloudflare.
       "database_id": "REEMPLAZAR_POR_EL_ID_DE_LA_BASE"
     }

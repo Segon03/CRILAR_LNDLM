@@ -13,11 +13,7 @@ assert.equal(idValido(UUID1), true);
 assert.equal(idValido('corto'), false);
 assert.equal(idValido("x'; DROP TABLE visitas;--0000"), false);
 assert.equal(idValido(123), false);
-assert.deepEqual(leerPedido(JSON.stringify({ t: 'i', s: UUID1, v: UUID2 })), { t: 'i', s: UUID1, v: UUID2, si: null });
-assert.deepEqual(leerPedido(JSON.stringify({ t: 'i', s: UUID1, v: UUID2, si: 'museo' })), { t: 'i', s: UUID1, v: UUID2, si: 'museo' });
-assert.deepEqual(leerPedido(JSON.stringify({ t: 'l', s: UUID1, v: UUID2, si: 'vitrina' })).si, 'vitrina');
-assert.equal(leerPedido(JSON.stringify({ t: 'i', s: UUID1, v: UUID2, si: 'otro' })), null, 'sitio desconocido');
-assert.equal(leerPedido(JSON.stringify({ t: 'i', s: UUID1, v: UUID2, si: 3 })), null);
+assert.deepEqual(leerPedido(JSON.stringify({ t: 'i', s: UUID1, v: UUID2 })), { t: 'i', s: UUID1, v: UUID2 });
 assert.equal(leerPedido(JSON.stringify({ t: 'x', s: UUID1, v: UUID2 })), null);
 assert.equal(leerPedido(JSON.stringify({ t: 'l', s: 'malo', v: UUID2 })), null);
 assert.equal(leerPedido('no es json'), null);
@@ -42,16 +38,13 @@ function baseFalsa() {
   return { llamadas, prepare(sql) { return { bind(...args) { return { run: async () => { llamadas.push({ sql, args }); } }; } }; } };
 }
 let db = baseFalsa();
-await registrar(db, { t: 'i', s: UUID1, v: UUID2, si: 'museo' }, 1000, { pais: 'AR', provincia: 'La Rioja' });
-assert.match(db.llamadas[0].sql, /INSERT OR IGNORE/);
-assert.deepEqual(db.llamadas[0].args, [UUID1, UUID2, 1000, 'AR', 'La Rioja', 'museo']);
-db = baseFalsa();
 await registrar(db, { t: 'i', s: UUID1, v: UUID2 }, 1000, { pais: 'AR', provincia: 'La Rioja' });
-assert.equal(db.llamadas[0].args.at(-1), null, 'sin sitio queda vacío');
+assert.match(db.llamadas[0].sql, /INSERT OR IGNORE/);
+assert.deepEqual(db.llamadas[0].args, [UUID1, UUID2, 1000, 'AR', 'La Rioja']);
 db = baseFalsa();
-await registrar(db, { t: 'l', s: UUID1, v: UUID2, si: 'museo' }, 1015, { pais: null, provincia: null });
+await registrar(db, { t: 'l', s: UUID1, v: UUID2 }, 1015, { pais: null, provincia: null });
 assert.match(db.llamadas[0].sql, /ON CONFLICT\(id\) DO UPDATE SET ultimo/);
-assert.deepEqual(db.llamadas[0].args.slice(-2), [5, 'museo']);
+assert.equal(db.llamadas[0].args.at(-1), 5);
 
 // ---------- Worker de recepción ----------
 const ORIGEN = 'https://segon03.github.io';
@@ -66,13 +59,7 @@ let env = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN };
 let r = await recepcion.fetch(pedido(), env);
 assert.equal(r.status, 204); assert.equal(r.headers.get('Access-Control-Allow-Origin'), ORIGEN);
 assert.equal(env.DB.llamadas.length, 1);
-assert.deepEqual(env.DB.llamadas[0].args, [UUID1, UUID2, env.DB.llamadas[0].args[2], 'AR', 'La Rioja', null]);
-env = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN };
-assert.equal((await recepcion.fetch(pedido({ cuerpo: JSON.stringify({ t: 'i', s: UUID1, v: UUID2, si: 'museo' }) }), env)).status, 204);
-assert.equal(env.DB.llamadas[0].args.at(-1), 'museo');
-env = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN };
-assert.equal((await recepcion.fetch(pedido({ cuerpo: JSON.stringify({ t: 'i', s: UUID1, v: UUID2, si: 'x' }) }), env)).status, 400);
-assert.equal(env.DB.llamadas.length, 0);
+assert.deepEqual(env.DB.llamadas[0].args, [UUID1, UUID2, env.DB.llamadas[0].args[2], 'AR', 'La Rioja']);
 env = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN };
 assert.equal((await recepcion.fetch(pedido({ origen: 'https://malo.com' }), env)).status, 403);
 assert.equal((await recepcion.fetch(pedido({ origen: null }), env)).status, 403);
