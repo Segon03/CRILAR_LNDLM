@@ -47,6 +47,8 @@ img{max-width:100%}
 .intro__lista li::before{content:counter(paso);display:grid;place-items:center;width:2rem;height:2rem;border:1px solid rgba(253,190,15,.65);border-radius:50%;font-family:var(--f-titulo);font-size:1.1rem;color:var(--oro)}
 .intro__sonido{margin:0;font-family:var(--f-titulo);font-style:italic;font-size:1.05rem;color:var(--luna-2)}
 .intro__pie{display:grid;gap:.8rem;justify-items:center;width:100%}
+.intro__aviso{margin:0;max-width:34rem;font-size:.8rem;line-height:1.35;color:var(--luna-2);opacity:.85}
+.intro__aviso[hidden]{display:none}
 .cargando__barra{width:min(260px,70vw);height:2px;background:rgba(217,229,246,.15);overflow:hidden}
 .cargando__barra i{display:block;height:100%;width:0;background:var(--oro);animation:llenar 9s linear forwards}
 /* cuenta regresiva antes de la apertura */

@@ -136,3 +136,9 @@ Juego de unir las 11 preguntas con sus respuestas, como el tablero de la muestra
 El tablero reproduce el físico: la imagen limpia está en `images/tablero/fondo.webp` y encima se dibuja un SVG con los círculos (posición y diámetro en `pc` y `rc`, sobre un cuadrado de 1600 unidades). Dentro de cada círculo va la versión corta de la pregunta (`pt`); la pregunta completa (`p`) aparece en el panel de lectura de abajo. Todo está en `datos/muestra.js`, ficha del punto `s2L-2` (tipo `"tablero"`), el segundo punto de la Sala 2.
 
 Los renglones y el tamaño de letra de los círculos no los calcula el navegador: se calculan una vez con `python3 herramientas/tablero_lineas.py` (necesita `pip install fonttools brotli` y node), que mide el texto con la tipografía del sitio y escribe `datos/tablero-lineas.js`. **Si se cambia un texto del tablero, hay que volver a correr ese script.** Los sonidos los genera el navegador. Cuenta como objeto visitado con solo abrirlo.
+
+## Estadísticas de uso
+
+El sitio puede registrar de forma anónima cuántas visitas tiene, cuánto duran, a qué hora entran y desde qué provincia y país, con un panel privado para consultarlo. Están apagadas hasta que se configure la dirección del servicio en `js/estadisticas.js`. El plan está en `PLAN_ESTADISTICAS.md` y los pasos para publicarlas, en `estadisticas/LEEME.md`.
+
+Para entrar antes de la apertura sin que la visita cuente, usá `?previa=1`. Para que un equipo de prueba no cuente nunca, abrí la página una vez con `?sinstats=1`.
