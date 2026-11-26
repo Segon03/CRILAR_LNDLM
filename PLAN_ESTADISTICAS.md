@@ -60,8 +60,9 @@ La carpeta `estadisticas/` no forma parte del sitio publicado: GitHub Pages la s
 - [x] Pruebas automáticas de la recepción, el login, el script y el panel, y recorrido completo del sitio en navegador sin errores ni archivos faltantes.
 
 ### Falta (lo hace el equipo, ver `estadisticas/LEEME.md`)
-- [ ] Crear la cuenta de Cloudflare, la base y los dos Workers; completar el ID de la base y los datos de Access.
-- [ ] Unir esta rama a la que publica el sitio y poner la dirección de la recepción en `js/estadisticas.js`.
+- [x] Cuenta de Cloudflare, base `micrositio-estadisticas` y los dos Workers, publicados desde la rama `pruebas`.
+- [ ] Completar los datos de Access del panel.
+- [x] Rama unida a `pruebas` y dirección de la recepción en `js/estadisticas.js`: `https://micrositio-recepcion.segundoricardo.workers.dev/api/e`.
 - [ ] Probar desde dos celulares (datos móviles y wifi) y con una VPN, y comparar con el panel.
 - [ ] Comprobar que un pedido al panel sin sesión es rechazado.
 - [ ] Marcar los equipos de prueba con `?sinstats=1`.
