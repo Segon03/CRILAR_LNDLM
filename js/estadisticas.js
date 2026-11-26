@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var ENDPOINT = '';
+  var ENDPOINT = 'https://micrositio-recepcion.segundoricardo.workers.dev/api/e';
 
   var INTERVALO_MS = 15000;             /* aviso de "sigue acá" mientras la página está visible */
   var INACTIVIDAD_MS = 30 * 60 * 1000;  /* pasado este tiempo sin avisos, es una visita nueva */

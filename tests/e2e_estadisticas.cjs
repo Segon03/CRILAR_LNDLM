@@ -29,7 +29,7 @@ async function abrir(navegador, { query = '', endpoint = '', abierta = false, re
     const archivo = path.join(RAIZ, rel);
     if (!archivo.startsWith(RAIZ) || !fs.existsSync(archivo) || fs.statSync(archivo).isDirectory()) { faltantes.push(rel); return route.fulfill({ status: 404, body: 'no' }); }
     let cuerpo = fs.readFileSync(archivo);
-    if (rel === 'js/estadisticas.js' && endpoint) cuerpo = Buffer.from(cuerpo.toString().replace("var ENDPOINT = '';", `var ENDPOINT = '${endpoint}';`));
+    if (rel === 'js/estadisticas.js') cuerpo = Buffer.from(cuerpo.toString().replace(/var ENDPOINT = '[^']*';/, `var ENDPOINT = '${endpoint}';`));
     if (rel === 'datos/muestra.js' && abierta) cuerpo = Buffer.from(cuerpo.toString().replace(/"apertura": "[^"]+"/, '"apertura": "2020-01-01T00:00:00-03:00"'));
     return route.fulfill({ status: 200, body: cuerpo, headers: { 'Content-Type': TIPOS[path.extname(rel)] || 'application/octet-stream', Date: new Date().toUTCString() } });
   });
@@ -55,7 +55,7 @@ async function entrar(page) {
   const nav = await chromium.launch();
   let r, e;
 
-  // 1. Como se publica: estadísticas apagadas y antes de la apertura (cuenta regresiva)
+  // 1. Estadísticas apagadas (ENDPOINT vacío) y antes de la apertura (cuenta regresiva)
   r = await abrir(nav);
   e = await estado(r.page);
   assert.equal(e.aviso, false, 'apagadas: no muestra el aviso');
@@ -64,7 +64,7 @@ async function entrar(page) {
   if (ahora < apertura) assert.equal(e.cuenta, true, 'antes de la apertura se ve la cuenta regresiva');
   assert.deepEqual(r.errores, []); assert.deepEqual(r.faltantes, []);
   await r.ctx.close();
-  console.log('ok 1: publicado tal cual (apagadas), sin errores ni archivos faltantes');
+  console.log('ok 1: apagadas, sin errores ni archivos faltantes');
 
   // 2. Encendidas, visita abierta: cuenta, muestra el aviso y la visita funciona
   r = await abrir(nav, { endpoint: RECEPCION, abierta: true });

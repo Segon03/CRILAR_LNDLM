@@ -98,6 +98,6 @@ assert.equal(E.iniciar(w.win, URL_OK), true);
 
 // el archivo publicado sale apagado
 const fuente = require('node:fs').readFileSync(require('node:path').join(__dirname, '../js/estadisticas.js'), 'utf8');
-assert.match(fuente, /var ENDPOINT = '';/, 'ENDPOINT tiene que estar vacío hasta configurar Cloudflare');
+assert.match(fuente, /var ENDPOINT = '(https:\/\/[\w.-]+\.workers\.dev\/api\/e)?';/, 'ENDPOINT vacío o una dirección de workers.dev terminada en /api/e');
 
 console.log('estadisticas (cliente del micrositio): todas las pruebas pasaron');
