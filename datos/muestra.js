@@ -14,7 +14,7 @@
    ficha.media  foto o infografia: {"src": "images/fichas/archivo.jpg", "alt": "descripción"}
                 (con {"recorte": true} se muestra un acercamiento de la propia escena)
                 video: {"youtube": "ID_DEL_VIDEO"} o {"mp4": "images/fichas/video.mp4"}
-   sorteo.endpoint  dirección que recibe los datos del formulario (ver README)
+   sorteo.endpoint  dirección que recibe los datos del formulario (ver README y estadisticas/LEEME.md)
    intro        pantalla de bienvenida: segundos que permanece, indicaciones y botón
    evento.apertura  fecha y hora en que se habilita la visita (antes se ve la cuenta regresiva)
    sonido       archivos de audio, volúmenes (0 a 1) y texto de créditos que se muestra al pie
@@ -52,7 +52,7 @@ window.MUESTRA = {
   },
   "inicio": "entrada",
   "sorteo": {
-    "endpoint": "",
+    "endpoint": "https://micrositio-recepcion.segundoricardo.workers.dev/api/sorteo",
     "bases": "",
     "titulo": "Participá del sorteo",
     "gracias": "Ya estás participando. ¡Mucha suerte!"

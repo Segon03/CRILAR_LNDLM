@@ -5,6 +5,7 @@ const $ = (id) => document.getElementById(id);
 const REFRESCO_MS = 30000;
 let actual = { nombre: 'evento', ...C.EVENTO };
 let datos = null;
+let participantes = [];
 
 function esc(t) { return String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function fmtN(n) { return n.toLocaleString('es-AR'); }
@@ -20,11 +21,41 @@ async function cargar() {
     if (!r.ok) { aviso('No se pudieron cargar los datos. Probá de nuevo en un momento.'); return; }
     datos = await r.json();
     datos.recibido = ahora;
+    await cargarParticipantes();
     aviso(datos.truncado ? 'Hay más visitas que las que se pueden mostrar juntas: se muestran las primeras 100.000. Acotá el período.' : '');
     pintar();
   } catch {
     aviso('No se pudieron cargar los datos. Revisá la conexión.');
   }
+}
+
+async function cargarParticipantes() {
+  try {
+    const r = await fetch('/api/participantes', { cache: 'no-store', credentials: 'same-origin' });
+    if (!r.ok) return;
+    participantes = (await r.json()).filas || [];
+  } catch { /* se mantiene la lista anterior */ }
+  $('s-n').textContent = fmtN(participantes.length);
+  const cuerpo = $('s-tabla').querySelector('tbody');
+  cuerpo.innerHTML = participantes.length
+    ? participantes.slice().reverse().map((p) => `<tr><td>${esc(C.textoAR(p.fecha))}</td><td>${esc(p.nombre)}</td><td>${esc(p.email)}</td><td>${esc(p.telefono || '')}</td><td>${esc(p.codigo)}</td></tr>`).join('')
+    : '<tr><td colspan="5" class="vacio">Todavía no hay participantes.</td></tr>';
+}
+
+function descargarParticipantes() {
+  const blob = new Blob([C.participantesCSV(participantes)], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `participantes_sorteo_${C.partesAR(Math.floor(Date.now() / 1000)).fecha}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function sortearGanador() {
+  const g = C.sortear(participantes, C.azarSeguro);
+  const el = $('s-ganador');
+  el.hidden = false;
+  el.textContent = g ? `Ganador/a: ${g.nombre} · ${g.email} · recorrido ${g.codigo} (entre ${fmtN(participantes.length)} participantes, ${C.textoAR(Math.floor(Date.now() / 1000))})` : 'No hay participantes para sortear.';
 }
 
 function barrasVerticales(el, items) {
@@ -131,8 +162,9 @@ function mostrarPanel() {
   $('ingreso').hidden = true;
   $('controles').hidden = false;
   $('contenido').hidden = false;
-  // antes del evento se muestra "hoy" (para ver las pruebas) y desde su inicio, la noche completa
-  elegir(Date.now() / 1000 >= C.EVENTO.desde ? 'evento' : 'hoy');
+  // antes del evento abre en "hoy", durante la noche en el evento y después en "todo" (el registro sigue abierto)
+  const t = Date.now() / 1000;
+  elegir(t < C.EVENTO.desde ? 'hoy' : t < C.EVENTO.hasta ? 'evento' : 'todo');
 }
 
 async function entrar(ev) {
@@ -174,6 +206,8 @@ $('aplicar').addEventListener('click', aplicarFechas);
 $('csv').addEventListener('click', descargarCSV);
 $('imprimir').addEventListener('click', () => window.print());
 $('salir').addEventListener('click', salir);
+$('s-csv').addEventListener('click', descargarParticipantes);
+$('s-sortear').addEventListener('click', sortearGanador);
 $('form-ingreso').addEventListener('submit', entrar);
 setInterval(() => { if (adentro && document.visibilityState === 'visible') cargar(); }, REFRESCO_MS);
 iniciar();

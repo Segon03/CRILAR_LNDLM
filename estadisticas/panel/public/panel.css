@@ -75,3 +75,13 @@ input { font: inherit; font-size: .85rem; padding: 6px 8px; border: 1px solid va
 .error { margin: 0; color: #b3261e; font-size: .9rem; }
 @media (prefers-color-scheme: dark) { .error { color: #ff8a80; } }
 [hidden] { display: none !important; }
+
+.cabecera-sorteo { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.cabecera-sorteo h2 { margin: 0; }
+.ganador { margin: 8px 0; padding: 10px 14px; border-radius: 10px; background: color-mix(in srgb, var(--acento) 16%, var(--tarjeta)); font-weight: 600; }
+.tabla-caja { max-height: 420px; overflow: auto; border: 1px solid var(--borde); border-radius: 10px; margin-top: 10px; }
+.tabla { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.tabla th, .tabla td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+.tabla th { position: sticky; top: 0; background: var(--tarjeta); color: var(--suave); font-weight: 600; }
+.tabla td.vacio { color: var(--suave); white-space: normal; }
+@media print { #s-csv, #s-sortear, .tabla-caja { max-height: none; } #s-csv, #s-sortear { display: none; } }

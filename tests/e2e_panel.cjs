@@ -9,6 +9,10 @@ const PUB = path.join(__dirname, '../estadisticas/panel/public');
 const BASE = 'https://micrositio-panel.prueba.workers.dev/';
 const ahora = Math.floor(Date.now() / 1000);
 let sesion = false;
+const participantes = [
+  { fecha: ahora - 500, nombre: 'Ana Pérez', email: 'ana@ejemplo.com', telefono: '', codigo: 'CR-1A2B3C', objetos: 12, pais: 'AR', provincia: 'La Rioja' },
+  { fecha: ahora - 100, nombre: '<b>Luis</b>', email: 'luis@ejemplo.com', telefono: '380', codigo: 'CR-ZZZZZZ', objetos: 12, pais: 'AR', provincia: 'Córdoba' },
+];
 const filas = [
   { v: 'aaaaaaaa-1', i: ahora - 3000, u: ahora - 2800, p: 'AR', r: 'La Rioja' },
   { v: 'bbbbbbbb-2', i: ahora - 2000, u: ahora - 1990, p: 'AR', r: 'Córdoba' },
@@ -31,6 +35,7 @@ const filas = [
     }
     if (u.pathname === '/api/salir') { sesion = false; return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }); }
     if (u.pathname.startsWith('/api/') && !sesion) return route.fulfill({ status: 401, contentType: 'application/json', body: '{}' });
+    if (u.pathname === '/api/participantes') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ filas: participantes }) });
     if (u.pathname === '/api/yo') return route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
     if (u.pathname === '/api/visitas') {
       const desde = +u.searchParams.get('desde'), hasta = +u.searchParams.get('hasta');
@@ -66,6 +71,15 @@ const filas = [
   assert.ok(!/sitio|vitrina/i.test(csv));
   assert.ok(!/vitrina/i.test(await page.content()), 'el panel no menciona la vitrina');
 
+  // sorteo
+  assert.equal(await t('s-n'), '2');
+  assert.equal(await page.$$eval('#s-tabla tbody tr', (f) => f.length), 2);
+  assert.equal(await page.$eval('#s-tabla tbody tr td:nth-child(2)', (n) => n.textContent), '<b>Luis</b>', 'muestra el texto sin interpretarlo como HTML');
+  const [desc2] = await Promise.all([page.waitForEvent('download'), page.click('#s-csv')]);
+  assert.match(desc2.suggestedFilename(), /^participantes_sorteo_/);
+  assert.equal(fs.readFileSync(await desc2.path(), 'utf8').trim().split('\r\n').length, 3);
+  await page.click('#s-sortear');
+  assert.match(await t('s-ganador'), /^Ganador\/a: .+ · .+@ejemplo\.com · recorrido CR-/);
   if (process.env.CAPTURAS) await page.screenshot({ path: path.join(process.env.CAPTURAS, 'e2e_panel.png'), fullPage: true });
   await page.click('#salir');
   await page.waitForSelector('#ingreso:not([hidden])');

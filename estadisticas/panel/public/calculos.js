@@ -137,3 +137,22 @@ export function rango(nombre, ahora) {
   if (nombre === 'todo') return { desde: hoy0 + 86400 - 399 * 86400, hasta: hoy0 + 86400 };
   return null;
 }
+
+// ---------- sorteo ----------
+export function participantesCSV(filas) {
+  const cab = ['Fecha y hora (Argentina)', 'Nombre y apellido', 'Correo', 'Teléfono', 'Número de recorrido', 'Objetos visitados', 'País', 'Provincia'];
+  const lineas = filas.map((f) => [textoAR(f.fecha), f.nombre, f.email, f.telefono || '', f.codigo, f.objetos, f.pais || '', f.provincia || ''].map(celda).join(';'));
+  return '\ufeff' + [cab.map(celda).join(';'), ...lineas].join('\r\n') + '\r\n';
+}
+
+// Elige un índice al azar sin sesgo. "azar(n)" devuelve un entero en [0, n); se puede reemplazar en las pruebas.
+export function sortear(filas, azar) {
+  if (!filas.length) return null;
+  return filas[azar(filas.length)];
+}
+
+export function azarSeguro(n) {
+  const max = Math.floor(0x100000000 / n) * n, v = new Uint32Array(1);
+  do { crypto.getRandomValues(v); } while (v[0] >= max);
+  return v[0] % n;
+}

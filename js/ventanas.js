@@ -235,7 +235,8 @@
       console.info('[sorteo] No hay "endpoint" configurado en datos/muestra.js: los datos quedaron solo en este navegador.', datos);
       return;
     }
-    await fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(datos) });
+    const r = await fetch(url, { method: 'POST', mode: 'cors', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(datos) });
+    if (!r.ok) throw new Error('sorteo ' + r.status);
   }
 
   function abrirSorteo() {

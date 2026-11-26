@@ -67,12 +67,13 @@ La carpeta `estadisticas/` no forma parte del sitio publicado: GitHub Pages la s
 - [ ] Probar desde dos celulares (datos móviles y wifi) y con una VPN, y comparar con el panel.
 - [ ] Comprobar que un pedido al panel sin sesión es rechazado.
 - [ ] Marcar los equipos de prueba con `?sinstats=1`.
-- [x] Base en cero (25/11) y conteo a partir del 27/11 17:00.
+- [x] Base en cero (25/11) y conteo a partir del 27/11 17:00, sin fecha de cierre.
+- [x] Participantes del sorteo guardados en la tabla `participantes`, con lista, CSV y sorteo en el panel.
 - [ ] Al terminar el evento, descargar un CSV de respaldo y decidir cuánto tiempo se guardan los datos.
 
 ## Fuera de alcance
 
 - Otros proyectos, como la app de la vitrina.
-- Qué salas u objetos se miran, dispositivo, ciudad y cualquier dato personal.
+- En las estadísticas de visitas: qué salas u objetos se miran, dispositivo, ciudad y cualquier dato personal. Los únicos datos personales son los que cada participante deja voluntariamente en el formulario del sorteo.
 - Cookies o herramientas de seguimiento de otras empresas.
 - Seguimiento de personas entre dispositivos.

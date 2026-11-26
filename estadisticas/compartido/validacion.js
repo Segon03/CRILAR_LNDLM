@@ -47,3 +47,27 @@ export function antesDeContar(ahora, desde) {
   const d = Number(desde);
   return Number.isFinite(d) && d > 0 && ahora < d;
 }
+
+// ---------- sorteo ----------
+export const MAX_CUERPO_SORTEO = 2000; // bytes
+const RE_EMAIL = /^[^\s@<>"'`]{1,64}@[^\s@<>"'`]{1,190}\.[^\s@<>"'`.]{2,24}$/;
+const RE_CODIGO = /^CR-[0-9A-Z]{6}$/;
+
+// Devuelve { nombre, email, telefono, codigo, objetos } o null si el formulario no es válido.
+// El correo se guarda en minúsculas: es lo que impide anotarse dos veces.
+export function leerParticipante(texto) {
+  if (typeof texto !== 'string' || texto.length === 0 || texto.length > MAX_CUERPO_SORTEO) return null;
+  let o;
+  try { o = JSON.parse(texto); } catch { return null; }
+  if (!o || typeof o !== 'object') return null;
+  const nombre = limpiarTexto(o.nombre, 100);
+  const email = typeof o.email === 'string' ? o.email.trim().toLowerCase() : '';
+  const telefono = limpiarTexto(o.telefono, 40);
+  const codigo = typeof o.codigo === 'string' ? o.codigo.trim().toUpperCase() : '';
+  const objetos = Number(o.objetos);
+  if (!nombre || nombre.length < 3) return null;
+  if (email.length > 254 || !RE_EMAIL.test(email)) return null;
+  if (!RE_CODIGO.test(codigo)) return null;
+  if (!Number.isInteger(objetos) || objetos < 0 || objetos > 500) return null;
+  return { nombre, email, telefono, codigo, objetos };
+}

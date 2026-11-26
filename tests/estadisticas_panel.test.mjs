@@ -53,6 +53,19 @@ assert.ok(csv.startsWith('﻿"Fecha y hora (Argentina)";"Duración (segundos)"')
 assert.ok(csv.includes('"27/11/2026 21:00";"90";"AR";"La ""Rioja""";"3f2b8c1e"'), csv);
 assert.ok(!csv.includes('9d4a'), 'el identificador se acorta');
 
+// ---------- sorteo ----------
+const part = [{ fecha: E0 + 21 * 3600, nombre: 'Ana "La" Pérez', email: 'ana@ejemplo.com', telefono: '', codigo: 'CR-1A2B3C', objetos: 12, pais: 'AR', provincia: 'La Rioja' },
+  { fecha: E0 + 22 * 3600, nombre: 'Luis', email: 'luis@ejemplo.com', telefono: '380', codigo: 'CR-ZZZZZZ', objetos: 12, pais: 'AR', provincia: 'Córdoba' }];
+const pcsv = C.participantesCSV(part);
+assert.ok(pcsv.startsWith('\ufeff"Fecha y hora (Argentina)";"Nombre y apellido";"Correo"'));
+assert.ok(pcsv.includes('"27/11/2026 21:00";"Ana ""La"" Pérez";"ana@ejemplo.com";"";"CR-1A2B3C"'));
+assert.equal(pcsv.trim().split('\r\n').length, 3);
+assert.equal(C.sortear([], () => 0), null);
+assert.equal(C.sortear(part, () => 1).nombre, 'Luis');
+const cuenta = [0, 0, 0];
+for (let i = 0; i < 3000; i++) cuenta[C.azarSeguro(3)]++;
+assert.ok(cuenta.every((n) => n > 800), 'azarSeguro reparte parejo: ' + cuenta);
+
 // ---------- rangos ----------
 const ahora = E0 + 15 * 3600 + 1234; // 27/11 15:20
 assert.deepEqual(C.rango('hoy', ahora), { desde: E0, hasta: E0 + 86400 });

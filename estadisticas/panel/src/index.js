@@ -1,4 +1,4 @@
-// Worker del panel: solo lee la base. Los datos (/api/visitas) se entregan solo con una sesión válida,
+// Worker del panel: solo lee la base. Los datos (/api/visitas y /api/participantes del sorteo) se entregan solo con una sesión válida,
 // que se obtiene con la contraseña guardada como secreto PANEL_CLAVE. La página en sí no contiene datos.
 import { claveConfigurada, claveCorrecta, crearSesion, sesionValida, leerCookie, cookieSesion, cookieBorrar } from '../../compartido/sesion.js';
 
@@ -23,6 +23,14 @@ export async function visitas(url, env, ahora = Math.floor(Date.now() / 1000)) {
     .all();
   const truncado = results.length > MAX_FILAS;
   return respuesta({ desde, hasta, ahora, truncado, filas: truncado ? results.slice(0, MAX_FILAS) : results });
+}
+
+export async function participantes(env) {
+  const { results } = await env.DB
+    .prepare('SELECT fecha, nombre, email, telefono, codigo, objetos, pais, provincia FROM participantes ORDER BY fecha LIMIT ?1')
+    .bind(MAX_FILAS)
+    .all();
+  return respuesta({ filas: results });
 }
 
 async function entrar(request, env, esperar) {
@@ -57,6 +65,7 @@ export function crearPanel({ esperar = (ms) => new Promise((r) => setTimeout(r, 
       if (request.method !== 'GET') return respuesta({ error: 'método' }, 405);
       if (!(await sesionValida(leerCookie(request), env.PANEL_CLAVE))) return respuesta({ error: 'sin-sesion' }, 401);
       if (url.pathname === '/api/visitas') return visitas(url, env);
+      if (url.pathname === '/api/participantes') return participantes(env);
       if (url.pathname === '/api/yo') return respuesta({ ok: true });
       return respuesta({ error: 'no existe' }, 404);
     },

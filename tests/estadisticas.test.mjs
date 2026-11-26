@@ -1,10 +1,10 @@
 // Pruebas de la recepción de estadísticas y del login del panel. Uso: node tests/estadisticas.test.mjs
 import assert from 'node:assert/strict';
-import { idValido, leerPedido, esBot, origenPermitido, geoDe, limpiarTexto, antesDeContar, MAX_CUERPO } from '../estadisticas/compartido/validacion.js';
+import { idValido, leerPedido, leerParticipante, esBot, origenPermitido, geoDe, limpiarTexto, antesDeContar, MAX_CUERPO } from '../estadisticas/compartido/validacion.js';
 import * as S from '../estadisticas/compartido/sesion.js';
-import { registrar } from '../estadisticas/recepcion/src/registro.js';
+import { registrar, anotarParticipante } from '../estadisticas/recepcion/src/registro.js';
 import recepcion from '../estadisticas/recepcion/src/index.js';
-import { crearPanel, visitas } from '../estadisticas/panel/src/index.js';
+import { crearPanel, visitas, participantes } from '../estadisticas/panel/src/index.js';
 
 const UUID1 = '3f2b8c1e-9d4a-4e7b-8a10-5c6d7e8f9a0b', UUID2 = 'a1b2c3d4-e5f6-4789-9abc-def012345678';
 
@@ -91,6 +91,39 @@ assert.equal(antesDeContar(100, 'x'), false);
 const recepcionWrangler = (await import('node:fs')).readFileSync(new URL('../estadisticas/recepcion/wrangler.jsonc', import.meta.url), 'utf8');
 assert.match(recepcionWrangler, /"CONTAR_DESDE": "1795809600"/, '27/11/2026 17:00 hora de Argentina');
 
+// ---------- sorteo ----------
+const P_OK = { nombre: 'Ana Pérez', email: ' Ana@Ejemplo.com ', telefono: '380 4123456', codigo: 'cr-1a2b3c', objetos: 12 };
+assert.deepEqual(leerParticipante(JSON.stringify(P_OK)), { nombre: 'Ana Pérez', email: 'ana@ejemplo.com', telefono: '380 4123456', codigo: 'CR-1A2B3C', objetos: 12 });
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, telefono: '' })).telefono, null, 'teléfono opcional');
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, nombre: 'A' })), null);
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, email: 'sin-arroba' })), null);
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, email: 'a@b' })), null);
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, codigo: 'XX-123456' })), null);
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, objetos: -1 })), null);
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, objetos: 'muchos' })), null);
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, nombre: 'x'.repeat(3000) })), null, 'demasiado grande');
+assert.equal(leerParticipante('no es json'), null);
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, nombre: '<script>Ana</script>' })).nombre, 'scriptAna/script', 'saca caracteres peligrosos');
+{
+  const db = baseFalsa();
+  await anotarParticipante(db, leerParticipante(JSON.stringify(P_OK)), 1000, { pais: 'AR', provincia: 'La Rioja' });
+  assert.match(db.llamadas[0].sql, /INSERT OR IGNORE INTO participantes/);
+  assert.deepEqual(db.llamadas[0].args, [1000, 'Ana Pérez', 'ana@ejemplo.com', '380 4123456', 'CR-1A2B3C', 12, 'AR', 'La Rioja']);
+  const pedidoS = (cuerpo, origen = ORIGEN) => new Request('https://recepcion.ejemplo.workers.dev/api/sorteo', { method: 'POST', headers: { Origin: origen, 'User-Agent': UA, 'Content-Type': 'text/plain' }, body: cuerpo });
+  let e2 = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN };
+  assert.equal((await recepcion.fetch(pedidoS(JSON.stringify(P_OK)), e2)).status, 204);
+  assert.equal(e2.DB.llamadas.length, 1, 'guarda al participante');
+  e2 = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN };
+  assert.equal((await recepcion.fetch(pedidoS(JSON.stringify({ ...P_OK, email: 'mal' })), e2)).status, 400);
+  assert.equal((await recepcion.fetch(pedidoS(JSON.stringify(P_OK), 'https://otro.sitio'), e2)).status, 403);
+  assert.equal(e2.DB.llamadas.length, 0);
+  e2 = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN, CONTAR_DESDE: String(Math.floor(Date.now() / 1000) + 3600) };
+  assert.equal((await recepcion.fetch(pedidoS(JSON.stringify(P_OK)), e2)).status, 204);
+  assert.equal(e2.DB.llamadas.length, 0, 'antes de la hora de inicio no se guarda');
+  e2 = { DB: { prepare() { throw new Error('caída'); } }, ORIGEN_PERMITIDO: ORIGEN };
+  assert.equal((await recepcion.fetch(pedidoS(JSON.stringify(P_OK)), e2)).status, 500, 'si la base falla, el formulario se entera y deja reintentar');
+}
+
 // ---------- login del panel ----------
 const CLAVE = 'una-clave-larga-de-prueba';
 assert.equal(S.claveConfigurada({}), false, 'sin contraseña no entra nadie');
@@ -141,6 +174,11 @@ r = await visitas(new URL('https://x/api/visitas?desde=0&hasta=2000'), envP, 150
 assert.equal(r.status, 200); assert.deepEqual((await r.json()).filas, filas);
 assert.equal((await visitas(new URL('https://x/api/visitas?desde=10&hasta=5'), envP)).status, 400);
 assert.equal((await visitas(new URL('https://x/api/visitas?desde=0&hasta=999999999'), envP)).status, 400);
+assert.equal((await P.fetch(pedidoP('/api/participantes'), envP)).status, 401, 'sin sesión no se ven los participantes');
+r = await P.fetch(pedidoP('/api/participantes', conSesion), envP);
+assert.equal(r.status, 200);
+r = await participantes(envP);
+assert.deepEqual((await r.json()).filas, filas);
 r = await P.fetch(pedidoP('/api/salir', { method: 'POST' }), envP);
 assert.match(r.headers.get('Set-Cookie'), /Max-Age=0/);
 

@@ -55,22 +55,9 @@ Los textos que dicen "de ejemplo" son provisorios.
 
 El formulario solo se abre cuando se visitaron todos los objetos que figuran como `"tipo": "objeto"`. Los de tipo `"info"` no cuentan.
 
-Mientras `sorteo.endpoint` esté vacío, los datos de cada participante quedan solo en el navegador de quien los cargó y vos no los recibís. Para recibirlos en una planilla de Google:
+Los datos de cada participante (nombre, correo, teléfono opcional y número de recorrido) se envían a la recepción de estadísticas en Cloudflare (`sorteo.endpoint` en `datos/muestra.js`) y se guardan en la tabla `participantes` de la misma base. Se ven, se descargan en CSV y se sortea un ganador desde el panel privado, con su contraseña. Hay un participante por correo: si alguien se anota dos veces, queda la primera inscripción. Las inscripciones se guardan desde el 27/11 a las 17:00, igual que las visitas. Más detalles en `estadisticas/LEEME.md`.
 
-1. Creá una hoja de cálculo nueva y abrí Extensiones, Apps Script.
-2. Pegá este código:
-
-```js
-function doPost(e) {
-  const d = JSON.parse(e.postData.contents);
-  SpreadsheetApp.getActiveSheet().appendRow([new Date(), d.nombre, d.email, d.telefono, d.codigo, d.objetos]);
-  return ContentService.createTextOutput('ok');
-}
-```
-
-3. Elegí Implementar, Nueva implementación, tipo Aplicación web. Ejecutar como "Yo" y acceso para "Cualquier persona".
-4. Copiá la dirección que te da y pegala en `sorteo.endpoint`, dentro de `datos/muestra.js`.
-5. Si tenés las bases y condiciones en línea, pegá su dirección en `sorteo.bases` y el formulario enlazará el texto.
+Si `sorteo.endpoint` quedara vacío, los datos quedarían solo en el navegador de quien los cargó.
 
 El número de recorrido (CR-XXXXXX) se calcula con los objetos visitados. Alcanza para un sorteo informal, pero no es a prueba de personas con conocimientos técnicos. Conviene revisar con el instituto qué requisitos formales tiene un sorteo y el manejo de datos personales.
 

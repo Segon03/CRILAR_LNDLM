@@ -10,12 +10,20 @@ const assert = require('node:assert/strict');
 const RAIZ = path.resolve(process.argv[2] || path.join(__dirname, '..'));
 const SITIO = 'https://segon03.github.io/CRILAR_LNDLM/';
 const RECEPCION = 'https://micrositio-recepcion.prueba.workers.dev/api/e';
+const SORTEO = 'https://micrositio-recepcion.segundoricardo.workers.dev/api/sorteo'; // la dirección real, configurada en datos/muestra.js
 const TIPOS = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.woff2': 'font/woff2', '.json': 'application/json' };
 
-async function abrir(navegador, { query = '', endpoint = '', abierta = false, recepcionCaida = false, movil = false } = {}) {
+async function abrir(navegador, { query = '', endpoint = '', abierta = false, recepcionCaida = false, movil = false, estadoSorteo = 204 } = {}) {
   const ctx = await navegador.newContext(movil ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 800 } });
   const page = await ctx.newPage();
-  const avisos = [], faltantes = [], errores = [];
+  const avisos = [], faltantes = [], errores = [], inscripciones = [];
+  await page.route(SORTEO, async (route) => {
+    const req = route.request();
+    const cors = { 'Access-Control-Allow-Origin': 'https://segon03.github.io', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
+    if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+    inscripciones.push({ cuerpo: JSON.parse(req.postData()), origen: req.headers()['origin'] });
+    return route.fulfill({ status: estadoSorteo, headers: cors });
+  });
   page.on('pageerror', (e) => errores.push(e.message));
   await page.route(RECEPCION, async (route) => {
     const req = route.request();
@@ -35,7 +43,7 @@ async function abrir(navegador, { query = '', endpoint = '', abierta = false, re
   });
   await page.goto(SITIO + query, { waitUntil: 'load' });
   await page.waitForTimeout(600);
-  return { ctx, page, avisos, faltantes, errores };
+  return { ctx, page, avisos, faltantes, errores, inscripciones };
 }
 
 const estado = (page) => page.evaluate(() => ({
@@ -112,6 +120,34 @@ async function entrar(page) {
   assert.deepEqual(r.errores, []);
   await r.ctx.close();
   console.log('ok 5: portada en celular');
+
+  // 6. Sorteo: al completar el recorrido, el formulario envía los datos a la recepción
+  async function completarYAbrirSorteo(page) {
+    await entrar(page);
+    await page.evaluate(() => { for (const o of window.CRILAR.listarObjetos()) window.CRILAR.marcarVisto(o.id); window.CRILAR.actualizarHUD && window.CRILAR.actualizarHUD(); });
+    await page.evaluate(() => document.getElementById('btn-sorteo').click()); // en la puerta la barra queda tapada; el botón es el mismo
+    await page.waitForSelector('#form-sorteo');
+    await page.fill('#f-nombre', 'Ana Pérez');
+    await page.fill('#f-email', 'ana@ejemplo.com');
+    await page.check('#form-sorteo input[name=acepto]');
+    await page.click('#form-sorteo button[type=submit]');
+  }
+  r = await abrir(nav, { query: '?previa=1' });
+  await completarYAbrirSorteo(r.page);
+  await r.page.waitForSelector('#sorteo-titulo:has-text("Ya estás participando")');
+  assert.equal(r.inscripciones.length, 1);
+  assert.equal(r.inscripciones[0].origen, 'https://segon03.github.io');
+  assert.equal(r.inscripciones[0].cuerpo.email, 'ana@ejemplo.com');
+  assert.match(r.inscripciones[0].cuerpo.codigo, /^CR-[0-9A-Z]{6}$/);
+  assert.ok(r.inscripciones[0].cuerpo.objetos > 0);
+  assert.deepEqual(r.errores, []);
+  await r.ctx.close();
+  r = await abrir(nav, { query: '?previa=1', estadoSorteo: 500 });
+  await completarYAbrirSorteo(r.page);
+  await r.page.waitForSelector('#estado-form:has-text("No pudimos enviar")');
+  assert.equal(await r.page.$('#form-sorteo') !== null, true, 'si falla, el formulario sigue ahí para reintentar');
+  await r.ctx.close();
+  console.log('ok 6: el sorteo envía los datos y avisa si no se pudieron guardar');
 
   await nav.close();
   console.log('e2e del micrositio: todas las pruebas pasaron');
