@@ -1,14 +1,10 @@
 {
-  // Worker del panel. Solo lee. Se protege con Cloudflare Access (ver estadisticas/LEEME.md).
+  // Worker del panel. Solo lee. Se protege con una contraseña guardada como secreto PANEL_CLAVE
+  // en Cloudflare (Settings > Variables and Secrets), nunca en este archivo. Ver estadisticas/LEEME.md.
   "name": "micrositio-panel",
   "main": "src/index.js",
   "compatibility_date": "2025-01-01",
   "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
-  "vars": {
-    // Se completan después de activar Access. No son secretos.
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": ""
-  },
   "d1_databases": [
     {
       "binding": "DB",

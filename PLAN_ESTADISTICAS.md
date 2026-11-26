@@ -19,20 +19,20 @@ GitHub Pages es estático y no puede guardar datos. Por eso la página envía av
 
 1. Al abrir el micrositio, `js/estadisticas.js` avisa "ingresó alguien". Mientras la página está a la vista, avisa cada 15 segundos "sigue acá". Al ocultarse o cerrarse manda un último aviso.
 2. Un Worker de **recepción**, público, guarda los avisos en una base D1. El país y la provincia salen de los datos que Cloudflare agrega a cada conexión. La IP no se guarda. Solo puede escribir.
-3. Un Worker de **panel** lee la base y muestra los resultados. Está detrás del login de Cloudflare Access: solo entran los correos autorizados. Solo puede leer, y rechaza todo pedido sin un token válido de Access, aunque Access esté mal configurado.
+3. Un Worker de **panel** lee la base y muestra los resultados. Se entra con una contraseña guardada como secreto en Cloudflare (`PANEL_CLAVE`), nunca en el código. Al entrar, el panel entrega una sesión firmada que dura 12 horas. Solo puede leer, y sin contraseña configurada no entrega datos a nadie.
 
-Son dos Workers porque el login de Access sobre una dirección `workers.dev` protege el sitio completo y no deja una ruta pública.
+Son dos Workers para que la recepción, que es pública, no tenga ningún acceso de lectura a los datos.
 
 ## Decisiones
 
-- **Servicio:** Cloudflare Workers + D1 + Access, plan gratuito. Nombres: `micrositio-recepcion`, `micrositio-panel` y la base `micrositio-estadisticas`.
+- **Servicio:** Cloudflare Workers + D1, plan gratuito. Nombres: `micrositio-recepcion`, `micrositio-panel` y la base `micrositio-estadisticas`.
 - **Una fila por visita:** los avisos de "sigue acá" solo actualizan la hora del último aviso. La permanencia es esa hora menos la de entrada, con un tope de una hora.
 - **Reloj del servidor:** la hora la pone el Worker. Los horarios se muestran en hora de Argentina.
 - **Sin cookies:** el micrositio guarda dos identificadores al azar en el propio navegador (uno del visitante y otro de la visita), con nombres propios (`micrositio_est_...`).
 - **Apagadas por defecto:** mientras `ENDPOINT` esté vacío en `js/estadisticas.js`, no se envía nada ni se muestra el aviso de privacidad.
 - **Un solo archivo nuevo en el micrositio:** `js/estadisticas.js`, cargado al final de `index.html`. Es un script común como los demás del sitio. Si falla, la visita sigue igual.
 - **No se cuentan:** `?previa`, `?cuenta`, `?editar`, los navegadores marcados con `?sinstats=1`, `localhost` y el archivo abierto con doble clic. Los enlaces `?escena=` sí cuentan.
-- **Correo autorizado:** `segundo.nc@conicet.gov.ar`. Se pueden sumar más desde Cloudflare sin tocar el código.
+- **Acceso al panel:** contraseña única. Se eligió en lugar de Cloudflare Access porque Access pide cargar una tarjeta para activar Zero Trust.
 - **Evento:** 27 de noviembre de 2026; la visita abre a las 18:00. El filtro "Noche de los Museos" del panel cubre del 27/11 00:00 al 28/11 06:00, hora de Argentina.
 
 ## Estructura
@@ -40,7 +40,7 @@ Son dos Workers porque el login de Access sobre una dirección `workers.dev` pro
 ```
 estadisticas/
   schema.sql            tabla de visitas
-  compartido/           validación de pedidos y verificación del token de Access
+  compartido/           validación de pedidos y contraseña/sesión del panel
   recepcion/            Worker público (wrangler.jsonc y src/)
   panel/                Worker del panel (wrangler.jsonc, src/) y public/ con la página
   LEEME.md              pasos para publicar en Cloudflare
@@ -61,7 +61,8 @@ La carpeta `estadisticas/` no forma parte del sitio publicado: GitHub Pages la s
 
 ### Falta (lo hace el equipo, ver `estadisticas/LEEME.md`)
 - [x] Cuenta de Cloudflare, base `micrositio-estadisticas` y los dos Workers, publicados desde la rama `pruebas`.
-- [ ] Completar los datos de Access del panel.
+- [x] Panel con contraseña (`micrositio-panel.segundoricardo.workers.dev`).
+- [ ] Cargar el secreto `PANEL_CLAVE` en Cloudflare (lo hace el equipo).
 - [x] Rama unida a `pruebas` y dirección de la recepción en `js/estadisticas.js`: `https://micrositio-recepcion.segundoricardo.workers.dev/api/e`.
 - [ ] Probar desde dos celulares (datos móviles y wifi) y con una VPN, y comparar con el panel.
 - [ ] Comprobar que un pedido al panel sin sesión es rechazado.

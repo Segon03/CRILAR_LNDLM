@@ -1,10 +1,10 @@
-// Pruebas de la recepción de estadísticas y de la verificación de Access. Uso: node tests/estadisticas.test.mjs
+// Pruebas de la recepción de estadísticas y del login del panel. Uso: node tests/estadisticas.test.mjs
 import assert from 'node:assert/strict';
 import { idValido, leerPedido, esBot, origenPermitido, geoDe, limpiarTexto, MAX_CUERPO } from '../estadisticas/compartido/validacion.js';
-import { verificarJWT, verificarAccess } from '../estadisticas/compartido/access.js';
+import * as S from '../estadisticas/compartido/sesion.js';
 import { registrar } from '../estadisticas/recepcion/src/registro.js';
 import recepcion from '../estadisticas/recepcion/src/index.js';
-import panel, { visitas } from '../estadisticas/panel/src/index.js';
+import { crearPanel, visitas } from '../estadisticas/panel/src/index.js';
 
 const UUID1 = '3f2b8c1e-9d4a-4e7b-8a10-5c6d7e8f9a0b', UUID2 = 'a1b2c3d4-e5f6-4789-9abc-def012345678';
 
@@ -72,47 +72,57 @@ assert.equal(env.DB.llamadas.length, 0, 'ningún pedido inválido o de bot toca 
 env = { DB: { prepare() { throw new Error('caída'); } }, ORIGEN_PERMITIDO: ORIGEN };
 assert.equal((await recepcion.fetch(pedido(), env)).status, 204);
 
-// ---------- Access ----------
-const par = await crypto.subtle.generateKey({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign', 'verify']);
-const jwk = { ...(await crypto.subtle.exportKey('jwk', par.publicKey)), kid: 'k1', alg: 'RS256', use: 'sig' };
-const jwks = { keys: [jwk] };
-const b64 = (o) => Buffer.from(typeof o === 'string' ? o : JSON.stringify(o)).toString('base64url');
-async function firmar(datos, { kid = 'k1', clave = par.privateKey } = {}) {
-  const cab = b64({ alg: 'RS256', kid, typ: 'JWT' }), cuerpo = b64(datos);
-  const f = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', clave, new TextEncoder().encode(cab + '.' + cuerpo));
-  return `${cab}.${cuerpo}.${Buffer.from(f).toString('base64url')}`;
-}
-const EQUIPO = 'crilar.cloudflareaccess.com', AUD = 'aud-123', AHORA = 2_000_000_000;
-const base = { iss: `https://${EQUIPO}`, aud: [AUD], exp: AHORA + 600, email: 'segundo.nc@conicet.gov.ar' };
-const opt = { equipo: EQUIPO, aud: AUD, jwks, ahora: AHORA };
-assert.deepEqual(await verificarJWT(await firmar(base), opt), { ok: true, email: 'segundo.nc@conicet.gov.ar' });
-assert.equal((await verificarJWT(await firmar({ ...base, exp: AHORA - 1 }), opt)).motivo, 'vencido');
-assert.equal((await verificarJWT(await firmar({ ...base, aud: ['otra'] }), opt)).motivo, 'audiencia');
-assert.equal((await verificarJWT(await firmar({ ...base, iss: 'https://otro.cloudflareaccess.com' }), opt)).motivo, 'emisor');
-assert.equal((await verificarJWT(await firmar(base, { kid: 'desconocida' }), opt)).motivo, 'clave');
-const otra = await crypto.subtle.generateKey({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign', 'verify']);
-assert.equal((await verificarJWT(await firmar(base, { clave: otra.privateKey }), opt)).motivo, 'firma', 'firmado con otra clave');
-assert.equal((await verificarJWT('a.b', opt)).ok, false);
-assert.equal((await verificarJWT('', opt)).ok, false);
-
-const buscar = async () => ({ ok: true, json: async () => jwks });
-const conToken = async (t) => new Request('https://panel.ejemplo.workers.dev/api/yo', { headers: t ? { 'Cf-Access-Jwt-Assertion': t } : {} });
-const sinCfg = await verificarAccess(await conToken(await firmar({ ...base, exp: Math.floor(Date.now() / 1000) + 600 })), {}, { buscar });
-assert.equal(sinCfg.motivo, 'sin-configurar', 'sin configuración no deja pasar a nadie');
-const envPanel = { ACCESS_TEAM_DOMAIN: EQUIPO, ACCESS_AUD: AUD };
-assert.equal((await verificarAccess(await conToken(null), envPanel, { buscar })).motivo, 'sin-token');
-const valido = await firmar({ ...base, exp: Math.floor(Date.now() / 1000) + 600 });
-assert.equal((await verificarAccess(await conToken(valido), envPanel, { buscar })).ok, true);
+// ---------- login del panel ----------
+const CLAVE = 'una-clave-larga-de-prueba';
+assert.equal(S.claveConfigurada({}), false, 'sin contraseña no entra nadie');
+assert.equal(S.claveConfigurada({ PANEL_CLAVE: 'corta' }), false, 'contraseña corta no vale');
+assert.equal(S.claveConfigurada({ PANEL_CLAVE: CLAVE }), true);
+assert.equal(await S.claveCorrecta(CLAVE, CLAVE), true);
+assert.equal(await S.claveCorrecta(CLAVE + 'x', CLAVE), false);
+assert.equal(await S.claveCorrecta('', CLAVE), false);
+assert.equal(await S.claveCorrecta(CLAVE, ''), false);
+const T0 = 2_000_000_000;
+const tok = await S.crearSesion(CLAVE, T0);
+assert.equal(await S.sesionValida(tok, CLAVE, T0 + 10), true);
+assert.equal(await S.sesionValida(tok, CLAVE, T0 + S.DURACION_S + 1), false, 'vence');
+assert.equal(await S.sesionValida(tok, 'otra-clave-larga-distinta', T0 + 10), false, 'cambiar la contraseña corta las sesiones');
+const [exp, firma] = tok.split('.');
+assert.equal(await S.sesionValida(`${Number(exp) + 3600}.${firma}`, CLAVE, T0 + 10), false, 'no se puede estirar el vencimiento');
+assert.equal(await S.sesionValida(`${exp}.${firma.slice(0, -2)}AA`, CLAVE, T0 + 10), false, 'firma alterada');
+assert.equal(await S.sesionValida('basura', CLAVE, T0), false);
+assert.equal(await S.sesionValida(null, CLAVE, T0), false);
+assert.match(S.cookieSesion(tok), /HttpOnly; Secure; SameSite=Strict/);
+assert.equal(S.leerCookie(new Request('https://x/', { headers: { Cookie: `a=1; ${S.COOKIE}=${tok}; b=2` } })), tok);
 
 // ---------- Worker del panel ----------
 const filas = [{ v: UUID2, i: 1000, u: 1100, p: 'AR', r: 'La Rioja' }];
-const envP = { ...envPanel, ASSETS: { fetch: async () => new Response('<html></html>') },
+const P = crearPanel({ esperar: async () => {} });
+const BASE_P = 'https://panel.ejemplo.workers.dev';
+const envP = { PANEL_CLAVE: CLAVE, ASSETS: { fetch: async () => new Response('<html></html>') },
   DB: { prepare() { return { bind() { return { all: async () => ({ results: filas }) }; } }; } } };
-r = await panel.fetch(await conToken(null), envP);
-assert.equal(r.status, 403, 'sin sesión de Access no se entrega nada');
+const pedidoP = (ruta, o = {}) => new Request(BASE_P + ruta, o);
+r = await P.fetch(pedidoP('/'), envP);
+assert.equal(r.status, 200, 'la página (sin datos) se entrega');
+assert.equal((await P.fetch(pedidoP('/api/visitas'), envP)).status, 401, 'sin sesión no hay datos');
+assert.equal((await P.fetch(pedidoP('/api/yo'), envP)).status, 401);
+assert.equal((await P.fetch(pedidoP('/api/visitas'), { ...envP, PANEL_CLAVE: '' })).status, 503, 'sin contraseña configurada no hay datos');
+assert.equal((await P.fetch(pedidoP('/api/visitas', { headers: { Cookie: `${S.COOKIE}=${await S.crearSesion('otra-clave-larga-distinta')}` } }), envP)).status, 401, 'cookie firmada con otra clave');
+const post = (cuerpo, origen = BASE_P) => pedidoP('/api/entrar', { method: 'POST', headers: { Origin: origen, 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) });
+assert.equal((await P.fetch(post({ clave: 'equivocada-pero-larga' }), envP)).status, 401);
+assert.equal((await P.fetch(post({ clave: CLAVE }, 'https://otro.sitio'), envP)).status, 403, 'otro origen no puede iniciar sesión');
+r = await P.fetch(post({ clave: CLAVE }), envP);
+assert.equal(r.status, 200);
+const galleta = r.headers.get('Set-Cookie');
+assert.match(galleta, new RegExp(`^${S.COOKIE}=\\d+\\.`));
+const conSesion = { headers: { Cookie: galleta.split(';')[0] } };
+assert.equal((await P.fetch(pedidoP('/api/yo', conSesion), envP)).status, 200);
+r = await P.fetch(pedidoP('/api/visitas?desde=0&hasta=2000', conSesion), envP);
+assert.equal(r.status, 200);
 r = await visitas(new URL('https://x/api/visitas?desde=0&hasta=2000'), envP, 1500);
 assert.equal(r.status, 200); assert.deepEqual((await r.json()).filas, filas);
 assert.equal((await visitas(new URL('https://x/api/visitas?desde=10&hasta=5'), envP)).status, 400);
 assert.equal((await visitas(new URL('https://x/api/visitas?desde=0&hasta=999999999'), envP)).status, 400);
+r = await P.fetch(pedidoP('/api/salir', { method: 'POST' }), envP);
+assert.match(r.headers.get('Set-Cookie'), /Max-Age=0/);
 
 console.log('estadisticas: todas las pruebas pasaron');

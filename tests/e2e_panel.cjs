@@ -1,4 +1,4 @@
-// Prueba del panel del micrositio en un navegador con datos simulados: dibuja todo y descarga el CSV.
+// Prueba del panel del micrositio en un navegador con datos simulados: pide la contraseña, dibuja todo y descarga el CSV.
 // Uso: node tests/e2e_panel.cjs
 const { chromium } = require('playwright');
 const fs = require('node:fs');
@@ -8,6 +8,7 @@ const assert = require('node:assert/strict');
 const PUB = path.join(__dirname, '../estadisticas/panel/public');
 const BASE = 'https://micrositio-panel.prueba.workers.dev/';
 const ahora = Math.floor(Date.now() / 1000);
+let sesion = false;
 const filas = [
   { v: 'aaaaaaaa-1', i: ahora - 3000, u: ahora - 2800, p: 'AR', r: 'La Rioja' },
   { v: 'bbbbbbbb-2', i: ahora - 2000, u: ahora - 1990, p: 'AR', r: 'Córdoba' },
@@ -23,6 +24,14 @@ const filas = [
   page.on('pageerror', (e) => errores.push(e.message));
   await page.route(BASE + '**', (route) => {
     const u = new URL(route.request().url());
+    if (u.pathname === '/api/entrar') {
+      const ok = JSON.parse(route.request().postData()).clave === 'clave-de-prueba-larga';
+      if (ok) sesion = true;
+      return route.fulfill({ status: ok ? 200 : 401, contentType: 'application/json', body: '{}' });
+    }
+    if (u.pathname === '/api/salir') { sesion = false; return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }); }
+    if (u.pathname.startsWith('/api/') && !sesion) return route.fulfill({ status: 401, contentType: 'application/json', body: '{}' });
+    if (u.pathname === '/api/yo') return route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
     if (u.pathname === '/api/visitas') {
       const desde = +u.searchParams.get('desde'), hasta = +u.searchParams.get('hasta');
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ desde, hasta, ahora, truncado: false, filas: filas.filter((f) => f.i >= desde && f.i < hasta) }) });
@@ -32,6 +41,16 @@ const filas = [
     return route.fulfill({ status: 200, body: fs.readFileSync(path.join(PUB, rel)), headers: { 'Content-Type': tipos[path.extname(rel)] } });
   });
   await page.goto(BASE);
+  await page.waitForSelector('#ingreso:not([hidden])');
+  assert.equal(await page.$eval('#contenido', (n) => n.hidden), true, 'sin sesión no se ve el panel');
+  await page.fill('#clave', 'otra-clave-equivocada');
+  await page.click('#entrar');
+  await page.waitForSelector('#error-ingreso:not([hidden])');
+  assert.equal(await page.$eval('#error-ingreso', (n) => n.textContent), 'Contraseña incorrecta.');
+  if (process.env.CAPTURAS) await page.screenshot({ path: path.join(process.env.CAPTURAS, 'e2e_panel_ingreso.png') });
+  await page.fill('#clave', 'clave-de-prueba-larga');
+  await page.click('#entrar');
+  await page.waitForSelector('#contenido:not([hidden])');
   await page.click('[data-rango="7d"]');
   await page.waitForFunction(() => document.getElementById('k-ingresos').textContent === '4');
   const t = (id) => page.$eval('#' + id, (n) => n.textContent);
@@ -48,6 +67,9 @@ const filas = [
   assert.ok(!/vitrina/i.test(await page.content()), 'el panel no menciona la vitrina');
 
   if (process.env.CAPTURAS) await page.screenshot({ path: path.join(process.env.CAPTURAS, 'e2e_panel.png'), fullPage: true });
+  await page.click('#salir');
+  await page.waitForSelector('#ingreso:not([hidden])');
+  assert.equal(await page.$eval('#contenido', (n) => n.hidden), true, 'al salir se oculta el panel');
   assert.deepEqual(errores, []);
   await nav.close();
   console.log('e2e del panel: todas las pruebas pasaron');

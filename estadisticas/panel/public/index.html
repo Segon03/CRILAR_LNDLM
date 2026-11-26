@@ -16,7 +16,18 @@
     <div class="vivo" id="vivo" hidden title="Visitantes con actividad en el último minuto"><span class="punto"></span><b id="vivo-n">0</b> conectados ahora</div>
   </header>
 
-  <section class="controles" aria-label="Controles">
+  <section id="ingreso" class="ingreso" hidden>
+    <form id="form-ingreso" class="tarjeta">
+      <h2>Ingresar al panel</h2>
+      <p class="sub">Panel privado de estadísticas. Escribí la contraseña del panel.</p>
+      <label for="clave">Contraseña</label>
+      <input type="password" id="clave" name="clave" autocomplete="current-password" required minlength="12">
+      <button type="submit" class="activo" id="entrar">Entrar</button>
+      <p id="error-ingreso" class="error" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section class="controles" id="controles" aria-label="Controles" hidden>
     <div class="grupo" role="group" aria-label="Período">
       <button type="button" data-rango="hoy">Hoy</button>
       <button type="button" data-rango="7d">Últimos 7 días</button>
@@ -31,12 +42,13 @@
     <div class="grupo acciones">
       <button type="button" id="csv" class="sec">Descargar CSV</button>
       <button type="button" id="imprimir" class="sec">Informe (PDF)</button>
+      <button type="button" id="salir" class="sec">Salir</button>
     </div>
   </section>
 
   <p id="mensaje" class="mensaje" hidden></p>
 
-  <main id="contenido">
+  <main id="contenido" hidden>
     <section class="kpis" aria-label="Indicadores">
       <div class="kpi"><span>Ingresos</span><b id="k-ingresos">–</b><small>visitas a la página</small></div>
       <div class="kpi"><span>Visitantes únicos</span><b id="k-unicos">–</b><small id="k-recurrentes">aproximado</small></div>

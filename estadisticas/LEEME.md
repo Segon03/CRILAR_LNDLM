@@ -7,7 +7,7 @@ Las estadísticas son solo de este micrositio. No incluyen otros proyectos del C
 ## Qué hay
 
 - `recepcion/`: servicio público que recibe los avisos del micrositio y los guarda. Solo puede escribir.
-- `panel/`: el panel privado. Solo puede leer. Queda detrás de un login (Cloudflare Access).
+- `panel/`: el panel privado. Solo puede leer. Se entra con una contraseña.
 - `schema.sql`: la tabla de visitas.
 - `compartido/`: validaciones y verificación del login, que usan los dos servicios.
 
@@ -55,14 +55,14 @@ Los servicios se publican solos desde GitHub cada vez que cambia la rama elegida
 7. **Publicar el panel.** Igual que el paso 4, con estos datos:
    - Nombre del proyecto: `micrositio-panel`.
    - Directorio raíz: `estadisticas/panel`.
-8. **Activar el login.** En Cloudflare, abrí *Zero Trust* y creá el equipo con el plan gratuito. Puede pedir una tarjeta para verificar el alta aunque no cobre nada. Después, en *Workers & Pages > micrositio-panel > Settings > Domains & Routes*, activá *Cloudflare Access* en la dirección `workers.dev`. Al activarlo aparecen dos datos: el dominio del equipo (algo como `tuequipo.cloudflareaccess.com`) y el *AUD tag*. Copiá los dos.
-9. **Quién puede entrar.** En *Zero Trust > Access > Applications*, abrí la aplicación que se creó y, en su política de tipo *Allow*, dejá como único permitido el correo `segundo.nc@conicet.gov.ar`. No uses una regla por dominio (`@conicet.gov.ar`), porque dejaría entrar a cualquier persona con correo del CONICET.
-10. **Datos de Access en el código.** En `estadisticas/panel/wrangler.jsonc`, completá `ACCESS_TEAM_DOMAIN` con el dominio del equipo (sin `https://`) y `ACCESS_AUD` con el AUD tag. No son secretos. Al subir el cambio, el panel se vuelve a publicar solo. Mientras estén vacíos, el panel responde "Acceso denegado" a todos, a propósito.
-11. **Probar.** Abrí la dirección del panel en una ventana privada. Tiene que pedirte el correo y mandarte un código. Con un correo que no está autorizado no tiene que dejarte entrar.
+8. **Contraseña del panel.** En *Workers & Pages > micrositio-panel > Settings > Variables and Secrets*, elegí *Add*, tipo *Secret*, nombre `PANEL_CLAVE`, y escribí la contraseña (12 caracteres o más; conviene una frase larga). Guardá con *Deploy*. La contraseña queda cifrada en Cloudflare: no está en el código ni en GitHub. Mientras no esté configurada, el panel no entrega datos a nadie.
+9. **Probar.** Abrí `https://micrositio-panel.segundoricardo.workers.dev` en una ventana privada. Tiene que pedir la contraseña; con una equivocada no entra.
 
-### Sumar más correos después
+### Cambiar la contraseña o compartir el panel
 
-No hace falta tocar el código. En *Zero Trust > Access > Applications*, abrí la aplicación del panel, editá la política *Allow* y agregá los correos de a uno. Rigen en el momento.
+Para que otra persona vea el panel, pasale la dirección y la contraseña por un canal privado. Para cambiarla, editá el secreto `PANEL_CLAVE` en el mismo lugar del paso 8: todas las sesiones abiertas se cierran solas y hay que entrar con la nueva. La sesión dura 12 horas; el botón *Salir* la cierra antes.
+
+Por qué contraseña y no Cloudflare Access: Access (login con código por correo) pide cargar una tarjeta para activar el plan gratuito de Zero Trust. Si más adelante se quiere, se puede cambiar.
 
 ## Qué visitas no se cuentan
 
@@ -110,8 +110,8 @@ Si preferís borrar solo lo anterior a la apertura de la visita (18:00 del 27), 
 ## Si algo no anda
 
 - **No se registran visitas:** revisá que `js/estadisticas.js` tenga la dirección completa, con `/api/e` al final, y que el cambio esté en la rama que publica el sitio. Probá sin `?previa`, sin `?cuenta`, sin `?editar` y desde un navegador que no esté marcado con `?sinstats=1`.
-- **El panel dice "Acceso denegado":** faltan o están mal `ACCESS_TEAM_DOMAIN` o `ACCESS_AUD`, o el correo no figura en la política *Allow*. Cerrá la sesión (ventana privada) y volvé a entrar.
-- **El panel dice "Sin acceso" después de un rato:** venció la sesión. Recargá la página.
+- **El panel dice que no tiene contraseña configurada:** falta el secreto `PANEL_CLAVE` (paso 8) o tiene menos de 12 caracteres.
+- **El panel vuelve a pedir la contraseña:** pasaron 12 horas o alguien cambió la contraseña. Volvé a escribirla.
 - **Aparecen visitas sin provincia:** pasa con algunas conexiones. Se muestran como "Sin dato".
 
 ## Pruebas
@@ -126,4 +126,4 @@ NODE_PATH=$(npm root -g) node tests/e2e_estadisticas.cjs
 NODE_PATH=$(npm root -g) node tests/e2e_panel.cjs
 ```
 
-Las tres primeras prueban la recepción, el login, el script de la página y los cálculos del panel. Las dos últimas usan Playwright: abren el micrositio como si estuviera publicada y comprueban que cuenta, que no cuenta los accesos de prueba, que sigue andando si la recepción no responde, y que el panel dibuja bien y descarga el CSV.
+Las tres primeras prueban la recepción, la contraseña y la sesión del panel, el script de la página y los cálculos del panel. Las dos últimas usan Playwright: abren el micrositio como si estuviera publicada y comprueban que cuenta, que no cuenta los accesos de prueba, que sigue andando si la recepción no responde, y que el panel dibuja bien y descarga el CSV.

@@ -1,4 +1,4 @@
-// Página del panel: pide las visitas al Worker, las calcula con calculos.js y dibuja los gráficos.
+// Página del panel: pide la contraseña, después pide las visitas al Worker, las calcula con calculos.js y dibuja los gráficos.
 import * as C from './calculos.js';
 
 const $ = (id) => document.getElementById(id);
@@ -16,7 +16,7 @@ async function cargar() {
   const ahora = Math.floor(Date.now() / 1000);
   try {
     const r = await fetch(`/api/visitas?desde=${actual.desde}&hasta=${actual.hasta}`, { cache: 'no-store', credentials: 'same-origin' });
-    if (r.status === 403) { aviso('Sin acceso: tu sesión venció o tu correo no está autorizado. Recargá la página para volver a ingresar.'); return; }
+    if (r.status === 401) { mostrarIngreso('La sesión venció. Volvé a escribir la contraseña.'); return; }
     if (!r.ok) { aviso('No se pudieron cargar los datos. Probá de nuevo en un momento.'); return; }
     datos = await r.json();
     datos.recibido = ahora;
@@ -109,10 +109,71 @@ function descargarCSV() {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
+let adentro = false;
+
+function mostrarIngreso(error) {
+  adentro = false;
+  datos = null;
+  $('ingreso').hidden = false;
+  $('controles').hidden = true;
+  $('contenido').hidden = true;
+  $('vivo').hidden = true;
+  aviso('');
+  $('rango-texto').textContent = 'acceso privado';
+  $('error-ingreso').hidden = !error;
+  $('error-ingreso').textContent = error || '';
+  $('clave').value = '';
+  $('clave').focus();
+}
+
+function mostrarPanel() {
+  adentro = true;
+  $('ingreso').hidden = true;
+  $('controles').hidden = false;
+  $('contenido').hidden = false;
+  // antes del evento se muestra "hoy" (para ver las pruebas) y desde su inicio, la noche completa
+  elegir(Date.now() / 1000 >= C.EVENTO.desde ? 'evento' : 'hoy');
+}
+
+async function entrar(ev) {
+  ev.preventDefault();
+  const boton = $('entrar');
+  boton.disabled = true;
+  $('error-ingreso').hidden = true;
+  try {
+    const r = await fetch('/api/entrar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clave: $('clave').value }), credentials: 'same-origin' });
+    if (r.ok) { $('clave').value = ''; mostrarPanel(); }
+    else if (r.status === 401) mostrarIngreso('Contraseña incorrecta.');
+    else if (r.status === 503) mostrarIngreso('El panel todavía no tiene contraseña configurada en Cloudflare.');
+    else mostrarIngreso('No se pudo ingresar. Probá de nuevo.');
+  } catch {
+    mostrarIngreso('No se pudo conectar. Revisá la conexión.');
+  } finally {
+    boton.disabled = false;
+  }
+}
+
+async function salir() {
+  try { await fetch('/api/salir', { method: 'POST', credentials: 'same-origin' }); } catch { /* igual se sale */ }
+  mostrarIngreso('');
+}
+
+async function iniciar() {
+  try {
+    const r = await fetch('/api/yo', { cache: 'no-store', credentials: 'same-origin' });
+    if (r.ok) mostrarPanel();
+    else if (r.status === 503) mostrarIngreso('El panel todavía no tiene contraseña configurada en Cloudflare.');
+    else mostrarIngreso('');
+  } catch {
+    mostrarIngreso('No se pudo conectar. Revisá la conexión.');
+  }
+}
+
 document.querySelectorAll('[data-rango]').forEach((b) => b.addEventListener('click', () => elegir(b.dataset.rango)));
 $('aplicar').addEventListener('click', aplicarFechas);
 $('csv').addEventListener('click', descargarCSV);
 $('imprimir').addEventListener('click', () => window.print());
-setInterval(() => { if (document.visibilityState === 'visible') cargar(); }, REFRESCO_MS);
-// antes del evento se muestra "hoy" (para ver las pruebas) y desde su inicio, la noche completa
-elegir(Date.now() / 1000 >= C.EVENTO.desde ? 'evento' : 'hoy');
+$('salir').addEventListener('click', salir);
+$('form-ingreso').addEventListener('submit', entrar);
+setInterval(() => { if (adentro && document.visibilityState === 'visible') cargar(); }, REFRESCO_MS);
+iniciar();

@@ -66,3 +66,12 @@ input { font: inherit; font-size: .85rem; padding: 6px 8px; border: 1px solid va
   :root { --acento: #2f8f5b; --texto: #000; --suave: #444; --vacio: #e6e6e6; }
   .barra, .pista i, .calor .c { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+.ingreso { display: grid; place-items: center; min-height: 50vh; }
+.ingreso form { width: min(100%, 380px); display: flex; flex-direction: column; gap: 10px; }
+.ingreso label { font-size: .85rem; color: var(--suave); }
+.ingreso input { font-size: 1rem; padding: 9px 10px; }
+.ingreso button { padding: 9px 12px; font-size: 1rem; }
+.error { margin: 0; color: #b3261e; font-size: .9rem; }
+@media (prefers-color-scheme: dark) { .error { color: #ff8a80; } }
+[hidden] { display: none !important; }
