@@ -38,8 +38,8 @@ async function cargarParticipantes() {
   $('s-n').textContent = fmtN(participantes.length);
   const cuerpo = $('s-tabla').querySelector('tbody');
   cuerpo.innerHTML = participantes.length
-    ? participantes.slice().reverse().map((p) => `<tr><td>${esc(C.textoAR(p.fecha))}</td><td>${esc(p.nombre)}</td><td>${esc(p.email)}</td><td>${esc(p.telefono || '')}</td><td>${esc(p.codigo)}</td></tr>`).join('')
-    : '<tr><td colspan="5" class="vacio">Todavía no hay participantes.</td></tr>';
+    ? participantes.slice().reverse().map((p) => `<tr><td>${esc(C.textoAR(p.fecha))}</td><td>${esc(p.nombre)}</td><td>${esc(p.email)}</td><td>${esc(p.edad ?? '')}</td><td>${esc(p.domicilio || '')}</td><td>${esc(p.telefono || '')}</td><td>${esc(p.codigo)}</td></tr>`).join('')
+    : '<tr><td colspan="7" class="vacio">Todavía no hay participantes.</td></tr>';
 }
 
 function descargarParticipantes() {

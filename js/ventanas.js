@@ -196,6 +196,8 @@
       '<form id="form-sorteo" novalidate>' +
         campo('nombre', 'Nombre y apellido', 'text', 'autocomplete="name" required') +
         campo('email', 'Correo electrónico', 'email', 'autocomplete="email" inputmode="email" required') +
+        campo('edad', 'Edad', 'number', 'inputmode="numeric" min="18" max="120" step="1" required') +
+        campo('domicilio', 'Domicilio (calle, número y localidad)', 'text', 'autocomplete="street-address" maxlength="150" required') +
         campo('telefono', 'Teléfono (opcional)', 'tel', 'autocomplete="tel" inputmode="tel"') +
         '<div class="trampa" aria-hidden="true"><label>No completar<input name="web" tabindex="-1" autocomplete="off"></label></div>' +
         '<div class="campo" id="campo-acepto"><label class="acepto"><input type="checkbox" name="acepto" aria-describedby="err-acepto"><span>Acepto las ' + bases + ' y que el CRILAR use estos datos solo para este sorteo.</span></label>' +
@@ -221,10 +223,14 @@
   }
   function validar(f) {
     const nombre = f.elements.nombre.value.trim(), email = f.elements.email.value.trim();
+    const edad = Number(f.elements.edad.value), domicilio = f.elements.domicilio.value.trim();
     const a = poner('nombre', nombre.length < 3 ? 'Escribí tu nombre y apellido.' : '');
     const b = poner('email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? '' : 'Revisá el correo: parece incompleto.');
+    const d = poner('edad', !f.elements.edad.value.trim() || !Number.isInteger(edad) || edad > 120 ? 'Escribí tu edad en años.'
+      : edad < 18 ? 'Tenés que ser mayor de 18. Si sos menor, pedile a un adulto responsable que se inscriba con sus datos.' : '');
+    const e = poner('domicilio', domicilio.length < 5 ? 'Escribí tu domicilio: calle, número y localidad.' : '');
     const c = poner('acepto', f.elements.acepto.checked ? '' : 'Para participar tenés que aceptar las bases.');
-    return a && b && c;
+    return a && b && d && e && c;
   }
   async function enviar(datos) {
     const url = (D.sorteo && D.sorteo.endpoint) || '';
@@ -262,6 +268,7 @@
       try {
         await enviar({
           evento: D.evento.nombre, nombre: form.elements.nombre.value.trim(), email: form.elements.email.value.trim(),
+          edad: Number(form.elements.edad.value), domicilio: form.elements.domicilio.value.trim(),
           telefono: form.elements.telefono.value.trim(), codigo: codigo(), objetos: C.vistos(), fecha: new Date().toISOString()
         });
         estado.registrado = true;

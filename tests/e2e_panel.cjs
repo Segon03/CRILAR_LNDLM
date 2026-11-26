@@ -10,7 +10,7 @@ const BASE = 'https://micrositio-panel.prueba.workers.dev/';
 const ahora = Math.floor(Date.now() / 1000);
 let sesion = false;
 const participantes = [
-  { fecha: ahora - 500, nombre: 'Ana Pérez', email: 'ana@ejemplo.com', telefono: '', codigo: 'CR-1A2B3C', objetos: 12, pais: 'AR', provincia: 'La Rioja' },
+  { fecha: ahora - 500, nombre: 'Ana Pérez', email: 'ana@ejemplo.com', edad: 34, domicilio: 'Calle 1 123, Chilecito', telefono: '', codigo: 'CR-1A2B3C', objetos: 12, pais: 'AR', provincia: 'La Rioja' },
   { fecha: ahora - 100, nombre: '<b>Luis</b>', email: 'luis@ejemplo.com', telefono: '380', codigo: 'CR-ZZZZZZ', objetos: 12, pais: 'AR', provincia: 'Córdoba' },
 ];
 const filas = [

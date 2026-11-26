@@ -54,11 +54,12 @@ assert.ok(csv.includes('"27/11/2026 21:00";"90";"AR";"La ""Rioja""";"3f2b8c1e"')
 assert.ok(!csv.includes('9d4a'), 'el identificador se acorta');
 
 // ---------- sorteo ----------
-const part = [{ fecha: E0 + 21 * 3600, nombre: 'Ana "La" Pérez', email: 'ana@ejemplo.com', telefono: '', codigo: 'CR-1A2B3C', objetos: 12, pais: 'AR', provincia: 'La Rioja' },
+const part = [{ fecha: E0 + 21 * 3600, nombre: 'Ana "La" Pérez', email: 'ana@ejemplo.com', edad: 34, domicilio: 'Calle 1 123, Chilecito', telefono: '', codigo: 'CR-1A2B3C', objetos: 12, pais: 'AR', provincia: 'La Rioja' },
   { fecha: E0 + 22 * 3600, nombre: 'Luis', email: 'luis@ejemplo.com', telefono: '380', codigo: 'CR-ZZZZZZ', objetos: 12, pais: 'AR', provincia: 'Córdoba' }];
 const pcsv = C.participantesCSV(part);
 assert.ok(pcsv.startsWith('\ufeff"Fecha y hora (Argentina)";"Nombre y apellido";"Correo"'));
-assert.ok(pcsv.includes('"27/11/2026 21:00";"Ana ""La"" Pérez";"ana@ejemplo.com";"";"CR-1A2B3C"'));
+assert.ok(pcsv.includes('"27/11/2026 21:00";"Ana ""La"" Pérez";"ana@ejemplo.com";"34";"Calle 1 123, Chilecito";"";"CR-1A2B3C"'));
+assert.ok(pcsv.includes('"luis@ejemplo.com";"";"";"380"'), 'sin edad ni domicilio quedan vacíos');
 assert.equal(pcsv.trim().split('\r\n').length, 3);
 assert.equal(C.sortear([], () => 0), null);
 assert.equal(C.sortear(part, () => 1).nombre, 'Luis');

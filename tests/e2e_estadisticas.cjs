@@ -129,6 +129,13 @@ async function entrar(page) {
     await page.waitForSelector('#form-sorteo');
     await page.fill('#f-nombre', 'Ana Pérez');
     await page.fill('#f-email', 'ana@ejemplo.com');
+    await page.fill('#f-edad', '16');
+    await page.fill('#f-domicilio', 'Calle 1 123, Chilecito');
+    await page.check('#form-sorteo input[name=acepto]');
+    await page.click('#form-sorteo button[type=submit]');
+    const errEdad = await page.textContent('#err-edad');
+    if (!/mayor de 18/.test(errEdad)) throw new Error('falta el aviso de edad: ' + errEdad);
+    await page.fill('#f-edad', '34');
     await page.check('#form-sorteo input[name=acepto]');
     await page.click('#form-sorteo button[type=submit]');
   }
@@ -137,7 +144,10 @@ async function entrar(page) {
   await r.page.waitForSelector('#sorteo-titulo:has-text("Ya estás participando")');
   assert.equal(r.inscripciones.length, 1);
   assert.equal(r.inscripciones[0].origen, 'https://segon03.github.io');
+  assert.equal(r.inscripciones.length, 1, 'con 16 años no se envió');
   assert.equal(r.inscripciones[0].cuerpo.email, 'ana@ejemplo.com');
+  assert.equal(r.inscripciones[0].cuerpo.edad, 34);
+  assert.equal(r.inscripciones[0].cuerpo.domicilio, 'Calle 1 123, Chilecito');
   assert.match(r.inscripciones[0].cuerpo.codigo, /^CR-[0-9A-Z]{6}$/);
   assert.ok(r.inscripciones[0].cuerpo.objetos > 0);
   assert.deepEqual(r.errores, []);

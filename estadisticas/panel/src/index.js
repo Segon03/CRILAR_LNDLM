@@ -27,7 +27,7 @@ export async function visitas(url, env, ahora = Math.floor(Date.now() / 1000)) {
 
 export async function participantes(env) {
   const { results } = await env.DB
-    .prepare('SELECT fecha, nombre, email, telefono, codigo, objetos, pais, provincia FROM participantes ORDER BY fecha LIMIT ?1')
+    .prepare('SELECT fecha, nombre, email, edad, domicilio, telefono, codigo, objetos, pais, provincia FROM participantes ORDER BY fecha LIMIT ?1')
     .bind(MAX_FILAS)
     .all();
   return respuesta({ filas: results });

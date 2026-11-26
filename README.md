@@ -55,7 +55,7 @@ Los textos que dicen "de ejemplo" son provisorios.
 
 El formulario solo se abre cuando se visitaron todos los objetos que figuran como `"tipo": "objeto"`. Los de tipo `"info"` no cuentan.
 
-Los datos de cada participante (nombre, correo, teléfono opcional y número de recorrido) se envían a la recepción de estadísticas en Cloudflare (`sorteo.endpoint` en `datos/muestra.js`) y se guardan en la tabla `participantes` de la misma base. Se ven, se descargan en CSV y se sortea un ganador desde el panel privado, con su contraseña. Hay un participante por correo: si alguien se anota dos veces, queda la primera inscripción. Las inscripciones se guardan desde el 27/11 a las 17:00, igual que las visitas. Más detalles en `estadisticas/LEEME.md`.
+Los datos de cada participante (nombre, correo, edad, domicilio, teléfono opcional y número de recorrido) se envían a la recepción de estadísticas en Cloudflare (`sorteo.endpoint` en `datos/muestra.js`) y se guardan en la tabla `participantes` de la misma base. Se ven, se descargan en CSV y se sortea un ganador desde el panel privado, con su contraseña. Hay un participante por correo: si alguien se anota dos veces, queda la primera inscripción. Las inscripciones se guardan desde el 27/11 a las 17:00, igual que las visitas. Más detalles en `estadisticas/LEEME.md`.
 
 Si `sorteo.endpoint` quedara vacío, los datos quedarían solo en el navegador de quien los cargó.
 

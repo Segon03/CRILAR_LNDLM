@@ -76,7 +76,7 @@ Los enlaces directos a una sala (`?escena=...`) sí cuentan, porque pueden llega
 
 ## Sorteo
 
-El formulario del sorteo del micrositio envía los datos a `/api/sorteo` de la misma recepción, y se guardan en la tabla `participantes` de la base: fecha, nombre, correo, teléfono (opcional), número de recorrido, cantidad de objetos visitados, país y provincia. Hay un participante por correo; si alguien se anota dos veces, queda la primera inscripción. Si la base no responde, el formulario avisa y deja reintentar.
+El formulario del sorteo del micrositio envía los datos a `/api/sorteo` de la misma recepción, y se guardan en la tabla `participantes` de la base: fecha, nombre, correo, edad, domicilio, teléfono (opcional), número de recorrido, cantidad de objetos visitados, y país y provincia de la conexión. Solo se aceptan mayores de 18 años: un menor participa a través de un adulto que se inscribe con sus propios datos. Hay un participante por correo; si alguien se anota dos veces, queda la primera inscripción. Si la base no responde, el formulario avisa y deja reintentar.
 
 En el panel, al final, está la lista de participantes con dos botones: *Descargar participantes (CSV)* y *Sortear un ganador*, que elige uno al azar con el generador seguro del navegador y muestra la fecha y la hora del sorteo. Conviene sortear con testigos y guardar una captura y el CSV.
 

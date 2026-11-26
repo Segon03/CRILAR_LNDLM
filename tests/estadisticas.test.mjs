@@ -92,8 +92,15 @@ const recepcionWrangler = (await import('node:fs')).readFileSync(new URL('../est
 assert.match(recepcionWrangler, /"CONTAR_DESDE": "1795809600"/, '27/11/2026 17:00 hora de Argentina');
 
 // ---------- sorteo ----------
-const P_OK = { nombre: 'Ana Pérez', email: ' Ana@Ejemplo.com ', telefono: '380 4123456', codigo: 'cr-1a2b3c', objetos: 12 };
-assert.deepEqual(leerParticipante(JSON.stringify(P_OK)), { nombre: 'Ana Pérez', email: 'ana@ejemplo.com', telefono: '380 4123456', codigo: 'CR-1A2B3C', objetos: 12 });
+const P_OK = { nombre: 'Ana Pérez', email: ' Ana@Ejemplo.com ', edad: 34, domicilio: 'Av. Siempreviva 742, Anillaco', telefono: '380 4123456', codigo: 'cr-1a2b3c', objetos: 12 };
+assert.deepEqual(leerParticipante(JSON.stringify(P_OK)), { nombre: 'Ana Pérez', email: 'ana@ejemplo.com', edad: 34, domicilio: 'Av. Siempreviva 742, Anillaco', telefono: '380 4123456', codigo: 'CR-1A2B3C', objetos: 12 });
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, edad: 17 })), null, 'menores de 18 no');
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, edad: 18 })).edad, 18);
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, edad: 30.5 })), null);
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, edad: 200 })), null);
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, edad: undefined })), null, 'edad obligatoria');
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, domicilio: '' })), null, 'domicilio obligatorio');
+assert.equal(leerParticipante(JSON.stringify({ ...P_OK, domicilio: 'x'.repeat(400) })).domicilio.length, 150, 'domicilio recortado');
 assert.equal(leerParticipante(JSON.stringify({ ...P_OK, telefono: '' })).telefono, null, 'teléfono opcional');
 assert.equal(leerParticipante(JSON.stringify({ ...P_OK, nombre: 'A' })), null);
 assert.equal(leerParticipante(JSON.stringify({ ...P_OK, email: 'sin-arroba' })), null);
@@ -108,7 +115,7 @@ assert.equal(leerParticipante(JSON.stringify({ ...P_OK, nombre: '<script>Ana</sc
   const db = baseFalsa();
   await anotarParticipante(db, leerParticipante(JSON.stringify(P_OK)), 1000, { pais: 'AR', provincia: 'La Rioja' });
   assert.match(db.llamadas[0].sql, /INSERT OR IGNORE INTO participantes/);
-  assert.deepEqual(db.llamadas[0].args, [1000, 'Ana Pérez', 'ana@ejemplo.com', '380 4123456', 'CR-1A2B3C', 12, 'AR', 'La Rioja']);
+  assert.deepEqual(db.llamadas[0].args, [1000, 'Ana Pérez', 'ana@ejemplo.com', '380 4123456', 'CR-1A2B3C', 12, 'AR', 'La Rioja', 34, 'Av. Siempreviva 742, Anillaco']);
   const pedidoS = (cuerpo, origen = ORIGEN) => new Request('https://recepcion.ejemplo.workers.dev/api/sorteo', { method: 'POST', headers: { Origin: origen, 'User-Agent': UA, 'Content-Type': 'text/plain' }, body: cuerpo });
   let e2 = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN };
   assert.equal((await recepcion.fetch(pedidoS(JSON.stringify(P_OK)), e2)).status, 204);

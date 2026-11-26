@@ -21,7 +21,7 @@ export async function registrar(db, { t, s, v }, ahora, { pais, provincia }) {
 // Un participante por correo: si ya está anotado, se conserva la primera inscripción.
 export async function anotarParticipante(db, p, ahora, { pais, provincia }) {
   await db
-    .prepare('INSERT OR IGNORE INTO participantes (fecha, nombre, email, telefono, codigo, objetos, pais, provincia) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)')
-    .bind(ahora, p.nombre, p.email, p.telefono, p.codigo, p.objetos, pais, provincia)
+    .prepare('INSERT OR IGNORE INTO participantes (fecha, nombre, email, telefono, codigo, objetos, pais, provincia, edad, domicilio) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)')
+    .bind(ahora, p.nombre, p.email, p.telefono, p.codigo, p.objetos, pais, provincia, p.edad, p.domicilio)
     .run();
 }

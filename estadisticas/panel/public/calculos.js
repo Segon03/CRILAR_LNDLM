@@ -140,8 +140,8 @@ export function rango(nombre, ahora) {
 
 // ---------- sorteo ----------
 export function participantesCSV(filas) {
-  const cab = ['Fecha y hora (Argentina)', 'Nombre y apellido', 'Correo', 'Teléfono', 'Número de recorrido', 'Objetos visitados', 'País', 'Provincia'];
-  const lineas = filas.map((f) => [textoAR(f.fecha), f.nombre, f.email, f.telefono || '', f.codigo, f.objetos, f.pais || '', f.provincia || ''].map(celda).join(';'));
+  const cab = ['Fecha y hora (Argentina)', 'Nombre y apellido', 'Correo', 'Edad', 'Domicilio', 'Teléfono', 'Número de recorrido', 'Objetos visitados', 'País (conexión)', 'Provincia (conexión)'];
+  const lineas = filas.map((f) => [textoAR(f.fecha), f.nombre, f.email, f.edad ?? '', f.domicilio || '', f.telefono || '', f.codigo, f.objetos, f.pais || '', f.provincia || ''].map(celda).join(';'));
   return '\ufeff' + [cab.map(celda).join(';'), ...lineas].join('\r\n') + '\r\n';
 }
 

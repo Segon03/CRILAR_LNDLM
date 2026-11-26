@@ -19,5 +19,10 @@ CREATE TABLE IF NOT EXISTS participantes (
   codigo    TEXT NOT NULL,         -- número de recorrido CR-XXXXXX
   objetos   INTEGER NOT NULL,      -- objetos visitados
   pais      TEXT,
-  provincia TEXT
+  provincia TEXT,
+  edad      INTEGER,               -- años (18 o más)
+  domicilio TEXT                   -- calle, número y localidad
 );
+-- Si la tabla ya existía sin edad ni domicilio (creada antes del 25/11/2026 23:45):
+-- ALTER TABLE participantes ADD COLUMN edad INTEGER;
+-- ALTER TABLE participantes ADD COLUMN domicilio TEXT;
