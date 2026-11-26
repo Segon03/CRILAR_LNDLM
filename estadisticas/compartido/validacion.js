@@ -40,3 +40,10 @@ export function geoDe(cf) {
   const pais = limpiarTexto(cf && cf.country, 2);
   return { pais: pais ? pais.toUpperCase() : null, provincia: limpiarTexto(cf && cf.region) };
 }
+
+// Antes de CONTAR_DESDE (segundos desde 1970, hora del servidor) los avisos se aceptan pero no se guardan.
+// Sin valor, o con un valor que no es un número, se cuenta siempre.
+export function antesDeContar(ahora, desde) {
+  const d = Number(desde);
+  return Number.isFinite(d) && d > 0 && ahora < d;
+}

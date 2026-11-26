@@ -1,6 +1,6 @@
 // Pruebas de la recepción de estadísticas y del login del panel. Uso: node tests/estadisticas.test.mjs
 import assert from 'node:assert/strict';
-import { idValido, leerPedido, esBot, origenPermitido, geoDe, limpiarTexto, MAX_CUERPO } from '../estadisticas/compartido/validacion.js';
+import { idValido, leerPedido, esBot, origenPermitido, geoDe, limpiarTexto, antesDeContar, MAX_CUERPO } from '../estadisticas/compartido/validacion.js';
 import * as S from '../estadisticas/compartido/sesion.js';
 import { registrar } from '../estadisticas/recepcion/src/registro.js';
 import recepcion from '../estadisticas/recepcion/src/index.js';
@@ -71,6 +71,25 @@ assert.equal(env.DB.llamadas.length, 0, 'ningún pedido inválido o de bot toca 
 // un fallo de la base no se le nota a la app
 env = { DB: { prepare() { throw new Error('caída'); } }, ORIGEN_PERMITIDO: ORIGEN };
 assert.equal((await recepcion.fetch(pedido(), env)).status, 204);
+
+// ---------- hora de inicio ----------
+assert.equal(antesDeContar(100, '200'), true);
+assert.equal(antesDeContar(200, '200'), false);
+assert.equal(antesDeContar(300, '200'), false);
+assert.equal(antesDeContar(100, ''), false, 'vacío: se cuenta siempre');
+assert.equal(antesDeContar(100, undefined), false);
+assert.equal(antesDeContar(100, 'x'), false);
+{
+  const envFut = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN, CONTAR_DESDE: String(Math.floor(Date.now() / 1000) + 3600) };
+  const rr = await recepcion.fetch(pedido(), envFut);
+  assert.equal(rr.status, 204, 'antes de la hora responde bien');
+  assert.equal(envFut.DB.llamadas.length, 0, 'pero no guarda nada');
+  const envPas = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN, CONTAR_DESDE: '1' };
+  await recepcion.fetch(pedido(), envPas);
+  assert.equal(envPas.DB.llamadas.length, 1, 'después de la hora guarda');
+}
+const recepcionWrangler = (await import('node:fs')).readFileSync(new URL('../estadisticas/recepcion/wrangler.jsonc', import.meta.url), 'utf8');
+assert.match(recepcionWrangler, /"CONTAR_DESDE": "1795809600"/, '27/11/2026 17:00 hora de Argentina');
 
 // ---------- login del panel ----------
 const CLAVE = 'una-clave-larga-de-prueba';

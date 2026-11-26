@@ -2,7 +2,8 @@
 import assert from 'node:assert/strict';
 import * as C from '../estadisticas/panel/public/calculos.js';
 
-const E0 = C.EVENTO.desde; // 27/11/2026 00:00 hora de Argentina
+const E0 = C.epochDesdeAR('2026-11-27'); // 27/11/2026 00:00 hora de Argentina
+assert.equal(C.EVENTO.desde, C.epochDesdeAR('2026-11-27T17:00'), 'el evento empieza a las 17:00');
 const fila = (seg, dur, v, p = 'AR', r = 'La Rioja') => ({ v, i: E0 + seg, u: E0 + seg + dur, p, r });
 
 // ---------- horas de Argentina ----------

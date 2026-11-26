@@ -33,7 +33,7 @@ Son dos Workers para que la recepción, que es pública, no tenga ningún acceso
 - **Un solo archivo nuevo en el micrositio:** `js/estadisticas.js`, cargado al final de `index.html`. Es un script común como los demás del sitio. Si falla, la visita sigue igual.
 - **No se cuentan:** `?previa`, `?cuenta`, `?editar`, los navegadores marcados con `?sinstats=1`, `localhost` y el archivo abierto con doble clic. Los enlaces `?escena=` sí cuentan.
 - **Acceso al panel:** contraseña única. Se eligió en lugar de Cloudflare Access porque Access pide cargar una tarjeta para activar Zero Trust.
-- **Evento:** 27 de noviembre de 2026; la visita abre a las 18:00. El filtro "Noche de los Museos" del panel cubre del 27/11 00:00 al 28/11 06:00, hora de Argentina.
+- **Evento:** 27 de noviembre de 2026; la visita abre a las 18:00. Las visitas se guardan desde las 17:00 del 27 (`CONTAR_DESDE` en la recepción). El filtro "Noche de los Museos" del panel cubre del 27/11 17:00 al 28/11 06:00, hora de Argentina.
 
 ## Estructura
 
@@ -67,7 +67,7 @@ La carpeta `estadisticas/` no forma parte del sitio publicado: GitHub Pages la s
 - [ ] Probar desde dos celulares (datos móviles y wifi) y con una VPN, y comparar con el panel.
 - [ ] Comprobar que un pedido al panel sin sesión es rechazado.
 - [ ] Marcar los equipos de prueba con `?sinstats=1`.
-- [ ] Borrar los datos de prueba antes del evento.
+- [x] Base en cero (25/11) y conteo a partir del 27/11 17:00.
 - [ ] Al terminar el evento, descargar un CSV de respaldo y decidir cuánto tiempo se guardan los datos.
 
 ## Fuera de alcance

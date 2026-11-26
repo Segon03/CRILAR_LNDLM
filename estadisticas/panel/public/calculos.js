@@ -12,8 +12,8 @@ export const TRAMOS = [
   { etiqueta: '3 a 10 min', hasta: 600 },
   { etiqueta: 'Más de 10 min', hasta: Infinity },
 ];
-// Noche de los Museos: del 27/11/2026 00:00 al 28/11/2026 06:00, hora de Argentina
-export const EVENTO = { desde: 1795748400, hasta: 1795856400 };
+// Noche de los Museos: del 27/11/2026 17:00 (una hora antes de la apertura, cuando empieza a contar) al 28/11/2026 06:00, hora de Argentina
+export const EVENTO = { desde: 1795809600, hasta: 1795856400 };
 
 const pad = (n) => String(n).padStart(2, '0');
 

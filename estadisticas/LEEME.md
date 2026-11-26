@@ -74,21 +74,24 @@ Ojo: `?previa=1` también queda recordado en el navegador para saltear la cuenta
 
 Los enlaces directos a una sala (`?escena=...`) sí cuentan, porque pueden llegarle a un visitante real.
 
-## Antes del evento: borrar los datos de prueba
+## Desde cuándo se cuenta
 
-Las pruebas que hagas antes del evento cuentan como visitas. Para dejar el panel en cero, en la consola de la base ejecutá:
+La recepción guarda visitas recién a partir del **27 de noviembre de 2026 a las 17:00** (hora de Argentina), una hora antes de la apertura. Antes de esa hora los avisos llegan pero no se guardan, así que las pruebas del equipo no ensucian los números. La hora la pone el servidor, no el celular.
+
+La hora está en `CONTAR_DESDE`, dentro de `estadisticas/recepcion/wrangler.jsonc`, en segundos desde 1970 (`1795809600`). Para cambiarla, poné otro valor y subí el cambio; vacío significa contar siempre.
+
+La base se dejó en cero el 25 de noviembre. Si hiciera falta vaciarla de nuevo, en la consola de la base:
 
 ```sql
-DELETE FROM visitas WHERE inicio < 1795748400;
+SELECT COUNT(*) FROM visitas;
+DELETE FROM visitas;
 ```
 
-`1795748400` es el 27 de noviembre de 2026 a las 00:00, hora de Argentina. Antes, revisá cuántas filas va a borrar con `SELECT COUNT(*) FROM visitas WHERE inicio < 1795748400;`.
-
-Si preferís borrar solo lo anterior a la apertura de la visita (18:00 del 27), usá `1795813200` en lugar de `1795748400`.
+Para borrar solo lo anterior a una hora, usá `DELETE FROM visitas WHERE inicio < 1795809600;` (27/11 17:00).
 
 ## Usar el panel
 
-- **Período:** hoy, últimos 7 días, la noche del evento (27/11 00:00 a 28/11 06:00) o fechas a elección. Antes del evento abre en "Hoy"; desde el inicio del evento abre en la noche completa.
+- **Período:** hoy, últimos 7 días, la noche del evento (27/11 17:00 a 28/11 06:00) o fechas a elección. Antes del evento abre en "Hoy"; desde el inicio del evento abre en la noche completa.
 - **Descargar CSV:** las visitas del período, separadas por punto y coma y con una codificación que Excel en español abre bien.
 - **Informe (PDF):** abre el cuadro de impresión del navegador; elegí "Guardar como PDF".
 - **Conectados ahora:** cuenta los visitantes que tuvieron actividad en el último minuto. Se actualiza solo cada 30 segundos.

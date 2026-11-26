@@ -1,5 +1,5 @@
 // Worker público de recepción: solo escribe. Recibe los avisos de la app y los guarda sin IP ni ciudad.
-import { leerPedido, origenPermitido, esBot, geoDe, MAX_CUERPO } from '../../compartido/validacion.js';
+import { leerPedido, origenPermitido, esBot, geoDe, antesDeContar, MAX_CUERPO } from '../../compartido/validacion.js';
 import { registrar } from './registro.js';
 
 export default {
@@ -25,8 +25,10 @@ export default {
     const pedido = leerPedido(await request.text());
     if (!pedido) return new Response('Pedido inválido', { status: 400, headers: cors });
 
+    const ahora = Math.floor(Date.now() / 1000);
+    if (antesDeContar(ahora, env.CONTAR_DESDE)) return new Response(null, { status: 204, headers: cors });
     try {
-      await registrar(env.DB, pedido, Math.floor(Date.now() / 1000), geoDe(request.cf));
+      await registrar(env.DB, pedido, ahora, geoDe(request.cf));
     } catch (e) {
       console.error('registrar', e && e.message); // la app no debe notar un fallo de estadísticas
     }

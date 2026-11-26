@@ -5,7 +5,10 @@
   "compatibility_date": "2025-01-01",
   "vars": {
     // Único origen autorizado a enviar avisos.
-    "ORIGEN_PERMITIDO": "https://segon03.github.io"
+    "ORIGEN_PERMITIDO": "https://segon03.github.io",
+    // Desde cuándo se guardan las visitas: 27/11/2026 17:00 hora de Argentina, una hora antes de la apertura.
+    // Antes de esa hora los avisos se reciben pero no se guardan. Vacío = se cuenta siempre.
+    "CONTAR_DESDE": "1795809600"
   },
   "d1_databases": [
     {
