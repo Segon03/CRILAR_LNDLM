@@ -82,6 +82,13 @@
   function mediaHTML(p, f) {
     const m = f.media || {}, t = f.tipo || 'texto';
     if (t === 'foto' || t === 'infografia') {
+      if (Array.isArray(m.imagenes) && m.imagenes.length) {
+        const n = m.imagenes.length, a0 = m.imagenes[0];
+        return '<figure class="media media--' + t + ' media--galeria"><img src="' + esc(a0.src) + '" alt="' + esc(a0.alt || f.titulo || '') + '">' +
+          (n > 1 ? '<div class="galeria__nav"><button type="button" class="galeria__btn galeria__ant" aria-label="Imagen anterior">‹</button>' +
+            '<span class="galeria__cuenta" aria-live="polite">1 / ' + n + '</span>' +
+            '<button type="button" class="galeria__btn galeria__sig" aria-label="Imagen siguiente">›</button></div>' : '') + '</figure>';
+      }
       if (m.src) return '<figure class="media media--' + t + '"><img src="' + esc(m.src) + '" alt="' + esc(m.alt || f.titulo || '') + '" loading="lazy"></figure>';
       if (t === 'foto' && m.recorte) return recorteHTML(p, m);
       return vacio(t === 'foto' ? 'Foto de ejemplo' : 'Infografía de ejemplo', 'Subí el archivo a images/fichas/ y escribí su ruta en media.src, dentro de datos/muestra.js.');
@@ -111,6 +118,16 @@
     if (vid && C.sonido) {
       const baja = (si) => () => C.sonido.musicaBaja(si);
       vid.addEventListener('play', baja(true)); vid.addEventListener('pause', baja(false)); vid.addEventListener('ended', baja(false));
+    }
+    const gal = fichaCont.querySelector('.media--galeria');
+    if (gal) {
+      const imgs = f.media.imagenes, img = gal.querySelector('img'), cta = gal.querySelector('.galeria__cuenta');
+      imgs.slice(1).forEach((x) => { const pre = new Image(); pre.src = x.src; });
+      let i = 0;
+      const ver = (d) => { i = (i + d + imgs.length) % imgs.length; img.src = imgs[i].src; img.alt = imgs[i].alt || f.titulo || ''; if (cta) cta.textContent = (i + 1) + ' / ' + imgs.length; };
+      const ant = gal.querySelector('.galeria__ant'), sig = gal.querySelector('.galeria__sig');
+      if (ant) ant.addEventListener('click', () => ver(-1));
+      if (sig) sig.addEventListener('click', () => ver(1));
     }
     if (vid) vid.play().catch(() => { /* si el navegador no deja arrancar solo, queda el botón de play */ });
     if (f.tipo === 'tablero' && C.tablero) C.tablero.iniciar(document.getElementById('tablero-raiz'), f.tablero);

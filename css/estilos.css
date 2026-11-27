@@ -90,8 +90,7 @@ img{max-width:100%}
 .punto__aro{position:absolute;inset:11px;border-radius:50%;border:2px solid currentColor;background:rgba(5,8,20,.35);filter:drop-shadow(0 0 7px currentColor);animation:latido 3.2s ease-in-out infinite}
 .punto__nucleo{position:absolute;inset:20px;border-radius:50%;background:currentColor;opacity:.92}
 .punto__mano{position:absolute;left:52%;top:46%;width:27px;height:27px;opacity:0;transform:translateY(7px) rotate(-14deg);transition:opacity .4s ease,transform .4s ease;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.65))}
-.vista--noche .punto__mano,.vista--apagada .punto__mano,.punto.cerca .punto__mano{opacity:1;transform:rotate(-14deg);animation:toque 3.8s ease-in-out infinite}
-.vista--luz:not(.vista--apagada) .punto:not(.cerca) .punto__aro{opacity:.6}
+.punto__mano,.vista--noche .punto__mano,.vista--apagada .punto__mano,.punto.cerca .punto__mano{opacity:1;transform:rotate(-14deg);animation:toque 3.8s ease-in-out infinite}
 .punto:hover .punto__aro,.punto:focus-visible .punto__aro{background:rgba(253,190,15,.28)}
 .punto.visto .punto__aro{border-color:#fff;background:rgba(253,190,15,.4);animation:none;opacity:1}
 .punto.visto .punto__mano{display:none}
@@ -417,3 +416,10 @@ img{max-width:100%}
 .carga[hidden]{display:none}
 .carga::before{content:"";width:.9rem;height:.9rem;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:giro .8s linear infinite}
 @keyframes giro{to{transform:rotate(360deg)}}
+
+/* ---------- Galería de imágenes en una ficha ---------- */
+.media--galeria img{max-height:min(62vh,640px)}
+.galeria__nav{display:flex;align-items:center;justify-content:center;gap:1rem;padding:.55rem 0;background:var(--noche-1)}
+.galeria__btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--oro);background:transparent;color:var(--oro);font-size:1.6rem;line-height:1;cursor:pointer}
+.galeria__btn:hover,.galeria__btn:focus-visible{background:rgba(253,190,15,.2)}
+.galeria__cuenta{color:var(--papel,#efe6cf);font-size:.95rem;min-width:3.5em;text-align:center}
