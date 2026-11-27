@@ -263,7 +263,21 @@
   });
 
   /* ---------- sorteo ---------- */
+  /* Número de recorrido: uno al azar por navegador, guardado para que no cambie al recargar.
+     Antes se calculaba con los objetos visitados y salía igual para todos los que completaban el
+     recorrido; a quien ya se inscribió con ese número se le sigue mostrando el mismo. */
+  const LETRAS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   function codigo() {
+    const guardado = memoria.leer('codigo', null);
+    if (typeof guardado === 'string' && /^CR-[0-9A-Z]{6}$/.test(guardado)) return guardado;
+    if (estado.registrado) return codigoAnterior();
+    const v = new Uint8Array(6);
+    try { crypto.getRandomValues(v); } catch (e) { for (let i = 0; i < 6; i++) v[i] = Math.floor(Math.random() * 256); }
+    const nuevo = 'CR-' + Array.from(v, (b) => LETRAS[b % LETRAS.length]).join('');
+    memoria.guardar('codigo', nuevo);
+    return nuevo;
+  }
+  function codigoAnterior() {
     const s = Array.from(estado.visto).sort().join('|') + '|crilar';
     let h = 2166136261;
     for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
