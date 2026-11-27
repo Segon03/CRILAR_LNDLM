@@ -29,7 +29,9 @@
     poner('intro-sub', D.evento && D.evento.subtitulo);
     poner('intro-sonido', intro.sonido);
     const lista = document.getElementById('intro-lista');
-    if (lista) (intro.indicaciones || []).forEach((t) => { const li = document.createElement('li'); li.textContent = t; lista.appendChild(li); });
+    /* después del cierre del sorteo no se lo anuncia en la bienvenida */
+    const sorteoCerrado = D.sorteo && D.sorteo.cierre && Date.now() >= Date.parse(D.sorteo.cierre);
+    if (lista) (intro.indicaciones || []).filter((t) => !(sorteoCerrado && /sorteo/i.test(t))).forEach((t) => { const li = document.createElement('li'); li.textContent = t; lista.appendChild(li); });
     barra.style.animationDuration = (saltar ? 0.2 : SEGUNDOS) + 's';
   }
 

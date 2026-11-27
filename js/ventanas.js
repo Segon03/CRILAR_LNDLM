@@ -103,7 +103,12 @@
     if (t === 'video') {
       const vcls = 'media media--video' + (m.vertical ? ' media--vertical' : '');
       const giro = '<p class="video__giro">Girá el celular para ver el video más grande.</p>';
-      if (m.youtube) return '<div class="' + vcls + '"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(m.youtube) + '?rel=0" title="' + esc(plano(f.titulo) || 'Video') + '" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>' + giro;
+      if (m.youtube) {
+        /* arranca solo; la placa del logo tapa la miniatura de YouTube hasta que el video empieza */
+        const q = 'rel=0&autoplay=1&playsinline=1&modestbranding=1&enablejsapi=1&origin=' + encodeURIComponent(location.origin);
+        return '<div class="' + vcls + '"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(m.youtube) + '?' + q + '" title="' + esc(plano(f.titulo) || 'Video') + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>' +
+          '<div class="video__tapa" aria-hidden="true"></div></div>' + giro;
+      }
       if (m.mp4) return '<div class="' + vcls + '"><video src="' + esc(m.mp4) + '"' + (m.poster ? ' poster="' + esc(m.poster) + '"' : '') + ' controls playsinline preload="metadata"></video></div>' + (m.vertical ? '' : giro);
       return vacio('Video de ejemplo', 'Pegá el ID de YouTube en media.youtube, o la ruta de un archivo en media.mp4, dentro de datos/muestra.js.');
     }
@@ -172,10 +177,33 @@
       img.addEventListener('click', () => abrirVisor(imgs, i, (j) => { i = j; ver(0); }));
     }
     if (vid) vid.play().catch(() => { /* si el navegador no deja arrancar solo, queda el botón de play */ });
+    const yt = fichaCont.querySelector('.media--video iframe');
+    if (yt) escucharYouTube(yt);
     if (f.tipo === 'tablero' && C.tablero) C.tablero.iniciar(document.getElementById('tablero-raiz'), f.tablero);
     if (f.tipo === 'juego' && C.juego) C.juego.iniciar(document.getElementById('juego-raiz'), f.juego);
     if (p.tipo === 'objeto') C.marcarVisto(p.id);
   }
+
+  /* Sigue el estado del reproductor de YouTube sin cargar su API: saca la placa del logo cuando
+     el video arranca y baja la música del recorrido mientras se reproduce. */
+  let ytActual = null;
+  function escucharYouTube(ifr) {
+    const tapa = ifr.parentNode.querySelector('.video__tapa');
+    const quitar = () => { if (tapa) tapa.classList.add('video__tapa--fuera'); };
+    ytActual = ifr;
+    setTimeout(quitar, 4000); /* si el navegador no deja arrancar solo, a los 4 s se ve el botón de play */
+    const pedir = () => { try { ifr.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), '*'); } catch (e) { /* nada */ } };
+    ifr.addEventListener('load', () => { pedir(); setTimeout(pedir, 600); });
+    ifr._quitar = quitar;
+  }
+  window.addEventListener('message', (ev) => {
+    if (!ytActual || ev.source !== ytActual.contentWindow || !/^https:\/\/(www\.)?youtube(-nocookie)?\.com$/.test(String(ev.origin))) return;
+    let d; try { d = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data; } catch (e) { return; }
+    const st = d && (d.event === 'onStateChange' ? d.info : d.event === 'infoDelivery' && d.info ? d.info.playerState : undefined);
+    if (st === undefined) return;
+    if (st === 1) { ytActual._quitar(); if (C.sonido) C.sonido.musicaBaja(true); }
+    else if (st === 0 || st === 2) { if (C.sonido) C.sonido.musicaBaja(false); }
+  });
 
   function cerrarFicha() {
     if (visor) { visor.remove(); visor = null; }
@@ -184,6 +212,7 @@
     if (C.juego) C.juego.detener();
     const vid = fichaCont.querySelector('video');
     if (vid) { vid.pause(); if (C.sonido) C.sonido.musicaBaja(false); }
+    if (ytActual) { try { ytActual.src = 'about:blank'; } catch (e) { /* nada */ } ytActual = null; if (C.sonido) C.sonido.musicaBaja(false); }
     if (C.tablero) C.tablero.detener();
     setTimeout(() => { if (!estado.fichaActual) fichaCont.innerHTML = ''; }, 320);
     if (C.completo() && !estado.sorteoOfrecido && !estado.registrado) setTimeout(abrirSorteo, 550);
@@ -302,10 +331,42 @@
       return;
     }
     const r = await fetch(url, { method: 'POST', mode: 'cors', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(datos) });
+    if (r.status === 410) { const e = new Error('sorteo cerrado'); e.cerrado = true; throw e; }
     if (!r.ok) throw new Error('sorteo ' + r.status);
   }
 
+  /* ---------- ventana de inscripción del sorteo ---------- */
+  /* Se usa la hora del servidor de GitHub (encabezado Date) para no depender del reloj del celular. */
+  let desfaseSorteo = 0;
+  if (/^https?:$/.test(location.protocol) && window.fetch) {
+    fetch(location.href.split('#')[0], { method: 'HEAD', cache: 'no-store' })
+      .then((r) => { const t = Date.parse(r.headers.get('Date') || ''); if (t) desfaseSorteo = t - Date.now(); })
+      .catch(() => { /* se usa el reloj del dispositivo */ });
+  }
+  function momentoSorteo() {
+    const s = D.sorteo || {}, t = Date.now() + desfaseSorteo;
+    const ini = Date.parse(s.inicio || ''), fin = Date.parse(s.cierre || '');
+    if (Number.isFinite(fin) && t >= fin) return 'cerrado';
+    if (Number.isFinite(ini) && t < ini && !/[?&]previa=/.test(location.search)) return 'antes';
+    return 'abierto';
+  }
+  function cartelSorteo(m) {
+    const s = D.sorteo || {};
+    const txt = m === 'cerrado' ? (s.cerradoTexto || 'La inscripción al sorteo finalizó. Gracias por su visita.') : (s.antesTexto || 'La inscripción al sorteo todavía no está abierta.');
+    return '<p class="ficha__area">Sorteo</p>' +
+      '<h2 class="ficha__titulo" id="sorteo-titulo">' + esc(m === 'cerrado' ? (s.cerradoTitulo || 'Inscripción finalizada') : 'Todavía no empezó') + '</h2>' +
+      '<p class="ficha__texto">' + esc(txt) + '</p>' +
+      '<button class="boton boton--tinta" type="button" data-cerrar>Seguir recorriendo</button>';
+  }
+
   function abrirSorteo() {
+    const mom = momentoSorteo();
+    if (mom !== 'abierto' && !estado.registrado) {
+      estado.sorteoOfrecido = true;
+      sorteoCont.innerHTML = cartelSorteo(mom);
+      abrirModal(modSorteo);
+      return;
+    }
     if (!C.completo() && !estado.registrado) {
       const f = C.listarObjetos().length - C.vistos();
       C.aviso(f === 1 ? 'Te falta 1 objeto para participar del sorteo.' : 'Te faltan ' + f + ' objetos para participar del sorteo.');
@@ -322,6 +383,7 @@
       const msg = $('#estado-form'), btn = form.querySelector('button[type="submit"]');
       msg.textContent = '';
       if (!validar(form)) return;
+      if (momentoSorteo() === 'cerrado') { sorteoCont.innerHTML = cartelSorteo('cerrado'); return; }
       if (form.elements.web.value) { estado.registrado = true; sorteoCont.innerHTML = gracias(); return; }
       btn.disabled = true;
       btn.textContent = 'Enviando…';
@@ -337,6 +399,7 @@
         sorteoCont.innerHTML = gracias();
         const b = sorteoCont.querySelector('button'); if (b) b.focus({ preventScroll: true });
       } catch (e) {
+        if (e && e.cerrado) { sorteoCont.innerHTML = cartelSorteo('cerrado'); return; }
         btn.disabled = false;
         btn.textContent = 'Participar del sorteo';
         msg.textContent = 'No pudimos enviar tus datos. Revisá la conexión y probá de nuevo.';

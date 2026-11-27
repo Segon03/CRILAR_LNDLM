@@ -151,6 +151,13 @@ export function sortear(filas, azar) {
   return filas[azar(filas.length)];
 }
 
+// Elige n participantes distintos, en orden (ganador y suplentes), sin repetir.
+export function sortearVarios(filas, n, azar) {
+  const resto = filas.slice(), elegidos = [];
+  while (elegidos.length < n && resto.length) elegidos.push(resto.splice(azar(resto.length), 1)[0]);
+  return elegidos;
+}
+
 export function azarSeguro(n) {
   const max = Math.floor(0x100000000 / n) * n, v = new Uint32Array(1);
   do { crypto.getRandomValues(v); } while (v[0] >= max);

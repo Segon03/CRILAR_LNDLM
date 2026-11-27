@@ -223,6 +223,8 @@ img{max-width:100%}
 .media--foto img,.media--infografia img{display:block;width:100%;max-height:min(56vh,560px);object-fit:contain}
 .media--video{aspect-ratio:16/9}
 .media--video iframe,.media--video video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.video__tapa{position:absolute;inset:0;background:#eef4fb url(../videos/logo-intro.jpg) center/cover no-repeat;pointer-events:none;transition:opacity .45s ease}
+.video__tapa--fuera{opacity:0}
 .media--vacio{display:grid;place-content:center;gap:.4rem;min-height:210px;padding:1.2rem;text-align:center;background:repeating-linear-gradient(135deg,var(--noche-1),var(--noche-1) 14px,var(--noche-2) 14px,var(--noche-2) 28px);color:var(--luna)}
 .media--vacio strong{font-family:var(--f-titulo);font-weight:400;font-size:1.4rem}
 .media--vacio span{max-width:44ch;margin:0 auto;font-size:.9rem;color:var(--luna-2)}

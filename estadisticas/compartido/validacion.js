@@ -76,3 +76,9 @@ export function leerParticipante(texto) {
   if (!Number.isInteger(objetos) || objetos < 0 || objetos > 500) return null;
   return { nombre, email, edad, domicilio, telefono, codigo, objetos };
 }
+
+// A partir de SORTEO_HASTA (segundos desde 1970) la inscripción al sorteo queda cerrada. Sin valor válido, nunca cierra.
+export function sorteoTerminado(ahora, hasta) {
+  const h = Number(hasta);
+  return Number.isFinite(h) && h > 0 && ahora >= h;
+}

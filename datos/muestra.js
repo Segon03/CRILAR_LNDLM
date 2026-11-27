@@ -17,6 +17,7 @@
                 varias imágenes: {"imagenes": [{"src": "...", "alt": "..."}, ...]} (se ven con flechas y se amplían al tocarlas)
    cursiva      en títulos y textos, *Nombre científico* entre asteriscos se muestra en cursiva
    sorteo.endpoint  dirección que recibe los datos del formulario (ver README y estadisticas/LEEME.md)
+   sorteo.inicio / sorteo.cierre  desde y hasta cuándo está abierto el formulario (hora del servidor)
    intro        pantalla de bienvenida: segundos que permanece, indicaciones y botón
    evento.apertura  fecha y hora en que se habilita la visita (antes se ve la cuenta regresiva)
    sonido       archivos de audio, volúmenes (0 a 1) y texto de créditos que se muestra al pie
@@ -56,6 +57,11 @@ window.MUESTRA = {
   "sorteo": {
     "endpoint": "https://micrositio-recepcion.segundoricardo.workers.dev/api/sorteo",
     "bases": "bases.html",
+    "inicio": "2026-11-27T18:00:00-03:00",
+    "cierre": "2026-11-30T08:00:00-03:00",
+    "antesTexto": "La inscripción al Sorteo se habilita el viernes 27 de noviembre a las 18:00 h.",
+    "cerradoTitulo": "Inscripción finalizada",
+    "cerradoTexto": "La inscripción al Sorteo finalizó a las 8:00 h del día 30 de noviembre. Gracias por su visita.",
     "titulo": "Participá del sorteo",
     "gracias": "Ya estás participando. ¡Mucha suerte!"
   },
@@ -152,16 +158,17 @@ window.MUESTRA = {
           "tipo": "info",
           "x": 90.6,
           "y": 47.1,
-          "titulo": "Estante de reconocimientos",
+          "titulo": "Reconocimientos",
           "ficha": {
             "area": "Institucional",
-            "titulo": "Estante de reconocimientos",
-            "tipo": "foto",
+            "titulo": "Reconocimientos",
+            "subtitulo": "Stella Maris de la Vega · Gestión administrativa",
+            "tipo": "video",
             "media": {
-              "recorte": true,
-              "alt": "Estante con placas y reconocimientos del instituto"
+              "mp4": "videos/reconocimientos.mp4",
+              "poster": "videos/logo-intro.jpg"
             },
-            "texto": "Texto de ejemplo. Acá va la descripción de lo que se exhibe en este estante.",
+            "texto": "",
             "credito": ""
           }
         },
@@ -188,17 +195,18 @@ window.MUESTRA = {
           "tipo": "objeto",
           "x": 48.7,
           "y": 51.2,
-          "titulo": "Fósil de ejemplo 1",
+          "titulo": "*Punatitan coughlini*",
           "ficha": {
-            "area": "Paleontología",
-            "titulo": "Fósil de ejemplo 1",
-            "tipo": "foto",
-            "texto": "Texto de ejemplo. Acá va la descripción del objeto: qué es, de dónde viene y por qué forma parte de la muestra.",
-            "credito": "",
+            "area": "Geociencias - Paleovertebrados",
+            "titulo": "*Punatitan coughlini*",
+            "subtitulo": "Dr. Martín Hechenleitner · Geociencias - Paleovertebrados",
+            "tipo": "video",
             "media": {
-              "recorte": true,
-              "alt": "Detalle de fósil de ejemplo 1"
-            }
+              "mp4": "videos/paleo-punatitan.mp4",
+              "poster": "videos/logo-intro.jpg"
+            },
+            "texto": "",
+            "credito": ""
           },
           "parada": 0
         },
@@ -207,17 +215,18 @@ window.MUESTRA = {
           "tipo": "objeto",
           "x": 61.9,
           "y": 49.3,
-          "titulo": "Fósil de ejemplo 2",
+          "titulo": "*Riojasaurus incertus*",
           "ficha": {
-            "area": "Paleontología",
-            "titulo": "Fósil de ejemplo 2",
-            "tipo": "infografia",
-            "texto": "Texto de ejemplo. Acá va la descripción del objeto: qué es, de dónde viene y por qué forma parte de la muestra.",
-            "credito": "",
+            "area": "Geociencias - Paleovertebrados",
+            "titulo": "*Riojasaurus incertus*",
+            "subtitulo": "Dr. Lucas Fiorelli · Geociencias - Paleovertebrados",
+            "tipo": "video",
             "media": {
-              "src": "",
-              "alt": ""
-            }
+              "mp4": "videos/paleo-riojasaurus.mp4",
+              "poster": "videos/logo-intro.jpg"
+            },
+            "texto": "",
+            "credito": ""
           },
           "parada": 1
         },
@@ -245,17 +254,18 @@ window.MUESTRA = {
           "tipo": "objeto",
           "x": 41.2,
           "y": 50.2,
-          "titulo": "Fósil de ejemplo 1",
+          "titulo": "Diorama del Triásico",
           "ficha": {
             "area": "Paleontología",
-            "titulo": "Fósil de ejemplo 1",
-            "tipo": "foto",
-            "texto": "Texto de ejemplo. Acá va la descripción del objeto: qué es, de dónde viene y por qué forma parte de la muestra.",
-            "credito": "",
+            "titulo": "Diorama del Triásico",
+            "subtitulo": "Diorama de un paleoambiente del Triásico Tardío, realizado por el paleoartista Carlos Bustamante (CRILAR-CONICET).",
+            "tipo": "video",
             "media": {
-              "recorte": true,
-              "alt": "Detalle de fósil de ejemplo 1"
-            }
+              "mp4": "videos/diorama-triasico.mp4",
+              "poster": "videos/logo-intro.jpg"
+            },
+            "texto": "",
+            "credito": ""
           },
           "parada": 3
         },
@@ -302,17 +312,18 @@ window.MUESTRA = {
           "tipo": "objeto",
           "x": 38.6,
           "y": 46.1,
-          "titulo": "Fósil de ejemplo 3",
+          "titulo": "Huellas fósiles",
           "ficha": {
-            "area": "Paleontología",
-            "titulo": "Fósil de ejemplo 3",
+            "area": "Geociencias - Paleovertebrados",
+            "titulo": "Huellas fósiles",
+            "subtitulo": "Dr. Martín Hechenleitner · Geociencias - Paleovertebrados",
             "tipo": "video",
-            "texto": "Texto de ejemplo. Acá va la descripción del objeto: qué es, de dónde viene y por qué forma parte de la muestra.",
-            "credito": "",
             "media": {
-              "youtube": "",
-              "mp4": ""
-            }
+              "mp4": "videos/paleo-huellas.mp4",
+              "poster": "videos/logo-intro.jpg"
+            },
+            "texto": "",
+            "credito": ""
           },
           "parada": 5
         },
@@ -321,17 +332,18 @@ window.MUESTRA = {
           "tipo": "objeto",
           "x": 38.5,
           "y": 56.2,
-          "titulo": "Fósil de ejemplo 4",
+          "titulo": "Huevos de dinosaurio",
           "ficha": {
-            "area": "Paleontología",
-            "titulo": "Fósil de ejemplo 4",
-            "tipo": "foto",
-            "texto": "Texto de ejemplo. Acá va la descripción del objeto: qué es, de dónde viene y por qué forma parte de la muestra.",
-            "credito": "",
+            "area": "Geociencias - Paleovertebrados",
+            "titulo": "Huevos de dinosaurio",
+            "subtitulo": "Dr. Lucas Fiorelli · Geociencias - Paleovertebrados",
+            "tipo": "video",
             "media": {
-              "recorte": true,
-              "alt": "Detalle de fósil de ejemplo 1"
-            }
+              "mp4": "videos/paleo-huevos.mp4",
+              "poster": "videos/logo-intro.jpg"
+            },
+            "texto": "",
+            "credito": ""
           },
           "parada": 6
         }
@@ -375,7 +387,7 @@ window.MUESTRA = {
             "credito": "",
             "media": {
               "mp4": "videos/entomo-720.mp4",
-              "poster": "videos/entomo-poster.jpg"
+              "poster": "videos/logo-intro.jpg"
             }
           },
           "parada": 0
@@ -393,7 +405,7 @@ window.MUESTRA = {
             "tipo": "video",
             "media": {
               "mp4": "videos/entomologia-bio.mp4",
-              "poster": "videos/entomologia-bio-poster.jpg"
+              "poster": "videos/logo-intro.jpg"
             },
             "texto": "",
             "credito": ""
@@ -413,7 +425,7 @@ window.MUESTRA = {
             "tipo": "video",
             "media": {
               "mp4": "videos/entomo-medica.mp4",
-              "poster": "videos/entomo-medica-poster.jpg"
+              "poster": "videos/logo-intro.jpg"
             },
             "texto": "",
             "credito": ""
@@ -632,7 +644,7 @@ window.MUESTRA = {
             "tipo": "video",
             "media": {
               "mp4": "videos/vertebrados.mp4",
-              "poster": "videos/vertebrados-poster.jpg"
+              "poster": "videos/logo-intro.jpg"
             },
             "texto": "",
             "credito": ""
@@ -648,10 +660,31 @@ window.MUESTRA = {
           "ficha": {
             "area": "Micología",
             "titulo": "Micología",
+            "subtitulo": "Dra. Victoria Miranda · Micología aplicada",
             "tipo": "video",
             "media": {
-              "youtube": "",
-              "mp4": ""
+              "mp4": "videos/micologia-bio.mp4",
+              "poster": "videos/logo-intro.jpg"
+            },
+            "texto": "",
+            "credito": ""
+          },
+          "parada": 4
+        },
+        {
+          "id": "s2L-5b",
+          "tipo": "objeto",
+          "x": 45.0,
+          "y": 61.0,
+          "titulo": "Micología aplicada",
+          "ficha": {
+            "area": "Micología",
+            "titulo": "Micología aplicada",
+            "subtitulo": "Dra. Carolina Rothen · Micología aplicada",
+            "tipo": "video",
+            "media": {
+              "mp4": "videos/micologia-2.mp4",
+              "poster": "videos/logo-intro.jpg"
             },
             "texto": "",
             "credito": ""
@@ -671,7 +704,7 @@ window.MUESTRA = {
             "tipo": "video",
             "media": {
               "mp4": "videos/cronobiologia.mp4",
-              "poster": "videos/cronobiologia-poster.jpg"
+              "poster": "videos/logo-intro.jpg"
             },
             "texto": "Los seres vivos tienen relojes internos que organizan sus funciones a lo largo del día. Este video cuenta qué estudia la cronobiología, cómo se investiga y por qué importa para la salud.",
             "credito": "Basado en la charla «Cronobiología y Salud» (CRILAR-CONICET, 2025). Fuentes: Fundación Nobel (2017); Czeisler et al., *Science* (1999)."
@@ -681,16 +714,17 @@ window.MUESTRA = {
         {
           "id": "s2L-7",
           "tipo": "objeto",
-          "x": 36.8,
-          "y": 49.3,
+          "x": 36.0,
+          "y": 63.0,
           "titulo": "Paleobotánica",
           "ficha": {
             "area": "Paleobotánica",
             "titulo": "Paleobotánica",
+            "subtitulo": "Dr. Juan García Massini · Paleobotánica",
             "tipo": "video",
             "media": {
-              "youtube": "",
-              "mp4": ""
+              "mp4": "videos/paleobotanica.mp4",
+              "poster": "videos/logo-intro.jpg"
             },
             "texto": "",
             "credito": ""
@@ -710,7 +744,7 @@ window.MUESTRA = {
             "tipo": "video",
             "media": {
               "mp4": "videos/olivo.mp4",
-              "poster": "videos/olivo-poster.jpg"
+              "poster": "videos/logo-intro.jpg"
             },
             "texto": "Coratina es una variedad italiana común en las fincas comerciales de Argentina. Su aceite es muy buscado porque tiene un sabor intenso y por sus altos niveles de polifenoles (antioxidantes que contribuyen a nuestra salud).",
             "credito": ""
@@ -761,7 +795,7 @@ window.MUESTRA = {
             "tipo": "video",
             "media": {
               "mp4": "videos/arqueologia.mp4",
-              "poster": "videos/arqueologia-poster.jpg"
+              "poster": "videos/logo-intro.jpg"
             },
             "texto": "",
             "credito": ""
@@ -775,13 +809,13 @@ window.MUESTRA = {
           "y": 53.2,
           "titulo": "El sismógrafo",
           "ficha": {
-            "area": "Geociencias",
+            "area": "Geociencias - Petrología",
             "titulo": "Geociencias",
-            "subtitulo": "Dr. Pablo Alasino · Geociencias",
+            "subtitulo": "Dr. Pablo Alasino · Geociencias - Petrología",
             "tipo": "video",
             "media": {
               "mp4": "videos/petrologia.mp4",
-              "poster": "videos/petrologia-poster.jpg"
+              "poster": "videos/logo-intro.jpg"
             },
             "texto": "",
             "credito": ""
@@ -847,5 +881,5 @@ window.MUESTRA = {
       ]
     }
   },
-  "version": 10
+  "version": 11
 };

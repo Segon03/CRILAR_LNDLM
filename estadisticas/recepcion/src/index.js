@@ -1,6 +1,6 @@
 // Worker público de recepción: solo escribe. Recibe los avisos de visita del micrositio (/api/e) y las
 // inscripciones al sorteo (/api/sorteo). No guarda la IP ni la ciudad.
-import { leerPedido, leerParticipante, origenPermitido, esBot, geoDe, antesDeContar, MAX_CUERPO, MAX_CUERPO_SORTEO } from '../../compartido/validacion.js';
+import { leerPedido, leerParticipante, origenPermitido, esBot, geoDe, antesDeContar, sorteoTerminado, MAX_CUERPO, MAX_CUERPO_SORTEO } from '../../compartido/validacion.js';
 import { registrar, anotarParticipante } from './registro.js';
 
 const RUTAS = { '/api/e': { max: MAX_CUERPO }, '/api/sorteo': { max: MAX_CUERPO_SORTEO } };
@@ -32,7 +32,8 @@ export default {
     if (url.pathname === '/api/sorteo') {
       const p = leerParticipante(texto);
       if (!p) return new Response('Datos inválidos', { status: 400, headers: cors });
-      if (antesDeContar(ahora, env.CONTAR_DESDE)) return new Response(null, { status: 204, headers: cors });
+      if (sorteoTerminado(ahora, env.SORTEO_HASTA)) return new Response('La inscripción al sorteo terminó', { status: 410, headers: cors });
+      if (antesDeContar(ahora, env.SORTEO_DESDE || env.CONTAR_DESDE)) return new Response(null, { status: 204, headers: cors });
       try {
         await anotarParticipante(env.DB, p, ahora, geoDe(request.cf));
       } catch (e) {

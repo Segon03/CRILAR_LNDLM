@@ -8,7 +8,11 @@
     "ORIGEN_PERMITIDO": "https://segon03.github.io",
     // Desde cuándo se guardan las visitas: 27/11/2026 17:00 hora de Argentina, una hora antes de la apertura.
     // Antes de esa hora los avisos se reciben pero no se guardan. Vacío = se cuenta siempre.
-    "CONTAR_DESDE": "1795809600"
+    "CONTAR_DESDE": "1795809600",
+    // Inscripción al sorteo: del 27/11/2026 18:00 al 30/11/2026 08:00, hora de Argentina.
+    // Antes se reciben pero no se guardan; después se rechazan (410) y el formulario muestra el cartel de cierre.
+    "SORTEO_DESDE": "1795813200",
+    "SORTEO_HASTA": "1796036400"
   },
   "d1_databases": [
     {

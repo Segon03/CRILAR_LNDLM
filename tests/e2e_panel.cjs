@@ -79,7 +79,7 @@ const filas = [
   assert.match(desc2.suggestedFilename(), /^participantes_sorteo_/);
   assert.equal(fs.readFileSync(await desc2.path(), 'utf8').trim().split('\r\n').length, 3);
   await page.click('#s-sortear');
-  assert.match(await t('s-ganador'), /^Ganador\/a: .+ · .+@ejemplo\.com · recorrido CR-/);
+  assert.match(await t('s-ganador'), /^Ganador\/a: .+ · .+@ejemplo\.com · recorrido CR-.*Suplente 1: /s);
   if (process.env.CAPTURAS) await page.screenshot({ path: path.join(process.env.CAPTURAS, 'e2e_panel.png'), fullPage: true });
   await page.click('#salir');
   await page.waitForSelector('#ingreso:not([hidden])');

@@ -52,10 +52,14 @@ function descargarParticipantes() {
 }
 
 function sortearGanador() {
-  const g = C.sortear(participantes, C.azarSeguro);
   const el = $('s-ganador');
   el.hidden = false;
-  el.textContent = g ? `Ganador/a: ${g.nombre} · ${g.email} · recorrido ${g.codigo} (entre ${fmtN(participantes.length)} participantes, ${C.textoAR(Math.floor(Date.now() / 1000))})` : 'No hay participantes para sortear.';
+  const [g, ...sup] = C.sortearVarios(participantes, 3, C.azarSeguro); // ganador y 2 suplentes, como dicen las bases
+  if (!g) { el.textContent = 'No hay participantes para sortear.'; return; }
+  const linea = (p) => `${p.nombre} · ${p.email} · recorrido ${p.codigo}`;
+  el.innerHTML = `<strong>Ganador/a:</strong> ${esc(linea(g))}` +
+    sup.map((p, i) => `<br>Suplente ${i + 1}: ${esc(linea(p))}`).join('') +
+    `<br><small>Sorteo entre ${fmtN(participantes.length)} participantes · ${esc(C.textoAR(Math.floor(Date.now() / 1000)))} (hora de Argentina)</small>`;
 }
 
 function barrasVerticales(el, items) {

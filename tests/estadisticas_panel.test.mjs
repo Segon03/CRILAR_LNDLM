@@ -63,6 +63,10 @@ assert.ok(pcsv.includes('"luis@ejemplo.com";"";"";"380"'), 'sin edad ni domicili
 assert.equal(pcsv.trim().split('\r\n').length, 3);
 assert.equal(C.sortear([], () => 0), null);
 assert.equal(C.sortear(part, () => 1).nombre, 'Luis');
+assert.deepEqual(C.sortearVarios(part, 3, () => 0).map((p) => p.nombre), ['Ana "La" Pérez', 'Luis'], 'sin repetir y sin pasarse');
+const muchos = Array.from({ length: 20 }, (_, i) => ({ nombre: 'P' + i }));
+const tres = C.sortearVarios(muchos, 3, C.azarSeguro);
+assert.equal(new Set(tres.map((p) => p.nombre)).size, 3);
 const cuenta = [0, 0, 0];
 for (let i = 0; i < 3000; i++) cuenta[C.azarSeguro(3)]++;
 assert.ok(cuenta.every((n) => n > 800), 'azarSeguro reparte parejo: ' + cuenta);

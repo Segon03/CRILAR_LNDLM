@@ -1,6 +1,6 @@
 // Pruebas de la recepción de estadísticas y del login del panel. Uso: node tests/estadisticas.test.mjs
 import assert from 'node:assert/strict';
-import { idValido, leerPedido, leerParticipante, esBot, origenPermitido, geoDe, limpiarTexto, antesDeContar, MAX_CUERPO } from '../estadisticas/compartido/validacion.js';
+import { idValido, leerPedido, leerParticipante, esBot, origenPermitido, geoDe, limpiarTexto, antesDeContar, sorteoTerminado, MAX_CUERPO } from '../estadisticas/compartido/validacion.js';
 import * as S from '../estadisticas/compartido/sesion.js';
 import { registrar, anotarParticipante } from '../estadisticas/recepcion/src/registro.js';
 import recepcion from '../estadisticas/recepcion/src/index.js';
@@ -127,6 +127,23 @@ assert.equal(leerParticipante(JSON.stringify({ ...P_OK, nombre: '<script>Ana</sc
   e2 = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN, CONTAR_DESDE: String(Math.floor(Date.now() / 1000) + 3600) };
   assert.equal((await recepcion.fetch(pedidoS(JSON.stringify(P_OK)), e2)).status, 204);
   assert.equal(e2.DB.llamadas.length, 0, 'antes de la hora de inicio no se guarda');
+  assert.equal(sorteoTerminado(100, '100'), true);
+  assert.equal(sorteoTerminado(99, '100'), false);
+  assert.equal(sorteoTerminado(99, ''), false);
+  assert.equal(sorteoTerminado(99, 'x'), false);
+  const ya = Math.floor(Date.now() / 1000);
+  e2 = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN, SORTEO_DESDE: String(ya - 10), SORTEO_HASTA: String(ya - 1) };
+  assert.equal((await recepcion.fetch(pedidoS(JSON.stringify(P_OK)), e2)).status, 410, 'después del cierre se rechaza');
+  assert.equal(e2.DB.llamadas.length, 0);
+  e2 = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN, CONTAR_DESDE: '1', SORTEO_DESDE: String(ya + 3600), SORTEO_HASTA: String(ya + 7200) };
+  assert.equal((await recepcion.fetch(pedidoS(JSON.stringify(P_OK)), e2)).status, 204);
+  assert.equal(e2.DB.llamadas.length, 0, 'antes de la apertura del sorteo no se guarda');
+  e2 = { DB: baseFalsa(), ORIGEN_PERMITIDO: ORIGEN, SORTEO_DESDE: String(ya - 10), SORTEO_HASTA: String(ya + 7200) };
+  assert.equal((await recepcion.fetch(pedidoS(JSON.stringify(P_OK)), e2)).status, 204);
+  assert.equal(e2.DB.llamadas.length, 1, 'dentro de la ventana se guarda');
+  const wr = (await import('node:fs')).readFileSync(new URL('../estadisticas/recepcion/wrangler.jsonc', import.meta.url), 'utf8');
+  assert.match(wr, /"SORTEO_DESDE": "1795813200"/, '27/11 18:00');
+  assert.match(wr, /"SORTEO_HASTA": "1796036400"/, '30/11 08:00');
   e2 = { DB: { prepare() { throw new Error('caída'); } }, ORIGEN_PERMITIDO: ORIGEN };
   assert.equal((await recepcion.fetch(pedidoS(JSON.stringify(P_OK)), e2)).status, 500, 'si la base falla, el formulario se entera y deja reintentar');
 }
