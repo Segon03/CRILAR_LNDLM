@@ -25,6 +25,21 @@ export async function visitas(url, env, ahora = Math.floor(Date.now() / 1000)) {
   return respuesta({ desde, hasta, ahora, truncado, filas: truncado ? results.slice(0, MAX_FILAS) : results });
 }
 
+// Versión pública, solo para mirar: las mismas visitas pero sin el identificador del navegador
+// (se reemplaza por un número que solo sirve para contar visitantes únicos dentro de la respuesta).
+// Nunca incluye datos del sorteo.
+export async function visitasPublicas(url, env, ahora = Math.floor(Date.now() / 1000)) {
+  const r = await visitas(url, env, ahora);
+  if (r.status !== 200) return r;
+  const d = await r.json();
+  const num = new Map();
+  d.filas = d.filas.map((f) => {
+    if (!num.has(f.v)) num.set(f.v, num.size + 1);
+    return { v: num.get(f.v), i: f.i, u: f.u, p: f.p, r: f.r };
+  });
+  return new Response(JSON.stringify(d), { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=20' } });
+}
+
 export async function participantes(env) {
   const { results } = await env.DB
     .prepare('SELECT fecha, nombre, email, edad, domicilio, telefono, codigo, objetos, pais, provincia FROM participantes ORDER BY fecha LIMIT ?1')
@@ -55,6 +70,9 @@ export function crearPanel({ esperar = (ms) => new Promise((r) => setTimeout(r, 
   return {
     async fetch(request, env) {
       const url = new URL(request.url);
+      if (url.pathname === '/publico/' ) return Response.redirect(url.origin + '/publico', 301);
+      if (url.pathname === '/publico') return env.ASSETS.fetch(new Request(url.origin + '/index.html', request));
+      if (url.pathname === '/api/publico/visitas' && request.method === 'GET') return visitasPublicas(url, env);
       if (!url.pathname.startsWith('/api/')) {
         if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Método no permitido', { status: 405, headers: SIN_CACHE });
         return env.ASSETS.fetch(request);

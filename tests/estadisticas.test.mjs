@@ -199,6 +199,15 @@ assert.equal(r.status, 200); assert.deepEqual((await r.json()).filas, filas);
 assert.equal((await visitas(new URL('https://x/api/visitas?desde=10&hasta=5'), envP)).status, 400);
 assert.equal((await visitas(new URL('https://x/api/visitas?desde=0&hasta=999999999'), envP)).status, 400);
 assert.equal((await P.fetch(pedidoP('/api/participantes'), envP)).status, 401, 'sin sesión no se ven los participantes');
+// vista pública: visitas sin identificador del navegador, sin contraseña; nunca el sorteo
+r = await P.fetch(pedidoP('/api/publico/visitas?desde=0&hasta=2000'), envP);
+assert.equal(r.status, 200);
+const pub = await r.json();
+assert.deepEqual(pub.filas, [{ v: 1, i: 1000, u: 1100, p: 'AR', r: 'La Rioja' }], 'el visitante se reemplaza por un número');
+assert.equal((await P.fetch(pedidoP('/api/publico/visitas?desde=0&hasta=2000'), { ...envP, PANEL_CLAVE: '' })).status, 200, 'la vista pública no depende de la contraseña');
+assert.equal((await P.fetch(pedidoP('/api/publico/participantes'), envP)).status, 401, 'no hay ruta pública del sorteo');
+assert.equal((await P.fetch(pedidoP('/publico/'), envP)).status, 301);
+assert.equal((await P.fetch(pedidoP('/publico'), envP)).status, 200);
 r = await P.fetch(pedidoP('/api/participantes', conSesion), envP);
 assert.equal(r.status, 200);
 r = await participantes(envP);

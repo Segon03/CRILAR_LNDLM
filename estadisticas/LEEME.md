@@ -58,6 +58,10 @@ Los servicios se publican solos desde GitHub cada vez que cambia la rama elegida
 8. **Contraseña del panel.** En *Workers & Pages > micrositio-panel > Settings > Variables and Secrets*, elegí *Add*, tipo *Secret*, nombre `PANEL_CLAVE`, y escribí la contraseña (12 caracteres o más; conviene una frase larga). Guardá con *Deploy*. La contraseña queda cifrada en Cloudflare: no está en el código ni en GitHub. Mientras no esté configurada, el panel no entrega datos a nadie.
 9. **Probar.** Abrí `https://micrositio-panel.segundoricardo.workers.dev` en una ventana privada. Tiene que pedir la contraseña; con una equivocada no entra.
 
+### Vista pública para compartir
+
+`https://micrositio-panel.segundoricardo.workers.dev/publico` muestra los mismos gráficos e indicadores sin pedir contraseña, para compartir. Es solo para mirar: no tiene el botón de CSV ni la sección del sorteo, y no entrega los identificadores de los navegadores (se reemplazan por números). Los datos del sorteo solo se ven en el panel con contraseña.
+
 ### Cambiar la contraseña o compartir el panel
 
 Para que otra persona vea el panel, pasale la dirección y la contraseña por un canal privado. Para cambiarla, editá el secreto `PANEL_CLAVE` en el mismo lugar del paso 8: todas las sesiones abiertas se cierran solas y hay que entrar con la nueva. La sesión dura 12 horas; el botón *Salir* la cierra antes.

@@ -3,6 +3,8 @@ import * as C from './calculos.js';
 
 const $ = (id) => document.getElementById(id);
 const REFRESCO_MS = 30000;
+// En /publico el panel es solo para mirar: sin contraseña, sin CSV y sin los datos del sorteo.
+const PUBLICO = location.pathname.replace(/\/+$/, '') === '/publico';
 let actual = { nombre: 'evento', ...C.EVENTO };
 let datos = null;
 let participantes = [];
@@ -16,12 +18,12 @@ function aviso(texto) { const m = $('mensaje'); m.hidden = !texto; m.textContent
 async function cargar() {
   const ahora = Math.floor(Date.now() / 1000);
   try {
-    const r = await fetch(`/api/visitas?desde=${actual.desde}&hasta=${actual.hasta}`, { cache: 'no-store', credentials: 'same-origin' });
+    const r = await fetch(`/api/${PUBLICO ? 'publico/' : ''}visitas?desde=${actual.desde}&hasta=${actual.hasta}`, { cache: 'no-store', credentials: 'same-origin' });
     if (r.status === 401) { mostrarIngreso('La sesión venció. Volvé a escribir la contraseña.'); return; }
     if (!r.ok) { aviso('No se pudieron cargar los datos. Probá de nuevo en un momento.'); return; }
     datos = await r.json();
     datos.recibido = ahora;
-    await cargarParticipantes();
+    if (!PUBLICO) await cargarParticipantes();
     aviso(datos.truncado ? 'Hay más visitas que las que se pueden mostrar juntas: se muestran las primeras 100.000. Acotá el período.' : '');
     pintar();
   } catch {
@@ -195,6 +197,13 @@ async function salir() {
 }
 
 async function iniciar() {
+  if (PUBLICO) {
+    for (const id of ['t-sorteo', 'csv', 'salir']) { const n = $(id); if (n) n.remove(); }
+    const sub = document.querySelector('.encabezado .sub'); if (sub) sub.insertAdjacentHTML('beforeend', ' · vista pública');
+    document.title = 'Estadísticas · Micrositio Noche de los Museos';
+    mostrarPanel();
+    return;
+  }
   try {
     const r = await fetch('/api/yo', { cache: 'no-store', credentials: 'same-origin' });
     if (r.ok) mostrarPanel();
