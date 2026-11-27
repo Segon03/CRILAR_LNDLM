@@ -231,25 +231,6 @@ window.MUESTRA = {
           "parada": 1
         },
         {
-          "id": "s1L-3",
-          "tipo": "objeto",
-          "x": 50.2,
-          "y": 51.7,
-          "titulo": "Fósil de ejemplo 3",
-          "ficha": {
-            "area": "Paleontología",
-            "titulo": "Fósil de ejemplo 3",
-            "tipo": "video",
-            "texto": "Texto de ejemplo. Acá va la descripción del video.",
-            "credito": "",
-            "media": {
-              "youtube": "",
-              "mp4": ""
-            }
-          },
-          "parada": 2
-        },
-        {
           "id": "s1R-1",
           "tipo": "objeto",
           "x": 41.2,
@@ -267,7 +248,7 @@ window.MUESTRA = {
             "texto": "",
             "credito": ""
           },
-          "parada": 3
+          "parada": 2
         },
         {
           "id": "s1R-2",
@@ -287,7 +268,7 @@ window.MUESTRA = {
             "texto": "Estos reptiles vivieron con los primeros dinosaurios, hace unos 230 millones de años.",
             "credito": ""
           },
-          "parada": 4
+          "parada": 3
         },
         {
           "id": "s1R-2b",
@@ -305,7 +286,7 @@ window.MUESTRA = {
             "texto": "",
             "credito": ""
           },
-          "parada": 4
+          "parada": 3
         },
         {
           "id": "s1R-3",
@@ -325,7 +306,7 @@ window.MUESTRA = {
             "texto": "",
             "credito": ""
           },
-          "parada": 5
+          "parada": 4
         },
         {
           "id": "s1R-4",
@@ -345,7 +326,7 @@ window.MUESTRA = {
             "texto": "",
             "credito": ""
           },
-          "parada": 6
+          "parada": 5
         }
       ],
       "video": {
@@ -359,7 +340,6 @@ window.MUESTRA = {
       "paradas": [
         0.0,
         4.9667,
-        7.9667,
         11.6333,
         14.3,
         18.4,
@@ -881,5 +861,5 @@ window.MUESTRA = {
       ]
     }
   },
-  "version": 11
+  "version": 12
 };
