@@ -55,7 +55,7 @@ window.MUESTRA = {
   "inicio": "entrada",
   "sorteo": {
     "endpoint": "https://micrositio-recepcion.segundoricardo.workers.dev/api/sorteo",
-    "bases": "",
+    "bases": "bases.html",
     "titulo": "Participá del sorteo",
     "gracias": "Ya estás participando. ¡Mucha suerte!"
   },
