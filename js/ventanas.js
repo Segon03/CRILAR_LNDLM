@@ -57,6 +57,10 @@
   });
 
   /* ---------- ficha de cada objeto ---------- */
+  /* *texto* entre asteriscos se muestra en cursiva (nombres científicos) */
+  const cursiva = (t) => esc(t || '').replace(/\*([^*]+)\*/g, '<i>$1</i>');
+  const plano = (t) => String(t || '').replace(/\*/g, '');
+
   function vacio(titulo, ayuda) {
     return '<div class="media media--vacio"><strong>' + esc(titulo) + '</strong><span>' + esc(ayuda) + '</span></div>';
   }
@@ -84,34 +88,71 @@
     if (t === 'foto' || t === 'infografia') {
       if (Array.isArray(m.imagenes) && m.imagenes.length) {
         const n = m.imagenes.length, a0 = m.imagenes[0];
-        return '<figure class="media media--' + t + ' media--galeria"><img src="' + esc(a0.src) + '" alt="' + esc(a0.alt || f.titulo || '') + '">' +
+        return '<figure class="media media--' + t + ' media--galeria"><img src="' + esc(a0.src) + '" alt="' + esc(a0.alt || plano(f.titulo)) + '" title="Tocá para ampliar">' +
           (n > 1 ? '<div class="galeria__nav"><button type="button" class="galeria__btn galeria__ant" aria-label="Imagen anterior">‹</button>' +
             '<span class="galeria__cuenta" aria-live="polite">1 / ' + n + '</span>' +
-            '<button type="button" class="galeria__btn galeria__sig" aria-label="Imagen siguiente">›</button></div>' : '') + '</figure>';
+            '<button type="button" class="galeria__btn galeria__sig" aria-label="Imagen siguiente">›</button></div>' : '') +
+          '<figcaption class="galeria__pista">Tocá la imagen para verla en grande y acercarla.</figcaption></figure>';
       }
-      if (m.src) return '<figure class="media media--' + t + '"><img src="' + esc(m.src) + '" alt="' + esc(m.alt || f.titulo || '') + '" loading="lazy"></figure>';
+      if (m.src) return '<figure class="media media--' + t + '"><img src="' + esc(m.src) + '" alt="' + esc(m.alt || plano(f.titulo)) + '" loading="lazy"></figure>';
       if (t === 'foto' && m.recorte) return recorteHTML(p, m);
       return vacio(t === 'foto' ? 'Foto de ejemplo' : 'Infografía de ejemplo', 'Subí el archivo a images/fichas/ y escribí su ruta en media.src, dentro de datos/muestra.js.');
     }
     if (t === 'tablero') return '<div class="media media--tablero" id="tablero-raiz"></div>';
     if (t === 'juego') return '<div class="media media--juego" id="juego-raiz"></div>';
     if (t === 'video') {
-      if (m.youtube) return '<div class="media media--video"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(m.youtube) + '?rel=0" title="' + esc(f.titulo || 'Video') + '" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>';
-      if (m.mp4) return '<div class="media media--video"><video src="' + esc(m.mp4) + '"' + (m.poster ? ' poster="' + esc(m.poster) + '"' : '') + ' controls playsinline preload="metadata"></video></div>';
+      const vcls = 'media media--video' + (m.vertical ? ' media--vertical' : '');
+      const giro = '<p class="video__giro">Girá el celular para ver el video más grande.</p>';
+      if (m.youtube) return '<div class="' + vcls + '"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(m.youtube) + '?rel=0" title="' + esc(plano(f.titulo) || 'Video') + '" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>' + giro;
+      if (m.mp4) return '<div class="' + vcls + '"><video src="' + esc(m.mp4) + '"' + (m.poster ? ' poster="' + esc(m.poster) + '"' : '') + ' controls playsinline preload="metadata"></video></div>' + (m.vertical ? '' : giro);
       return vacio('Video de ejemplo', 'Pegá el ID de YouTube en media.youtube, o la ruta de un archivo en media.mp4, dentro de datos/muestra.js.');
     }
     return '';
+  }
+
+  /* ---------- visor a pantalla completa para infografías ---------- */
+  let visor = null;
+  function abrirVisor(imgs, inicio, alCerrar) {
+    let i = inicio;
+    visor = crear('div', 'visor');
+    visor.setAttribute('role', 'dialog'); visor.setAttribute('aria-modal', 'true'); visor.setAttribute('aria-label', 'Imagen ampliada');
+    visor.innerHTML = '<div class="visor__lienzo"><img class="visor__img" alt=""></div>' +
+      '<button type="button" class="visor__cerrar" aria-label="Cerrar imagen ampliada">×</button>' +
+      (imgs.length > 1 ? '<button type="button" class="visor__flecha visor__ant" aria-label="Imagen anterior">‹</button><button type="button" class="visor__flecha visor__sig" aria-label="Imagen siguiente">›</button>' : '') +
+      '<p class="visor__pista">Tocá la imagen para acercar o alejar · <span class="visor__cuenta"></span></p>';
+    document.body.appendChild(visor);
+    const lienzo = visor.querySelector('.visor__lienzo'), im = visor.querySelector('.visor__img'), cta = visor.querySelector('.visor__cuenta');
+    const mostrar = () => { im.src = imgs[i].src; im.alt = imgs[i].alt || ''; cta.textContent = (i + 1) + ' / ' + imgs.length; visor.classList.remove('visor--zoom'); lienzo.scrollTo(0, 0); };
+    const mover = (d) => { i = (i + d + imgs.length) % imgs.length; mostrar(); };
+    im.addEventListener('click', (ev) => {
+      const r = im.getBoundingClientRect(), fx = (ev.clientX - r.left) / r.width, fy = (ev.clientY - r.top) / r.height;
+      const z = visor.classList.toggle('visor--zoom');
+      if (z) requestAnimationFrame(() => { lienzo.scrollLeft = fx * im.offsetWidth - lienzo.clientWidth / 2; lienzo.scrollTop = fy * im.offsetHeight - lienzo.clientHeight / 2; });
+    });
+    const cerrarV = () => { if (!visor) return; visor.remove(); visor = null; window.removeEventListener('keydown', tecla, true); if (alCerrar) alCerrar(i); };
+    const tecla = (ev) => {
+      if (ev.key === 'Escape') { ev.stopPropagation(); ev.preventDefault(); cerrarV(); }
+      else if (ev.key === 'ArrowRight') { ev.stopPropagation(); mover(1); }
+      else if (ev.key === 'ArrowLeft') { ev.stopPropagation(); mover(-1); }
+    };
+    window.addEventListener('keydown', tecla, true);
+    visor.querySelector('.visor__cerrar').addEventListener('click', cerrarV);
+    const a = visor.querySelector('.visor__ant'), b = visor.querySelector('.visor__sig');
+    if (a) a.addEventListener('click', () => mover(-1));
+    if (b) b.addEventListener('click', () => mover(1));
+    mostrar();
+    visor.querySelector('.visor__cerrar').focus();
   }
 
   function abrirFicha(p) {
     const f = p.ficha || {};
     fichaCont.innerHTML =
       (f.area ? '<p class="ficha__area">' + esc(f.area) + '</p>' : '') +
-      '<h2 class="ficha__titulo" id="ficha-titulo">' + esc(f.titulo || p.titulo || '') + '</h2>' +
-      (f.subtitulo ? '<p class="ficha__sub">' + esc(f.subtitulo) + '</p>' : '') +
+      '<h2 class="ficha__titulo" id="ficha-titulo">' + cursiva(f.titulo || p.titulo || '') + '</h2>' +
+      (f.subtitulo ? '<p class="ficha__sub">' + cursiva(f.subtitulo) + '</p>' : '') +
       mediaHTML(p, f) +
-      (f.texto ? '<p class="ficha__texto">' + esc(f.texto) + '</p>' : '') +
-      (f.credito ? '<p class="ficha__credito">' + esc(f.credito) + '</p>' : '');
+      (f.texto ? '<p class="ficha__texto">' + cursiva(f.texto) + '</p>' : '') +
+      (f.credito ? '<p class="ficha__credito">' + cursiva(f.credito) + '</p>' : '');
     estado.fichaActual = p;
     abrirModal(modFicha);
     const vid = fichaCont.querySelector('.media--video video');
@@ -128,6 +169,7 @@
       const ant = gal.querySelector('.galeria__ant'), sig = gal.querySelector('.galeria__sig');
       if (ant) ant.addEventListener('click', () => ver(-1));
       if (sig) sig.addEventListener('click', () => ver(1));
+      img.addEventListener('click', () => abrirVisor(imgs, i, (j) => { i = j; ver(0); }));
     }
     if (vid) vid.play().catch(() => { /* si el navegador no deja arrancar solo, queda el botón de play */ });
     if (f.tipo === 'tablero' && C.tablero) C.tablero.iniciar(document.getElementById('tablero-raiz'), f.tablero);
@@ -136,6 +178,7 @@
   }
 
   function cerrarFicha() {
+    if (visor) { visor.remove(); visor = null; }
     cerrarModal(modFicha);
     estado.fichaActual = null;
     if (C.juego) C.juego.detener();

@@ -102,7 +102,7 @@
     } else {
       b = crear('button', 'punto punto--' + p.tipo + (estado.visto.has(p.id) ? ' visto' : ''));
       b.innerHTML = '<span class="punto__aro"></span><span class="punto__nucleo"></span>' + ICONOS.mano;
-      b.setAttribute('aria-label', (p.tipo === 'entrar' ? 'Entrar a ' : 'Ver ') + (p.titulo || 'objeto'));
+      b.setAttribute('aria-label', (p.tipo === 'entrar' ? 'Entrar a ' : 'Ver ') + String(p.titulo || 'objeto').replace(/\*/g, ''));
     }
     b.type = 'button';
     b.style.left = p.x + '%';

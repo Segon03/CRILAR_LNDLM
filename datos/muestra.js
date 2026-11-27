@@ -13,7 +13,9 @@
    ficha.tipo   "foto", "infografia", "video" o "texto"
    ficha.media  foto o infografia: {"src": "images/fichas/archivo.jpg", "alt": "descripción"}
                 (con {"recorte": true} se muestra un acercamiento de la propia escena)
-                video: {"youtube": "ID_DEL_VIDEO"} o {"mp4": "images/fichas/video.mp4"}
+                video: {"youtube": "ID_DEL_VIDEO"} o {"mp4": "videos/video.mp4", "poster": "...", "vertical": true si es vertical}
+                varias imágenes: {"imagenes": [{"src": "...", "alt": "..."}, ...]} (se ven con flechas y se amplían al tocarlas)
+   cursiva      en títulos y textos, *Nombre científico* entre asteriscos se muestra en cursiva
    sorteo.endpoint  dirección que recibe los datos del formulario (ver README y estadisticas/LEEME.md)
    intro        pantalla de bienvenida: segundos que permanece, indicaciones y botón
    evento.apertura  fecha y hora en que se habilita la visita (antes se ve la cuenta regresiva)
@@ -119,10 +121,10 @@ window.MUESTRA = {
           "tipo": "info",
           "x": 21.5,
           "y": 46.0,
-          "titulo": "Huayracursor jaguensis",
+          "titulo": "*Huayracursor jaguensis*",
           "ficha": {
             "area": "Paleontología",
-            "titulo": "Huayracursor jaguensis",
+            "titulo": "*Huayracursor jaguensis*",
             "tipo": "video",
             "media": {
               "youtube": "HO4iYPf0SPA"
@@ -268,8 +270,9 @@ window.MUESTRA = {
             "titulo": "Rincosaurio",
             "tipo": "video",
             "media": {
-              "youtube": "",
-              "mp4": ""
+              "mp4": "videos/rincosaurio.mp4",
+              "poster": "videos/rincosaurio-poster.jpg",
+              "vertical": true
             },
             "texto": "Estos reptiles vivieron con los primeros dinosaurios, hace unos 230 millones de años.",
             "credito": ""
@@ -281,10 +284,10 @@ window.MUESTRA = {
           "tipo": "objeto",
           "x": 25.0,
           "y": 49.0,
-          "titulo": "Vitosaura colozacani",
+          "titulo": "*Vitosaura colozacani*",
           "ficha": {
             "area": "Paleontología",
-            "titulo": "Vitosaura colozacani",
+            "titulo": "*Vitosaura colozacani*",
             "tipo": "video",
             "media": {
               "youtube": "zK8Esa5hWdk"
@@ -386,7 +389,7 @@ window.MUESTRA = {
           "ficha": {
             "area": "Entomología",
             "titulo": "Biosistemática de insectos y control biológico",
-            "subtitulo": "Dr. Javier Torrens · Entomología biosistemática de insectos y control biológico de plagas",
+            "subtitulo": "Dres. Javier Torréns & Segundo Núñez-Campero · Entomología biosistemática de insectos y control biológico de plagas",
             "tipo": "video",
             "media": {
               "mp4": "videos/entomologia-bio.mp4",
@@ -671,7 +674,7 @@ window.MUESTRA = {
               "poster": "videos/cronobiologia-poster.jpg"
             },
             "texto": "Los seres vivos tienen relojes internos que organizan sus funciones a lo largo del día. Este video cuenta qué estudia la cronobiología, cómo se investiga y por qué importa para la salud.",
-            "credito": "Basado en la charla «Cronobiología y Salud» (CRILAR-CONICET, 2025). Fuentes: Fundación Nobel (2017); Czeisler et al., Science (1999)."
+            "credito": "Basado en la charla «Cronobiología y Salud» (CRILAR-CONICET, 2025). Fuentes: Fundación Nobel (2017); Czeisler et al., *Science* (1999)."
           },
           "parada": 5
         },
@@ -844,5 +847,5 @@ window.MUESTRA = {
       ]
     }
   },
-  "version": 9
+  "version": 10
 };
