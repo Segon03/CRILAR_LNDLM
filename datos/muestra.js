@@ -165,7 +165,7 @@ window.MUESTRA = {
             "subtitulo": "Stella Maris de la Vega · Gestión administrativa",
             "tipo": "video",
             "media": {
-              "mp4": "videos/reconocimientos.mp4",
+              "mp4": "videos/reconocimientos.mp4?v=2",
               "poster": "videos/logo-intro.jpg"
             },
             "texto": "",
