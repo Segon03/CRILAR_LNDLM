@@ -71,7 +71,7 @@ export function crearPanel({ esperar = (ms) => new Promise((r) => setTimeout(r, 
     async fetch(request, env) {
       const url = new URL(request.url);
       if (url.pathname === '/publico/' ) return Response.redirect(url.origin + '/publico', 301);
-      if (url.pathname === '/publico') return env.ASSETS.fetch(new Request(url.origin + '/index.html', request));
+      if (url.pathname === '/publico') return env.ASSETS.fetch(new Request(url.origin + '/', request)); // la misma página; panel.js detecta /publico
       if (url.pathname === '/api/publico/visitas' && request.method === 'GET') return visitasPublicas(url, env);
       if (!url.pathname.startsWith('/api/')) {
         if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Método no permitido', { status: 405, headers: SIN_CACHE });
